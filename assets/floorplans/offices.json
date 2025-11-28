@@ -1,0 +1,665 @@
+{
+  "offices": [
+    {
+      "id": "office-lon",
+      "name": "London Office",
+      "code": "LON",
+      "floors": [
+        {
+          "id": "lon-1",
+          "name": "1st Floor",
+          "level": 1,
+          "layout": {
+            "width": 1,
+            "height": 1
+          },
+          "desks": [
+            {
+              "id": "LON1-D01",
+              "label": "Desk 01",
+              "position": { "x": 0.12, "y": 0.15 },
+              "size": { "width": 0.06, "height": 0.04 },
+              "rotation": 0,
+              "zone": "Engineering",
+              "features": ["dual-monitor", "near-window"]
+            },
+            {
+              "id": "LON1-D02",
+              "label": "Desk 02",
+              "position": { "x": 0.24, "y": 0.15 },
+              "size": { "width": 0.06, "height": 0.04 },
+              "rotation": 0,
+              "zone": "Engineering",
+              "features": ["standing-desk", "dual-monitor"]
+            },
+            {
+              "id": "LON1-D03",
+              "label": "Desk 03",
+              "position": { "x": 0.36, "y": 0.15 },
+              "size": { "width": 0.06, "height": 0.04 },
+              "rotation": 90,
+              "zone": "Product",
+              "features": ["near-window"]
+            },
+            {
+              "id": "LON1-D04",
+              "label": "Desk 04",
+              "position": { "x": 0.48, "y": 0.16 },
+              "size": { "width": 0.06, "height": 0.04 },
+              "rotation": 90,
+              "zone": "Product",
+              "features": ["quiet-area"]
+            },
+            {
+              "id": "LON1-D05",
+              "label": "Desk 05",
+              "position": { "x": 0.62, "y": 0.18 },
+              "size": { "width": 0.07, "height": 0.04 },
+              "rotation": 180,
+              "zone": "Sales",
+              "features": ["near-window", "dual-monitor"]
+            },
+            {
+              "id": "LON1-D06",
+              "label": "Desk 06",
+              "position": { "x": 0.12, "y": 0.32 },
+              "size": { "width": 0.06, "height": 0.05 },
+              "rotation": 180,
+              "zone": "Sales",
+              "features": ["standing-desk"]
+            },
+            {
+              "id": "LON1-D07",
+              "label": "Desk 07",
+              "position": { "x": 0.26, "y": 0.34 },
+              "size": { "width": 0.05, "height": 0.04 },
+              "rotation": 270,
+              "zone": "Hotdesks",
+              "features": ["quiet-area"]
+            },
+            {
+              "id": "LON1-D08",
+              "label": "Desk 08",
+              "position": { "x": 0.4, "y": 0.35 },
+              "size": { "width": 0.05, "height": 0.04 },
+              "rotation": 270,
+              "zone": "Hotdesks",
+              "features": ["standing-desk", "near-window"]
+            }
+          ]
+        },
+        {
+          "id": "lon-2",
+          "name": "2nd Floor",
+          "level": 2,
+          "layout": {
+            "width": 1,
+            "height": 1
+          },
+          "desks": [
+            {
+              "id": "LON2-D01",
+              "label": "Desk 01",
+              "position": { "x": 0.15, "y": 0.6 },
+              "size": { "width": 0.06, "height": 0.05 },
+              "rotation": 0,
+              "zone": "Engineering",
+              "features": ["dual-monitor", "near-window"]
+            },
+            {
+              "id": "LON2-D02",
+              "label": "Desk 02",
+              "position": { "x": 0.28, "y": 0.6 },
+              "size": { "width": 0.06, "height": 0.05 },
+              "rotation": 0,
+              "zone": "Engineering",
+              "features": ["standing-desk"]
+            },
+            {
+              "id": "LON2-D03",
+              "label": "Desk 03",
+              "position": { "x": 0.42, "y": 0.6 },
+              "size": { "width": 0.06, "height": 0.05 },
+              "rotation": 90,
+              "zone": "Product",
+              "features": ["quiet-area"]
+            },
+            {
+              "id": "LON2-D04",
+              "label": "Desk 04",
+              "position": { "x": 0.56, "y": 0.62 },
+              "size": { "width": 0.06, "height": 0.05 },
+              "rotation": 90,
+              "zone": "Product",
+              "features": ["near-window"]
+            },
+            {
+              "id": "LON2-D05",
+              "label": "Desk 05",
+              "position": { "x": 0.7, "y": 0.64 },
+              "size": { "width": 0.07, "height": 0.05 },
+              "rotation": 180,
+              "zone": "Hotdesks",
+              "features": ["dual-monitor"]
+            },
+            {
+              "id": "LON2-D06",
+              "label": "Desk 06",
+              "position": { "x": 0.18, "y": 0.75 },
+              "size": { "width": 0.05, "height": 0.04 },
+              "rotation": 180,
+              "zone": "Hotdesks",
+              "features": ["quiet-area", "near-window"]
+            },
+            {
+              "id": "LON2-D07",
+              "label": "Desk 07",
+              "position": { "x": 0.32, "y": 0.77 },
+              "size": { "width": 0.05, "height": 0.04 },
+              "rotation": 270,
+              "zone": "Sales",
+              "features": ["dual-monitor"]
+            },
+            {
+              "id": "LON2-D08",
+              "label": "Desk 08",
+              "position": { "x": 0.46, "y": 0.79 },
+              "size": { "width": 0.05, "height": 0.04 },
+              "rotation": 270,
+              "zone": "Sales",
+              "features": ["standing-desk", "near-window"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "office-bri",
+      "name": "Bristol Office",
+      "code": "BRI",
+      "floors": [
+        {
+          "id": "bri-1",
+          "name": "1st Floor",
+          "level": 1,
+          "layout": {
+            "width": 1,
+            "height": 1
+          },
+          "desks": [
+            {
+              "id": "BRI1-D01",
+              "label": "Desk 01",
+              "position": { "x": 0.1, "y": 0.2 },
+              "size": { "width": 0.06, "height": 0.04 },
+              "rotation": 0,
+              "zone": "Engineering",
+              "features": ["dual-monitor", "near-window"]
+            },
+            {
+              "id": "BRI1-D02",
+              "label": "Desk 02",
+              "position": { "x": 0.22, "y": 0.2 },
+              "size": { "width": 0.06, "height": 0.04 },
+              "rotation": 0,
+              "zone": "Engineering",
+              "features": ["standing-desk"]
+            },
+            {
+              "id": "BRI1-D03",
+              "label": "Desk 03",
+              "position": { "x": 0.34, "y": 0.21 },
+              "size": { "width": 0.05, "height": 0.04 },
+              "rotation": 90,
+              "zone": "Product",
+              "features": ["quiet-area"]
+            },
+            {
+              "id": "BRI1-D04",
+              "label": "Desk 04",
+              "position": { "x": 0.46, "y": 0.23 },
+              "size": { "width": 0.05, "height": 0.04 },
+              "rotation": 90,
+              "zone": "Product",
+              "features": ["near-window"]
+            },
+            {
+              "id": "BRI1-D05",
+              "label": "Desk 05",
+              "position": { "x": 0.58, "y": 0.25 },
+              "size": { "width": 0.07, "height": 0.05 },
+              "rotation": 180,
+              "zone": "Sales",
+              "features": ["dual-monitor"]
+            },
+            {
+              "id": "BRI1-D06",
+              "label": "Desk 06",
+              "position": { "x": 0.12, "y": 0.4 },
+              "size": { "width": 0.06, "height": 0.04 },
+              "rotation": 180,
+              "zone": "Sales",
+              "features": ["near-window", "quiet-area"]
+            },
+            {
+              "id": "BRI1-D07",
+              "label": "Desk 07",
+              "position": { "x": 0.26, "y": 0.42 },
+              "size": { "width": 0.05, "height": 0.04 },
+              "rotation": 270,
+              "zone": "Hotdesks",
+              "features": ["standing-desk"]
+            },
+            {
+              "id": "BRI1-D08",
+              "label": "Desk 08",
+              "position": { "x": 0.4, "y": 0.44 },
+              "size": { "width": 0.05, "height": 0.04 },
+              "rotation": 270,
+              "zone": "Hotdesks",
+              "features": ["near-window"]
+            },
+            {
+              "id": "BRI1-D09",
+              "label": "Desk 09",
+              "position": { "x": 0.54, "y": 0.46 },
+              "size": { "width": 0.06, "height": 0.04 },
+              "rotation": 0,
+              "zone": "Collaboration",
+              "features": ["quiet-area"]
+            },
+            {
+              "id": "BRI1-D10",
+              "label": "Desk 10",
+              "position": { "x": 0.68, "y": 0.48 },
+              "size": { "width": 0.06, "height": 0.04 },
+              "rotation": 0,
+              "zone": "Collaboration",
+              "features": ["dual-monitor", "standing-desk"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "office-man",
+      "name": "Manchester Office",
+      "code": "MAN",
+      "floors": [
+        {
+          "id": "man-1",
+          "name": "1st Floor",
+          "level": 1,
+          "layout": {
+            "width": 1,
+            "height": 1
+          },
+          "desks": [
+            {
+              "id": "MAN1-D01",
+              "label": "Desk 01",
+              "position": { "x": 0.14, "y": 0.18 },
+              "size": { "width": 0.06, "height": 0.04 },
+              "rotation": 0,
+              "zone": "Engineering",
+              "features": ["dual-monitor", "near-window"]
+            },
+            {
+              "id": "MAN1-D02",
+              "label": "Desk 02",
+              "position": { "x": 0.26, "y": 0.18 },
+              "size": { "width": 0.06, "height": 0.04 },
+              "rotation": 0,
+              "zone": "Engineering",
+              "features": ["standing-desk"]
+            },
+            {
+              "id": "MAN1-D03",
+              "label": "Desk 03",
+              "position": { "x": 0.38, "y": 0.2 },
+              "size": { "width": 0.05, "height": 0.04 },
+              "rotation": 90,
+              "zone": "Product",
+              "features": ["quiet-area"]
+            },
+            {
+              "id": "MAN1-D04",
+              "label": "Desk 04",
+              "position": { "x": 0.5, "y": 0.22 },
+              "size": { "width": 0.05, "height": 0.04 },
+              "rotation": 90,
+              "zone": "Product",
+              "features": ["near-window"]
+            },
+            {
+              "id": "MAN1-D05",
+              "label": "Desk 05",
+              "position": { "x": 0.62, "y": 0.24 },
+              "size": { "width": 0.06, "height": 0.05 },
+              "rotation": 180,
+              "zone": "Hotdesks",
+              "features": ["dual-monitor"]
+            },
+            {
+              "id": "MAN1-D06",
+              "label": "Desk 06",
+              "position": { "x": 0.74, "y": 0.26 },
+              "size": { "width": 0.06, "height": 0.05 },
+              "rotation": 180,
+              "zone": "Hotdesks",
+              "features": ["quiet-area", "near-window"]
+            }
+          ]
+        },
+        {
+          "id": "man-2",
+          "name": "2nd Floor",
+          "level": 2,
+          "layout": {
+            "width": 1,
+            "height": 1
+          },
+          "desks": [
+            {
+              "id": "MAN2-D01",
+              "label": "Desk 01",
+              "position": { "x": 0.16, "y": 0.6 },
+              "size": { "width": 0.06, "height": 0.04 },
+              "rotation": 0,
+              "zone": "Engineering",
+              "features": ["dual-monitor", "standing-desk"]
+            },
+            {
+              "id": "MAN2-D02",
+              "label": "Desk 02",
+              "position": { "x": 0.28, "y": 0.6 },
+              "size": { "width": 0.06, "height": 0.04 },
+              "rotation": 0,
+              "zone": "Engineering",
+              "features": ["near-window"]
+            },
+            {
+              "id": "MAN2-D03",
+              "label": "Desk 03",
+              "position": { "x": 0.42, "y": 0.62 },
+              "size": { "width": 0.05, "height": 0.04 },
+              "rotation": 90,
+              "zone": "Product",
+              "features": ["quiet-area"]
+            },
+            {
+              "id": "MAN2-D04",
+              "label": "Desk 04",
+              "position": { "x": 0.56, "y": 0.64 },
+              "size": { "width": 0.05, "height": 0.04 },
+              "rotation": 90,
+              "zone": "Product",
+              "features": ["near-window"]
+            },
+            {
+              "id": "MAN2-D05",
+              "label": "Desk 05",
+              "position": { "x": 0.7, "y": 0.66 },
+              "size": { "width": 0.06, "height": 0.05 },
+              "rotation": 180,
+              "zone": "Sales",
+              "features": ["dual-monitor"]
+            },
+            {
+              "id": "MAN2-D06",
+              "label": "Desk 06",
+              "position": { "x": 0.82, "y": 0.68 },
+              "size": { "width": 0.06, "height": 0.05 },
+              "rotation": 180,
+              "zone": "Sales",
+              "features": ["standing-desk", "near-window"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "office-car",
+      "name": "Cardiff Office",
+      "code": "CAR",
+      "floors": [
+        {
+          "id": "car-1",
+          "name": "1st Floor",
+          "level": 1,
+          "layout": {
+            "width": 1,
+            "height": 1
+          },
+          "desks": [
+            {
+              "id": "CAR1-D01",
+              "label": "Desk 01",
+              "position": { "x": 0.1, "y": 0.18 },
+              "size": { "width": 0.06, "height": 0.04 },
+              "rotation": 0,
+              "zone": "Engineering",
+              "features": ["dual-monitor", "near-window"]
+            },
+            {
+              "id": "CAR1-D02",
+              "label": "Desk 02",
+              "position": { "x": 0.22, "y": 0.18 },
+              "size": { "width": 0.06, "height": 0.04 },
+              "rotation": 0,
+              "zone": "Engineering",
+              "features": ["standing-desk"]
+            },
+            {
+              "id": "CAR1-D03",
+              "label": "Desk 03",
+              "position": { "x": 0.34, "y": 0.2 },
+              "size": { "width": 0.05, "height": 0.04 },
+              "rotation": 90,
+              "zone": "Product",
+              "features": ["quiet-area"]
+            },
+            {
+              "id": "CAR1-D04",
+              "label": "Desk 04",
+              "position": { "x": 0.46, "y": 0.22 },
+              "size": { "width": 0.05, "height": 0.04 },
+              "rotation": 90,
+              "zone": "Product",
+              "features": ["near-window"]
+            },
+            {
+              "id": "CAR1-D05",
+              "label": "Desk 05",
+              "position": { "x": 0.58, "y": 0.24 },
+              "size": { "width": 0.06, "height": 0.05 },
+              "rotation": 180,
+              "zone": "Sales",
+              "features": ["dual-monitor"]
+            },
+            {
+              "id": "CAR1-D06",
+              "label": "Desk 06",
+              "position": { "x": 0.7, "y": 0.26 },
+              "size": { "width": 0.06, "height": 0.05 },
+              "rotation": 270,
+              "zone": "Collaboration",
+              "features": ["near-window", "quiet-area"]
+            },
+            {
+              "id": "CAR1-D07",
+              "label": "Desk 07",
+              "position": { "x": 0.16, "y": 0.36 },
+              "size": { "width": 0.06, "height": 0.04 },
+              "rotation": 270,
+              "zone": "Collaboration",
+              "features": ["standing-desk"]
+            },
+            {
+              "id": "CAR1-D08",
+              "label": "Desk 08",
+              "position": { "x": 0.3, "y": 0.38 },
+              "size": { "width": 0.05, "height": 0.04 },
+              "rotation": 0,
+              "zone": "Hotdesks",
+              "features": ["near-window"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "office-lds",
+      "name": "Leeds Office",
+      "code": "LDS",
+      "floors": [
+        {
+          "id": "lds-1",
+          "name": "1st Floor",
+          "level": 1,
+          "layout": {
+            "width": 1,
+            "height": 1
+          },
+          "desks": [
+            {
+              "id": "LDS1-D01",
+              "label": "Desk 01",
+              "position": { "x": 0.12, "y": 0.2 },
+              "size": { "width": 0.06, "height": 0.04 },
+              "rotation": 0,
+              "zone": "Engineering",
+              "features": ["dual-monitor", "near-window"]
+            },
+            {
+              "id": "LDS1-D02",
+              "label": "Desk 02",
+              "position": { "x": 0.24, "y": 0.2 },
+              "size": { "width": 0.06, "height": 0.04 },
+              "rotation": 0,
+              "zone": "Engineering",
+              "features": ["standing-desk"]
+            },
+            {
+              "id": "LDS1-D03",
+              "label": "Desk 03",
+              "position": { "x": 0.36, "y": 0.22 },
+              "size": { "width": 0.05, "height": 0.04 },
+              "rotation": 90,
+              "zone": "Product",
+              "features": ["quiet-area"]
+            },
+            {
+              "id": "LDS1-D04",
+              "label": "Desk 04",
+              "position": { "x": 0.48, "y": 0.24 },
+              "size": { "width": 0.05, "height": 0.04 },
+              "rotation": 90,
+              "zone": "Product",
+              "features": ["near-window"]
+            },
+            {
+              "id": "LDS1-D05",
+              "label": "Desk 05",
+              "position": { "x": 0.6, "y": 0.26 },
+              "size": { "width": 0.06, "height": 0.05 },
+              "rotation": 180,
+              "zone": "Hotdesks",
+              "features": ["dual-monitor"]
+            },
+            {
+              "id": "LDS1-D06",
+              "label": "Desk 06",
+              "position": { "x": 0.72, "y": 0.28 },
+              "size": { "width": 0.06, "height": 0.05 },
+              "rotation": 270,
+              "zone": "Collaboration",
+              "features": ["near-window", "quiet-area"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "office-gla",
+      "name": "Glasgow Office",
+      "code": "GLA",
+      "floors": [
+        {
+          "id": "gla-1",
+          "name": "1st Floor",
+          "level": 1,
+          "layout": {
+            "width": 1,
+            "height": 1
+          },
+          "desks": [
+            {
+              "id": "GLA1-D01",
+              "label": "Desk 01",
+              "position": { "x": 0.1, "y": 0.18 },
+              "size": { "width": 0.06, "height": 0.04 },
+              "rotation": 0,
+              "zone": "Engineering",
+              "features": ["dual-monitor", "near-window"]
+            },
+            {
+              "id": "GLA1-D02",
+              "label": "Desk 02",
+              "position": { "x": 0.22, "y": 0.18 },
+              "size": { "width": 0.06, "height": 0.04 },
+              "rotation": 0,
+              "zone": "Engineering",
+              "features": ["standing-desk"]
+            },
+            {
+              "id": "GLA1-D03",
+              "label": "Desk 03",
+              "position": { "x": 0.34, "y": 0.2 },
+              "size": { "width": 0.05, "height": 0.04 },
+              "rotation": 90,
+              "zone": "Product",
+              "features": ["quiet-area"]
+            },
+            {
+              "id": "GLA1-D04",
+              "label": "Desk 04",
+              "position": { "x": 0.46, "y": 0.22 },
+              "size": { "width": 0.05, "height": 0.04 },
+              "rotation": 90,
+              "zone": "Product",
+              "features": ["near-window"]
+            },
+            {
+              "id": "GLA1-D05",
+              "label": "Desk 05",
+              "position": { "x": 0.58, "y": 0.24 },
+              "size": { "width": 0.06, "height": 0.05 },
+              "rotation": 180,
+              "zone": "Hotdesks",
+              "features": ["dual-monitor"]
+            },
+            {
+              "id": "GLA1-D06",
+              "label": "Desk 06",
+              "position": { "x": 0.7, "y": 0.26 },
+              "size": { "width": 0.06, "height": 0.05 },
+              "rotation": 270,
+              "zone": "Collaboration",
+              "features": ["near-window", "quiet-area"]
+            },
+            {
+              "id": "GLA1-D07",
+              "label": "Desk 07",
+              "position": { "x": 0.82, "y": 0.28 },
+              "size": { "width": 0.06, "height": 0.05 },
+              "rotation": 270,
+              "zone": "Exec",
+              "features": ["standing-desk", "dual-monitor"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
