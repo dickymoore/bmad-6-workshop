@@ -8,7 +8,10 @@ async function main() {
   const baseUrl = `http://localhost:${port}/demo-floorplans`;
 
   const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  const page = await browser.newPage({
+    viewport: { width: 1280, height: 900 },
+    deviceScaleFactor: 1.5,
+  });
 
   for (const office of offices) {
     for (const floor of office.floors) {

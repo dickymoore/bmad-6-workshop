@@ -148,12 +148,12 @@ export const OfficeFloorPlan: React.FC<OfficeFloorPlanProps> = ({
         const centerY = y + fixtureHeight / 2;
         const fill = fixture.color ?? fixtureColors[fixture.type] ?? "#e0e0e0";
         const fixtureFont = Math.min(
-          12,
-          Math.max(8, Math.min(fixtureWidth, fixtureHeight) * 0.25)
+          11,
+          Math.max(7, Math.min(fixtureWidth, fixtureHeight) * 0.22)
         );
         const fixtureLines = wrapLabel(
           fixture.label,
-          fixtureWidth - 6,
+          Math.max(6, fixtureWidth - 8),
           fixtureFont,
           3
         );
@@ -208,12 +208,12 @@ export const OfficeFloorPlan: React.FC<OfficeFloorPlanProps> = ({
         const centerY = y + deskHeight / 2;
         const fill = zoneColors[desk.zone] ?? "#cfd8dc";
         const textFontSize = Math.min(
-          12,
-          Math.max(7, Math.min(deskWidth, deskHeight) * 0.4)
+          10,
+          Math.max(6, Math.min(deskWidth, deskHeight) * 0.35)
         );
         const textLines = wrapLabel(
           desk.label,
-          Math.min(deskWidth, deskHeight) - 4,
+          Math.max(4, Math.min(deskWidth, deskHeight) - 6),
           textFontSize,
           2
         );
