@@ -2,11 +2,28 @@ import React, { useEffect, useMemo, useState } from "react";
 import OfficeFloorPlan, {
   Office,
   OfficesData,
+  zoneColors,
 } from "../components/OfficeFloorPlan";
 import officesJson from "../../assets/floorplans/offices.json";
 
 const officesData = officesJson as OfficesData;
 const offices: Office[] = officesData.offices;
+
+const fixtureTypeLabels: { key: string; label: string; color: string }[] = [
+  { key: "wall", label: "Walls/Partitions", color: "#b0bec5" },
+  { key: "meeting-room", label: "Meeting/Board Rooms", color: "#e0f7fa" },
+  { key: "kitchen", label: "Kitchen/Breakout", color: "#fff3e0" },
+  { key: "restroom", label: "Restrooms", color: "#ede7f6" },
+  { key: "reception", label: "Reception", color: "#f3e5f5" },
+  { key: "phonebooth", label: "Phone Booths", color: "#ede7f6" },
+  { key: "plant", label: "Planters", color: "#c8e6c9" },
+  { key: "storage", label: "Storage/Supplies", color: "#e0e0e0" },
+  { key: "printer", label: "Printers", color: "#eeeeee" },
+  { key: "game-table", label: "Table Tennis", color: "#e1bee7" },
+  { key: "foosball", label: "Foosball", color: "#bbdefb" },
+  { key: "arcade", label: "Arcade", color: "#ffecb3" },
+  { key: "slide", label: "Slide", color: "#ffe0b2" }
+];
 
 const DemoFloorplans: React.FC = () => {
   const [selectedOfficeId, setSelectedOfficeId] = useState<string>(
@@ -97,6 +114,40 @@ const DemoFloorplans: React.FC = () => {
           ) : (
             <div>Select an office and floor to view the plan.</div>
           )}
+          <div style={{ marginTop: "1rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.4rem 1rem" }}>
+            <strong style={{ gridColumn: "1 / -1" }}>Desk Zones</strong>
+            {Object.entries(zoneColors).map(([zone, color]) => (
+              <div key={zone} style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: "14px",
+                    height: "14px",
+                    background: color,
+                    border: "1px solid #607d8b",
+                    borderRadius: "2px",
+                  }}
+                />
+                <span style={{ fontSize: "0.9rem" }}>{zone}</span>
+              </div>
+            ))}
+            <strong style={{ gridColumn: "1 / -1", marginTop: "0.4rem" }}>Fixtures</strong>
+            {fixtureTypeLabels.map((item) => (
+              <div key={item.key} style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                <span
+                  style={{
+                    display: "inline-block",
+                    width: "14px",
+                    height: "14px",
+                    background: item.color,
+                    border: "1px solid #607d8b",
+                    borderRadius: "2px",
+                  }}
+                />
+                <span style={{ fontSize: "0.9rem" }}>{item.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

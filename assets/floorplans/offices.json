@@ -9,166 +9,57 @@
           "id": "lon-1",
           "name": "1st Floor",
           "level": 1,
-          "layout": {
-            "width": 1,
-            "height": 1
-          },
+          "layout": { "width": 1, "height": 1 },
+          "fixtures": [
+            { "id": "LON1-F01", "label": "Meeting Room A", "type": "meeting-room", "position": { "x": 0.64, "y": 0.06 }, "size": { "width": 0.3, "height": 0.22 }, "rotation": 0, "color": "#e0f7fa" },
+            { "id": "LON1-F02", "label": "Kitchen & Breakout", "type": "kitchen", "position": { "x": 0.06, "y": 0.64 }, "size": { "width": 0.28, "height": 0.22 }, "rotation": 0, "color": "#fff3e0" },
+            { "id": "LON1-F03", "label": "Restrooms", "type": "restroom", "position": { "x": 0.7, "y": 0.64 }, "size": { "width": 0.22, "height": 0.22 }, "rotation": 0, "color": "#ede7f6" },
+            { "id": "LON1-F04", "label": "Printer Station", "type": "printer", "position": { "x": 0.48, "y": 0.46 }, "size": { "width": 0.06, "height": 0.06 }, "rotation": 0, "color": "#eeeeee" },
+            { "id": "LON1-F05", "label": "Planter Row", "type": "plant", "position": { "x": 0.54, "y": 0.18 }, "size": { "width": 0.02, "height": 0.36 }, "rotation": 0, "color": "#c8e6c9" },
+            { "id": "LON1-F06", "label": "Foosball", "type": "foosball", "position": { "x": 0.44, "y": 0.7 }, "size": { "width": 0.12, "height": 0.08 }, "rotation": 0, "color": "#bbdefb" },
+            { "id": "LON1-F07", "label": "Arcade Cabinet", "type": "arcade", "position": { "x": 0.9, "y": 0.3 }, "size": { "width": 0.06, "height": 0.08 }, "rotation": 0, "color": "#ffecb3" }
+          ],
           "desks": [
-            {
-              "id": "LON1-D01",
-              "label": "Desk 01",
-              "position": { "x": 0.12, "y": 0.15 },
-              "size": { "width": 0.06, "height": 0.04 },
-              "rotation": 0,
-              "zone": "Engineering",
-              "features": ["dual-monitor", "near-window"]
-            },
-            {
-              "id": "LON1-D02",
-              "label": "Desk 02",
-              "position": { "x": 0.24, "y": 0.15 },
-              "size": { "width": 0.06, "height": 0.04 },
-              "rotation": 0,
-              "zone": "Engineering",
-              "features": ["standing-desk", "dual-monitor"]
-            },
-            {
-              "id": "LON1-D03",
-              "label": "Desk 03",
-              "position": { "x": 0.36, "y": 0.15 },
-              "size": { "width": 0.06, "height": 0.04 },
-              "rotation": 90,
-              "zone": "Product",
-              "features": ["near-window"]
-            },
-            {
-              "id": "LON1-D04",
-              "label": "Desk 04",
-              "position": { "x": 0.48, "y": 0.16 },
-              "size": { "width": 0.06, "height": 0.04 },
-              "rotation": 90,
-              "zone": "Product",
-              "features": ["quiet-area"]
-            },
-            {
-              "id": "LON1-D05",
-              "label": "Desk 05",
-              "position": { "x": 0.62, "y": 0.18 },
-              "size": { "width": 0.07, "height": 0.04 },
-              "rotation": 180,
-              "zone": "Sales",
-              "features": ["near-window", "dual-monitor"]
-            },
-            {
-              "id": "LON1-D06",
-              "label": "Desk 06",
-              "position": { "x": 0.12, "y": 0.32 },
-              "size": { "width": 0.06, "height": 0.05 },
-              "rotation": 180,
-              "zone": "Sales",
-              "features": ["standing-desk"]
-            },
-            {
-              "id": "LON1-D07",
-              "label": "Desk 07",
-              "position": { "x": 0.26, "y": 0.34 },
-              "size": { "width": 0.05, "height": 0.04 },
-              "rotation": 270,
-              "zone": "Hotdesks",
-              "features": ["quiet-area"]
-            },
-            {
-              "id": "LON1-D08",
-              "label": "Desk 08",
-              "position": { "x": 0.4, "y": 0.35 },
-              "size": { "width": 0.05, "height": 0.04 },
-              "rotation": 270,
-              "zone": "Hotdesks",
-              "features": ["standing-desk", "near-window"]
-            }
+            { "id": "LON1-D01", "label": "Desk 01", "position": { "x": 0.1, "y": 0.18 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["dual-monitor", "near-window"] },
+            { "id": "LON1-D02", "label": "Desk 02", "position": { "x": 0.16, "y": 0.18 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["standing-desk"] },
+            { "id": "LON1-D03", "label": "Desk 03", "position": { "x": 0.22, "y": 0.18 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["quiet-area"] },
+            { "id": "LON1-D04", "label": "Desk 04", "position": { "x": 0.28, "y": 0.18 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["near-window"] },
+            { "id": "LON1-D05", "label": "Desk 05", "position": { "x": 0.1, "y": 0.26 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["dual-monitor"] },
+            { "id": "LON1-D06", "label": "Desk 06", "position": { "x": 0.16, "y": 0.26 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["standing-desk"] },
+            { "id": "LON1-D07", "label": "Desk 07", "position": { "x": 0.22, "y": 0.26 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["quiet-area"] },
+            { "id": "LON1-D08", "label": "Desk 08", "position": { "x": 0.28, "y": 0.26 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["near-window"] },
+            { "id": "LON1-D09", "label": "Desk 09", "position": { "x": 0.36, "y": 0.38 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Hotdesks", "features": ["near-window"] },
+            { "id": "LON1-D10", "label": "Desk 10", "position": { "x": 0.44, "y": 0.38 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Hotdesks", "features": ["quiet-area"] },
+            { "id": "LON1-D11", "label": "Desk 11", "position": { "x": 0.68, "y": 0.32 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Exec", "features": ["dual-monitor"] },
+            { "id": "LON1-D12", "label": "Desk 12", "position": { "x": 0.74, "y": 0.32 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Exec", "features": ["standing-desk"] }
           ]
         },
         {
           "id": "lon-2",
           "name": "2nd Floor",
           "level": 2,
-          "layout": {
-            "width": 1,
-            "height": 1
-          },
+          "layout": { "width": 1, "height": 1 },
+          "fixtures": [
+            { "id": "LON2-F01", "label": "Board Room", "type": "meeting-room", "position": { "x": 0.08, "y": 0.08 }, "size": { "width": 0.28, "height": 0.2 }, "rotation": 0, "color": "#e0f2f1" },
+            { "id": "LON2-F02", "label": "Reception", "type": "reception", "position": { "x": 0.7, "y": 0.08 }, "size": { "width": 0.24, "height": 0.14 }, "rotation": 0, "color": "#f3e5f5" },
+            { "id": "LON2-F03", "label": "Kitchenette", "type": "kitchen", "position": { "x": 0.12, "y": 0.62 }, "size": { "width": 0.24, "height": 0.2 }, "rotation": 0, "color": "#fff8e1" },
+            { "id": "LON2-F04", "label": "Restrooms", "type": "restroom", "position": { "x": 0.72, "y": 0.64 }, "size": { "width": 0.22, "height": 0.22 }, "rotation": 0, "color": "#ede7f6" },
+            { "id": "LON2-F05", "label": "Storage", "type": "storage", "position": { "x": 0.9, "y": 0.64 }, "size": { "width": 0.06, "height": 0.14 }, "rotation": 0, "color": "#e0e0e0" },
+            { "id": "LON2-F06", "label": "Table Tennis", "type": "game-table", "position": { "x": 0.46, "y": 0.7 }, "size": { "width": 0.14, "height": 0.08 }, "rotation": 0, "color": "#e1bee7" }
+          ],
           "desks": [
-            {
-              "id": "LON2-D01",
-              "label": "Desk 01",
-              "position": { "x": 0.15, "y": 0.6 },
-              "size": { "width": 0.06, "height": 0.05 },
-              "rotation": 0,
-              "zone": "Engineering",
-              "features": ["dual-monitor", "near-window"]
-            },
-            {
-              "id": "LON2-D02",
-              "label": "Desk 02",
-              "position": { "x": 0.28, "y": 0.6 },
-              "size": { "width": 0.06, "height": 0.05 },
-              "rotation": 0,
-              "zone": "Engineering",
-              "features": ["standing-desk"]
-            },
-            {
-              "id": "LON2-D03",
-              "label": "Desk 03",
-              "position": { "x": 0.42, "y": 0.6 },
-              "size": { "width": 0.06, "height": 0.05 },
-              "rotation": 90,
-              "zone": "Product",
-              "features": ["quiet-area"]
-            },
-            {
-              "id": "LON2-D04",
-              "label": "Desk 04",
-              "position": { "x": 0.56, "y": 0.62 },
-              "size": { "width": 0.06, "height": 0.05 },
-              "rotation": 90,
-              "zone": "Product",
-              "features": ["near-window"]
-            },
-            {
-              "id": "LON2-D05",
-              "label": "Desk 05",
-              "position": { "x": 0.7, "y": 0.64 },
-              "size": { "width": 0.07, "height": 0.05 },
-              "rotation": 180,
-              "zone": "Hotdesks",
-              "features": ["dual-monitor"]
-            },
-            {
-              "id": "LON2-D06",
-              "label": "Desk 06",
-              "position": { "x": 0.18, "y": 0.75 },
-              "size": { "width": 0.05, "height": 0.04 },
-              "rotation": 180,
-              "zone": "Hotdesks",
-              "features": ["quiet-area", "near-window"]
-            },
-            {
-              "id": "LON2-D07",
-              "label": "Desk 07",
-              "position": { "x": 0.32, "y": 0.77 },
-              "size": { "width": 0.05, "height": 0.04 },
-              "rotation": 270,
-              "zone": "Sales",
-              "features": ["dual-monitor"]
-            },
-            {
-              "id": "LON2-D08",
-              "label": "Desk 08",
-              "position": { "x": 0.46, "y": 0.79 },
-              "size": { "width": 0.05, "height": 0.04 },
-              "rotation": 270,
-              "zone": "Sales",
-              "features": ["standing-desk", "near-window"]
-            }
+            { "id": "LON2-D01", "label": "Desk 01", "position": { "x": 0.4, "y": 0.2 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["dual-monitor"] },
+            { "id": "LON2-D02", "label": "Desk 02", "position": { "x": 0.46, "y": 0.2 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["standing-desk"] },
+            { "id": "LON2-D03", "label": "Desk 03", "position": { "x": 0.52, "y": 0.2 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["near-window"] },
+            { "id": "LON2-D04", "label": "Desk 04", "position": { "x": 0.58, "y": 0.2 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["quiet-area"] },
+            { "id": "LON2-D05", "label": "Desk 05", "position": { "x": 0.4, "y": 0.3 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["dual-monitor"] },
+            { "id": "LON2-D06", "label": "Desk 06", "position": { "x": 0.46, "y": 0.3 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["standing-desk"] },
+            { "id": "LON2-D07", "label": "Desk 07", "position": { "x": 0.52, "y": 0.3 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["near-window"] },
+            { "id": "LON2-D08", "label": "Desk 08", "position": { "x": 0.58, "y": 0.3 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["quiet-area"] },
+            { "id": "LON2-D09", "label": "Desk 09", "position": { "x": 0.7, "y": 0.32 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Hotdesks", "features": ["near-window"] },
+            { "id": "LON2-D10", "label": "Desk 10", "position": { "x": 0.76, "y": 0.32 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Hotdesks", "features": ["quiet-area"] },
+            { "id": "LON2-D11", "label": "Desk 11", "position": { "x": 0.22, "y": 0.48 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Collaboration", "features": ["near-window"] },
+            { "id": "LON2-D12", "label": "Desk 12", "position": { "x": 0.28, "y": 0.48 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Collaboration", "features": ["quiet-area"] }
           ]
         }
       ]
@@ -182,101 +73,30 @@
           "id": "bri-1",
           "name": "1st Floor",
           "level": 1,
-          "layout": {
-            "width": 1,
-            "height": 1
-          },
+          "layout": { "width": 1, "height": 1 },
+          "fixtures": [
+            { "id": "BRI1-F01", "label": "Meeting Suite", "type": "meeting-room", "position": { "x": 0.64, "y": 0.06 }, "size": { "width": 0.26, "height": 0.2 }, "rotation": 0, "color": "#e0f2f1" },
+            { "id": "BRI1-F02", "label": "Kitchen", "type": "kitchen", "position": { "x": 0.08, "y": 0.62 }, "size": { "width": 0.26, "height": 0.22 }, "rotation": 0, "color": "#fff8e1" },
+            { "id": "BRI1-F03", "label": "Restrooms", "type": "restroom", "position": { "x": 0.7, "y": 0.62 }, "size": { "width": 0.22, "height": 0.22 }, "rotation": 0, "color": "#ede7f6" },
+            { "id": "BRI1-F04", "label": "Phone Booths", "type": "phonebooth", "position": { "x": 0.5, "y": 0.2 }, "size": { "width": 0.12, "height": 0.12 }, "rotation": 0, "color": "#ede7f6" },
+            { "id": "BRI1-F05", "label": "Foosball", "type": "foosball", "position": { "x": 0.46, "y": 0.7 }, "size": { "width": 0.12, "height": 0.08 }, "rotation": 0, "color": "#bbdefb" },
+            { "id": "BRI1-F06", "label": "Arcade", "type": "arcade", "position": { "x": 0.9, "y": 0.3 }, "size": { "width": 0.06, "height": 0.08 }, "rotation": 0, "color": "#ffecb3" }
+          ],
           "desks": [
-            {
-              "id": "BRI1-D01",
-              "label": "Desk 01",
-              "position": { "x": 0.1, "y": 0.2 },
-              "size": { "width": 0.06, "height": 0.04 },
-              "rotation": 0,
-              "zone": "Engineering",
-              "features": ["dual-monitor", "near-window"]
-            },
-            {
-              "id": "BRI1-D02",
-              "label": "Desk 02",
-              "position": { "x": 0.22, "y": 0.2 },
-              "size": { "width": 0.06, "height": 0.04 },
-              "rotation": 0,
-              "zone": "Engineering",
-              "features": ["standing-desk"]
-            },
-            {
-              "id": "BRI1-D03",
-              "label": "Desk 03",
-              "position": { "x": 0.34, "y": 0.21 },
-              "size": { "width": 0.05, "height": 0.04 },
-              "rotation": 90,
-              "zone": "Product",
-              "features": ["quiet-area"]
-            },
-            {
-              "id": "BRI1-D04",
-              "label": "Desk 04",
-              "position": { "x": 0.46, "y": 0.23 },
-              "size": { "width": 0.05, "height": 0.04 },
-              "rotation": 90,
-              "zone": "Product",
-              "features": ["near-window"]
-            },
-            {
-              "id": "BRI1-D05",
-              "label": "Desk 05",
-              "position": { "x": 0.58, "y": 0.25 },
-              "size": { "width": 0.07, "height": 0.05 },
-              "rotation": 180,
-              "zone": "Sales",
-              "features": ["dual-monitor"]
-            },
-            {
-              "id": "BRI1-D06",
-              "label": "Desk 06",
-              "position": { "x": 0.12, "y": 0.4 },
-              "size": { "width": 0.06, "height": 0.04 },
-              "rotation": 180,
-              "zone": "Sales",
-              "features": ["near-window", "quiet-area"]
-            },
-            {
-              "id": "BRI1-D07",
-              "label": "Desk 07",
-              "position": { "x": 0.26, "y": 0.42 },
-              "size": { "width": 0.05, "height": 0.04 },
-              "rotation": 270,
-              "zone": "Hotdesks",
-              "features": ["standing-desk"]
-            },
-            {
-              "id": "BRI1-D08",
-              "label": "Desk 08",
-              "position": { "x": 0.4, "y": 0.44 },
-              "size": { "width": 0.05, "height": 0.04 },
-              "rotation": 270,
-              "zone": "Hotdesks",
-              "features": ["near-window"]
-            },
-            {
-              "id": "BRI1-D09",
-              "label": "Desk 09",
-              "position": { "x": 0.54, "y": 0.46 },
-              "size": { "width": 0.06, "height": 0.04 },
-              "rotation": 0,
-              "zone": "Collaboration",
-              "features": ["quiet-area"]
-            },
-            {
-              "id": "BRI1-D10",
-              "label": "Desk 10",
-              "position": { "x": 0.68, "y": 0.48 },
-              "size": { "width": 0.06, "height": 0.04 },
-              "rotation": 0,
-              "zone": "Collaboration",
-              "features": ["dual-monitor", "standing-desk"]
-            }
+            { "id": "BRI1-D01", "label": "Desk 01", "position": { "x": 0.1, "y": 0.18 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["dual-monitor"] },
+            { "id": "BRI1-D02", "label": "Desk 02", "position": { "x": 0.16, "y": 0.18 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["standing-desk"] },
+            { "id": "BRI1-D03", "label": "Desk 03", "position": { "x": 0.22, "y": 0.18 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["quiet-area"] },
+            { "id": "BRI1-D04", "label": "Desk 04", "position": { "x": 0.28, "y": 0.18 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["near-window"] },
+            { "id": "BRI1-D05", "label": "Desk 05", "position": { "x": 0.1, "y": 0.26 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["dual-monitor"] },
+            { "id": "BRI1-D06", "label": "Desk 06", "position": { "x": 0.16, "y": 0.26 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["standing-desk"] },
+            { "id": "BRI1-D07", "label": "Desk 07", "position": { "x": 0.22, "y": 0.26 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["quiet-area"] },
+            { "id": "BRI1-D08", "label": "Desk 08", "position": { "x": 0.28, "y": 0.26 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["near-window"] },
+            { "id": "BRI1-D09", "label": "Desk 09", "position": { "x": 0.34, "y": 0.38 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Hotdesks", "features": ["near-window"] },
+            { "id": "BRI1-D10", "label": "Desk 10", "position": { "x": 0.44, "y": 0.38 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Hotdesks", "features": ["quiet-area"] },
+            { "id": "BRI1-D11", "label": "Desk 11", "position": { "x": 0.62, "y": 0.28 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Sales", "features": ["dual-monitor"] },
+            { "id": "BRI1-D12", "label": "Desk 12", "position": { "x": 0.68, "y": 0.28 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Sales", "features": ["near-window"] },
+            { "id": "BRI1-D13", "label": "Desk 13", "position": { "x": 0.74, "y": 0.28 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Exec", "features": ["quiet-area"] },
+            { "id": "BRI1-D14", "label": "Desk 14", "position": { "x": 0.8, "y": 0.28 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Exec", "features": ["dual-monitor"] }
           ]
         }
       ]
@@ -290,130 +110,57 @@
           "id": "man-1",
           "name": "1st Floor",
           "level": 1,
-          "layout": {
-            "width": 1,
-            "height": 1
-          },
+          "layout": { "width": 1, "height": 1 },
+          "fixtures": [
+            { "id": "MAN1-F01", "label": "Project Room", "type": "meeting-room", "position": { "x": 0.12, "y": 0.08 }, "size": { "width": 0.26, "height": 0.2 }, "rotation": 0, "color": "#e0f7fa" },
+            { "id": "MAN1-F02", "label": "Kitchenette", "type": "kitchen", "position": { "x": 0.64, "y": 0.62 }, "size": { "width": 0.24, "height": 0.22 }, "rotation": 0, "color": "#fff3e0" },
+            { "id": "MAN1-F03", "label": "Restrooms", "type": "restroom", "position": { "x": 0.12, "y": 0.62 }, "size": { "width": 0.22, "height": 0.22 }, "rotation": 0, "color": "#ede7f6" },
+            { "id": "MAN1-F04", "label": "Printer Hub", "type": "printer", "position": { "x": 0.5, "y": 0.48 }, "size": { "width": 0.06, "height": 0.06 }, "rotation": 0, "color": "#eeeeee" },
+            { "id": "MAN1-F05", "label": "Slide", "type": "slide", "position": { "x": 0.9, "y": 0.3 }, "size": { "width": 0.06, "height": 0.14 }, "rotation": 0, "color": "#ffe0b2" }
+          ],
           "desks": [
-            {
-              "id": "MAN1-D01",
-              "label": "Desk 01",
-              "position": { "x": 0.14, "y": 0.18 },
-              "size": { "width": 0.06, "height": 0.04 },
-              "rotation": 0,
-              "zone": "Engineering",
-              "features": ["dual-monitor", "near-window"]
-            },
-            {
-              "id": "MAN1-D02",
-              "label": "Desk 02",
-              "position": { "x": 0.26, "y": 0.18 },
-              "size": { "width": 0.06, "height": 0.04 },
-              "rotation": 0,
-              "zone": "Engineering",
-              "features": ["standing-desk"]
-            },
-            {
-              "id": "MAN1-D03",
-              "label": "Desk 03",
-              "position": { "x": 0.38, "y": 0.2 },
-              "size": { "width": 0.05, "height": 0.04 },
-              "rotation": 90,
-              "zone": "Product",
-              "features": ["quiet-area"]
-            },
-            {
-              "id": "MAN1-D04",
-              "label": "Desk 04",
-              "position": { "x": 0.5, "y": 0.22 },
-              "size": { "width": 0.05, "height": 0.04 },
-              "rotation": 90,
-              "zone": "Product",
-              "features": ["near-window"]
-            },
-            {
-              "id": "MAN1-D05",
-              "label": "Desk 05",
-              "position": { "x": 0.62, "y": 0.24 },
-              "size": { "width": 0.06, "height": 0.05 },
-              "rotation": 180,
-              "zone": "Hotdesks",
-              "features": ["dual-monitor"]
-            },
-            {
-              "id": "MAN1-D06",
-              "label": "Desk 06",
-              "position": { "x": 0.74, "y": 0.26 },
-              "size": { "width": 0.06, "height": 0.05 },
-              "rotation": 180,
-              "zone": "Hotdesks",
-              "features": ["quiet-area", "near-window"]
-            }
+            { "id": "MAN1-D01", "label": "Desk 01", "position": { "x": 0.4, "y": 0.18 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["dual-monitor"] },
+            { "id": "MAN1-D02", "label": "Desk 02", "position": { "x": 0.46, "y": 0.18 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["standing-desk"] },
+            { "id": "MAN1-D03", "label": "Desk 03", "position": { "x": 0.52, "y": 0.18 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["quiet-area"] },
+            { "id": "MAN1-D04", "label": "Desk 04", "position": { "x": 0.58, "y": 0.18 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["near-window"] },
+            { "id": "MAN1-D05", "label": "Desk 05", "position": { "x": 0.4, "y": 0.26 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["dual-monitor"] },
+            { "id": "MAN1-D06", "label": "Desk 06", "position": { "x": 0.46, "y": 0.26 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["standing-desk"] },
+            { "id": "MAN1-D07", "label": "Desk 07", "position": { "x": 0.52, "y": 0.26 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["near-window"] },
+            { "id": "MAN1-D08", "label": "Desk 08", "position": { "x": 0.58, "y": 0.26 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["quiet-area"] },
+            { "id": "MAN1-D09", "label": "Desk 09", "position": { "x": 0.2, "y": 0.38 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Hotdesks", "features": ["near-window"] },
+            { "id": "MAN1-D10", "label": "Desk 10", "position": { "x": 0.3, "y": 0.38 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Hotdesks", "features": ["quiet-area"] },
+            { "id": "MAN1-D11", "label": "Desk 11", "position": { "x": 0.7, "y": 0.34 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Exec", "features": ["dual-monitor"] },
+            { "id": "MAN1-D12", "label": "Desk 12", "position": { "x": 0.76, "y": 0.34 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Exec", "features": ["standing-desk"] }
           ]
         },
         {
           "id": "man-2",
           "name": "2nd Floor",
           "level": 2,
-          "layout": {
-            "width": 1,
-            "height": 1
-          },
+          "layout": { "width": 1, "height": 1 },
+          "fixtures": [
+            { "id": "MAN2-F01", "label": "Board Room", "type": "meeting-room", "position": { "x": 0.64, "y": 0.06 }, "size": { "width": 0.28, "height": 0.2 }, "rotation": 0, "color": "#e0f2f1" },
+            { "id": "MAN2-F02", "label": "Reception", "type": "reception", "position": { "x": 0.08, "y": 0.08 }, "size": { "width": 0.24, "height": 0.14 }, "rotation": 0, "color": "#f3e5f5" },
+            { "id": "MAN2-F03", "label": "Kitchen", "type": "kitchen", "position": { "x": 0.12, "y": 0.62 }, "size": { "width": 0.24, "height": 0.2 }, "rotation": 0, "color": "#fff8e1" },
+            { "id": "MAN2-F04", "label": "Restrooms", "type": "restroom", "position": { "x": 0.7, "y": 0.64 }, "size": { "width": 0.22, "height": 0.22 }, "rotation": 0, "color": "#ede7f6" },
+            { "id": "MAN2-F05", "label": "Foosball", "type": "foosball", "position": { "x": 0.46, "y": 0.7 }, "size": { "width": 0.12, "height": 0.08 }, "rotation": 0, "color": "#bbdefb" },
+            { "id": "MAN2-F06", "label": "Printer", "type": "printer", "position": { "x": 0.5, "y": 0.5 }, "size": { "width": 0.06, "height": 0.06 }, "rotation": 0, "color": "#eeeeee" }
+          ],
           "desks": [
-            {
-              "id": "MAN2-D01",
-              "label": "Desk 01",
-              "position": { "x": 0.16, "y": 0.6 },
-              "size": { "width": 0.06, "height": 0.04 },
-              "rotation": 0,
-              "zone": "Engineering",
-              "features": ["dual-monitor", "standing-desk"]
-            },
-            {
-              "id": "MAN2-D02",
-              "label": "Desk 02",
-              "position": { "x": 0.28, "y": 0.6 },
-              "size": { "width": 0.06, "height": 0.04 },
-              "rotation": 0,
-              "zone": "Engineering",
-              "features": ["near-window"]
-            },
-            {
-              "id": "MAN2-D03",
-              "label": "Desk 03",
-              "position": { "x": 0.42, "y": 0.62 },
-              "size": { "width": 0.05, "height": 0.04 },
-              "rotation": 90,
-              "zone": "Product",
-              "features": ["quiet-area"]
-            },
-            {
-              "id": "MAN2-D04",
-              "label": "Desk 04",
-              "position": { "x": 0.56, "y": 0.64 },
-              "size": { "width": 0.05, "height": 0.04 },
-              "rotation": 90,
-              "zone": "Product",
-              "features": ["near-window"]
-            },
-            {
-              "id": "MAN2-D05",
-              "label": "Desk 05",
-              "position": { "x": 0.7, "y": 0.66 },
-              "size": { "width": 0.06, "height": 0.05 },
-              "rotation": 180,
-              "zone": "Sales",
-              "features": ["dual-monitor"]
-            },
-            {
-              "id": "MAN2-D06",
-              "label": "Desk 06",
-              "position": { "x": 0.82, "y": 0.68 },
-              "size": { "width": 0.06, "height": 0.05 },
-              "rotation": 180,
-              "zone": "Sales",
-              "features": ["standing-desk", "near-window"]
-            }
+            { "id": "MAN2-D01", "label": "Desk 01", "position": { "x": 0.1, "y": 0.26 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["dual-monitor"] },
+            { "id": "MAN2-D02", "label": "Desk 02", "position": { "x": 0.16, "y": 0.26 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["standing-desk"] },
+            { "id": "MAN2-D03", "label": "Desk 03", "position": { "x": 0.22, "y": 0.26 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["quiet-area"] },
+            { "id": "MAN2-D04", "label": "Desk 04", "position": { "x": 0.28, "y": 0.26 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["near-window"] },
+            { "id": "MAN2-D05", "label": "Desk 05", "position": { "x": 0.1, "y": 0.36 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["dual-monitor"] },
+            { "id": "MAN2-D06", "label": "Desk 06", "position": { "x": 0.16, "y": 0.36 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["standing-desk"] },
+            { "id": "MAN2-D07", "label": "Desk 07", "position": { "x": 0.22, "y": 0.36 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["near-window"] },
+            { "id": "MAN2-D08", "label": "Desk 08", "position": { "x": 0.28, "y": 0.36 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["quiet-area"] },
+            { "id": "MAN2-D09", "label": "Desk 09", "position": { "x": 0.6, "y": 0.5 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Sales", "features": ["dual-monitor"] },
+            { "id": "MAN2-D10", "label": "Desk 10", "position": { "x": 0.66, "y": 0.5 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Sales", "features": ["near-window"] },
+            { "id": "MAN2-D11", "label": "Desk 11", "position": { "x": 0.72, "y": 0.5 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Sales", "features": ["standing-desk"] },
+            { "id": "MAN2-D12", "label": "Desk 12", "position": { "x": 0.6, "y": 0.58 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Exec", "features": ["quiet-area"] },
+            { "id": "MAN2-D13", "label": "Desk 13", "position": { "x": 0.66, "y": 0.58 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Exec", "features": ["dual-monitor"] },
+            { "id": "MAN2-D14", "label": "Desk 14", "position": { "x": 0.72, "y": 0.58 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Exec", "features": ["near-window"] }
           ]
         }
       ]
@@ -427,83 +174,27 @@
           "id": "car-1",
           "name": "1st Floor",
           "level": 1,
-          "layout": {
-            "width": 1,
-            "height": 1
-          },
+          "layout": { "width": 1, "height": 1 },
+          "fixtures": [
+            { "id": "CAR1-F01", "label": "Team Room", "type": "meeting-room", "position": { "x": 0.64, "y": 0.06 }, "size": { "width": 0.26, "height": 0.2 }, "rotation": 0, "color": "#e0f2f1" },
+            { "id": "CAR1-F02", "label": "Kitchen", "type": "kitchen", "position": { "x": 0.1, "y": 0.64 }, "size": { "width": 0.26, "height": 0.22 }, "rotation": 0, "color": "#fff3e0" },
+            { "id": "CAR1-F03", "label": "Restrooms", "type": "restroom", "position": { "x": 0.72, "y": 0.64 }, "size": { "width": 0.22, "height": 0.22 }, "rotation": 0, "color": "#ede7f6" },
+            { "id": "CAR1-F04", "label": "Printer", "type": "printer", "position": { "x": 0.5, "y": 0.5 }, "size": { "width": 0.06, "height": 0.06 }, "rotation": 0, "color": "#eeeeee" },
+            { "id": "CAR1-F05", "label": "Table Tennis", "type": "game-table", "position": { "x": 0.46, "y": 0.7 }, "size": { "width": 0.14, "height": 0.08 }, "rotation": 0, "color": "#e1bee7" }
+          ],
           "desks": [
-            {
-              "id": "CAR1-D01",
-              "label": "Desk 01",
-              "position": { "x": 0.1, "y": 0.18 },
-              "size": { "width": 0.06, "height": 0.04 },
-              "rotation": 0,
-              "zone": "Engineering",
-              "features": ["dual-monitor", "near-window"]
-            },
-            {
-              "id": "CAR1-D02",
-              "label": "Desk 02",
-              "position": { "x": 0.22, "y": 0.18 },
-              "size": { "width": 0.06, "height": 0.04 },
-              "rotation": 0,
-              "zone": "Engineering",
-              "features": ["standing-desk"]
-            },
-            {
-              "id": "CAR1-D03",
-              "label": "Desk 03",
-              "position": { "x": 0.34, "y": 0.2 },
-              "size": { "width": 0.05, "height": 0.04 },
-              "rotation": 90,
-              "zone": "Product",
-              "features": ["quiet-area"]
-            },
-            {
-              "id": "CAR1-D04",
-              "label": "Desk 04",
-              "position": { "x": 0.46, "y": 0.22 },
-              "size": { "width": 0.05, "height": 0.04 },
-              "rotation": 90,
-              "zone": "Product",
-              "features": ["near-window"]
-            },
-            {
-              "id": "CAR1-D05",
-              "label": "Desk 05",
-              "position": { "x": 0.58, "y": 0.24 },
-              "size": { "width": 0.06, "height": 0.05 },
-              "rotation": 180,
-              "zone": "Sales",
-              "features": ["dual-monitor"]
-            },
-            {
-              "id": "CAR1-D06",
-              "label": "Desk 06",
-              "position": { "x": 0.7, "y": 0.26 },
-              "size": { "width": 0.06, "height": 0.05 },
-              "rotation": 270,
-              "zone": "Collaboration",
-              "features": ["near-window", "quiet-area"]
-            },
-            {
-              "id": "CAR1-D07",
-              "label": "Desk 07",
-              "position": { "x": 0.16, "y": 0.36 },
-              "size": { "width": 0.06, "height": 0.04 },
-              "rotation": 270,
-              "zone": "Collaboration",
-              "features": ["standing-desk"]
-            },
-            {
-              "id": "CAR1-D08",
-              "label": "Desk 08",
-              "position": { "x": 0.3, "y": 0.38 },
-              "size": { "width": 0.05, "height": 0.04 },
-              "rotation": 0,
-              "zone": "Hotdesks",
-              "features": ["near-window"]
-            }
+            { "id": "CAR1-D01", "label": "Desk 01", "position": { "x": 0.1, "y": 0.22 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["dual-monitor"] },
+            { "id": "CAR1-D02", "label": "Desk 02", "position": { "x": 0.16, "y": 0.22 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["standing-desk"] },
+            { "id": "CAR1-D03", "label": "Desk 03", "position": { "x": 0.22, "y": 0.22 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["quiet-area"] },
+            { "id": "CAR1-D04", "label": "Desk 04", "position": { "x": 0.28, "y": 0.22 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["near-window"] },
+            { "id": "CAR1-D05", "label": "Desk 05", "position": { "x": 0.1, "y": 0.32 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["dual-monitor"] },
+            { "id": "CAR1-D06", "label": "Desk 06", "position": { "x": 0.16, "y": 0.32 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["standing-desk"] },
+            { "id": "CAR1-D07", "label": "Desk 07", "position": { "x": 0.22, "y": 0.32 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["near-window"] },
+            { "id": "CAR1-D08", "label": "Desk 08", "position": { "x": 0.28, "y": 0.32 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["quiet-area"] },
+            { "id": "CAR1-D09", "label": "Desk 09", "position": { "x": 0.52, "y": 0.3 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Sales", "features": ["dual-monitor"] },
+            { "id": "CAR1-D10", "label": "Desk 10", "position": { "x": 0.58, "y": 0.3 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Sales", "features": ["near-window"] },
+            { "id": "CAR1-D11", "label": "Desk 11", "position": { "x": 0.64, "y": 0.3 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Exec", "features": ["quiet-area"] },
+            { "id": "CAR1-D12", "label": "Desk 12", "position": { "x": 0.7, "y": 0.3 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Exec", "features": ["dual-monitor"] }
           ]
         }
       ]
@@ -517,65 +208,27 @@
           "id": "lds-1",
           "name": "1st Floor",
           "level": 1,
-          "layout": {
-            "width": 1,
-            "height": 1
-          },
+          "layout": { "width": 1, "height": 1 },
+          "fixtures": [
+            { "id": "LDS1-F01", "label": "Meeting Room", "type": "meeting-room", "position": { "x": 0.66, "y": 0.06 }, "size": { "width": 0.26, "height": 0.2 }, "rotation": 0, "color": "#e0f2f1" },
+            { "id": "LDS1-F02", "label": "Kitchen", "type": "kitchen", "position": { "x": 0.08, "y": 0.64 }, "size": { "width": 0.26, "height": 0.22 }, "rotation": 0, "color": "#fff3e0" },
+            { "id": "LDS1-F03", "label": "Restrooms", "type": "restroom", "position": { "x": 0.7, "y": 0.64 }, "size": { "width": 0.22, "height": 0.22 }, "rotation": 0, "color": "#ede7f6" },
+            { "id": "LDS1-F04", "label": "Printer", "type": "printer", "position": { "x": 0.5, "y": 0.5 }, "size": { "width": 0.06, "height": 0.06 }, "rotation": 0, "color": "#eeeeee" },
+            { "id": "LDS1-F05", "label": "Arcade", "type": "arcade", "position": { "x": 0.9, "y": 0.3 }, "size": { "width": 0.06, "height": 0.08 }, "rotation": 0, "color": "#ffecb3" }
+          ],
           "desks": [
-            {
-              "id": "LDS1-D01",
-              "label": "Desk 01",
-              "position": { "x": 0.12, "y": 0.2 },
-              "size": { "width": 0.06, "height": 0.04 },
-              "rotation": 0,
-              "zone": "Engineering",
-              "features": ["dual-monitor", "near-window"]
-            },
-            {
-              "id": "LDS1-D02",
-              "label": "Desk 02",
-              "position": { "x": 0.24, "y": 0.2 },
-              "size": { "width": 0.06, "height": 0.04 },
-              "rotation": 0,
-              "zone": "Engineering",
-              "features": ["standing-desk"]
-            },
-            {
-              "id": "LDS1-D03",
-              "label": "Desk 03",
-              "position": { "x": 0.36, "y": 0.22 },
-              "size": { "width": 0.05, "height": 0.04 },
-              "rotation": 90,
-              "zone": "Product",
-              "features": ["quiet-area"]
-            },
-            {
-              "id": "LDS1-D04",
-              "label": "Desk 04",
-              "position": { "x": 0.48, "y": 0.24 },
-              "size": { "width": 0.05, "height": 0.04 },
-              "rotation": 90,
-              "zone": "Product",
-              "features": ["near-window"]
-            },
-            {
-              "id": "LDS1-D05",
-              "label": "Desk 05",
-              "position": { "x": 0.6, "y": 0.26 },
-              "size": { "width": 0.06, "height": 0.05 },
-              "rotation": 180,
-              "zone": "Hotdesks",
-              "features": ["dual-monitor"]
-            },
-            {
-              "id": "LDS1-D06",
-              "label": "Desk 06",
-              "position": { "x": 0.72, "y": 0.28 },
-              "size": { "width": 0.06, "height": 0.05 },
-              "rotation": 270,
-              "zone": "Collaboration",
-              "features": ["near-window", "quiet-area"]
-            }
+            { "id": "LDS1-D01", "label": "Desk 01", "position": { "x": 0.12, "y": 0.22 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["dual-monitor"] },
+            { "id": "LDS1-D02", "label": "Desk 02", "position": { "x": 0.18, "y": 0.22 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["standing-desk"] },
+            { "id": "LDS1-D03", "label": "Desk 03", "position": { "x": 0.24, "y": 0.22 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["quiet-area"] },
+            { "id": "LDS1-D04", "label": "Desk 04", "position": { "x": 0.3, "y": 0.22 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["near-window"] },
+            { "id": "LDS1-D05", "label": "Desk 05", "position": { "x": 0.12, "y": 0.32 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["dual-monitor"] },
+            { "id": "LDS1-D06", "label": "Desk 06", "position": { "x": 0.18, "y": 0.32 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["standing-desk"] },
+            { "id": "LDS1-D07", "label": "Desk 07", "position": { "x": 0.24, "y": 0.32 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["near-window"] },
+            { "id": "LDS1-D08", "label": "Desk 08", "position": { "x": 0.3, "y": 0.32 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["quiet-area"] },
+            { "id": "LDS1-D09", "label": "Desk 09", "position": { "x": 0.52, "y": 0.32 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Sales", "features": ["dual-monitor"] },
+            { "id": "LDS1-D10", "label": "Desk 10", "position": { "x": 0.58, "y": 0.32 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Sales", "features": ["near-window"] },
+            { "id": "LDS1-D11", "label": "Desk 11", "position": { "x": 0.64, "y": 0.32 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Exec", "features": ["quiet-area"] },
+            { "id": "LDS1-D12", "label": "Desk 12", "position": { "x": 0.7, "y": 0.32 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Exec", "features": ["dual-monitor"] }
           ]
         }
       ]
@@ -589,74 +242,27 @@
           "id": "gla-1",
           "name": "1st Floor",
           "level": 1,
-          "layout": {
-            "width": 1,
-            "height": 1
-          },
+          "layout": { "width": 1, "height": 1 },
+          "fixtures": [
+            { "id": "GLA1-F01", "label": "Project Room", "type": "meeting-room", "position": { "x": 0.12, "y": 0.06 }, "size": { "width": 0.26, "height": 0.2 }, "rotation": 0, "color": "#e0f7fa" },
+            { "id": "GLA1-F02", "label": "Kitchen", "type": "kitchen", "position": { "x": 0.64, "y": 0.64 }, "size": { "width": 0.24, "height": 0.22 }, "rotation": 0, "color": "#fff3e0" },
+            { "id": "GLA1-F03", "label": "Restrooms", "type": "restroom", "position": { "x": 0.12, "y": 0.64 }, "size": { "width": 0.22, "height": 0.22 }, "rotation": 0, "color": "#ede7f6" },
+            { "id": "GLA1-F04", "label": "Printer", "type": "printer", "position": { "x": 0.5, "y": 0.48 }, "size": { "width": 0.06, "height": 0.06 }, "rotation": 0, "color": "#eeeeee" },
+            { "id": "GLA1-F05", "label": "Foosball", "type": "foosball", "position": { "x": 0.46, "y": 0.7 }, "size": { "width": 0.12, "height": 0.08 }, "rotation": 0, "color": "#bbdefb" }
+          ],
           "desks": [
-            {
-              "id": "GLA1-D01",
-              "label": "Desk 01",
-              "position": { "x": 0.1, "y": 0.18 },
-              "size": { "width": 0.06, "height": 0.04 },
-              "rotation": 0,
-              "zone": "Engineering",
-              "features": ["dual-monitor", "near-window"]
-            },
-            {
-              "id": "GLA1-D02",
-              "label": "Desk 02",
-              "position": { "x": 0.22, "y": 0.18 },
-              "size": { "width": 0.06, "height": 0.04 },
-              "rotation": 0,
-              "zone": "Engineering",
-              "features": ["standing-desk"]
-            },
-            {
-              "id": "GLA1-D03",
-              "label": "Desk 03",
-              "position": { "x": 0.34, "y": 0.2 },
-              "size": { "width": 0.05, "height": 0.04 },
-              "rotation": 90,
-              "zone": "Product",
-              "features": ["quiet-area"]
-            },
-            {
-              "id": "GLA1-D04",
-              "label": "Desk 04",
-              "position": { "x": 0.46, "y": 0.22 },
-              "size": { "width": 0.05, "height": 0.04 },
-              "rotation": 90,
-              "zone": "Product",
-              "features": ["near-window"]
-            },
-            {
-              "id": "GLA1-D05",
-              "label": "Desk 05",
-              "position": { "x": 0.58, "y": 0.24 },
-              "size": { "width": 0.06, "height": 0.05 },
-              "rotation": 180,
-              "zone": "Hotdesks",
-              "features": ["dual-monitor"]
-            },
-            {
-              "id": "GLA1-D06",
-              "label": "Desk 06",
-              "position": { "x": 0.7, "y": 0.26 },
-              "size": { "width": 0.06, "height": 0.05 },
-              "rotation": 270,
-              "zone": "Collaboration",
-              "features": ["near-window", "quiet-area"]
-            },
-            {
-              "id": "GLA1-D07",
-              "label": "Desk 07",
-              "position": { "x": 0.82, "y": 0.28 },
-              "size": { "width": 0.06, "height": 0.05 },
-              "rotation": 270,
-              "zone": "Exec",
-              "features": ["standing-desk", "dual-monitor"]
-            }
+            { "id": "GLA1-D01", "label": "Desk 01", "position": { "x": 0.4, "y": 0.2 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["dual-monitor"] },
+            { "id": "GLA1-D02", "label": "Desk 02", "position": { "x": 0.46, "y": 0.2 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["standing-desk"] },
+            { "id": "GLA1-D03", "label": "Desk 03", "position": { "x": 0.52, "y": 0.2 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["quiet-area"] },
+            { "id": "GLA1-D04", "label": "Desk 04", "position": { "x": 0.58, "y": 0.2 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Engineering", "features": ["near-window"] },
+            { "id": "GLA1-D05", "label": "Desk 05", "position": { "x": 0.4, "y": 0.3 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["dual-monitor"] },
+            { "id": "GLA1-D06", "label": "Desk 06", "position": { "x": 0.46, "y": 0.3 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["standing-desk"] },
+            { "id": "GLA1-D07", "label": "Desk 07", "position": { "x": 0.52, "y": 0.3 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["near-window"] },
+            { "id": "GLA1-D08", "label": "Desk 08", "position": { "x": 0.58, "y": 0.3 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 0, "zone": "Product", "features": ["quiet-area"] },
+            { "id": "GLA1-D09", "label": "Desk 09", "position": { "x": 0.2, "y": 0.38 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Hotdesks", "features": ["near-window"] },
+            { "id": "GLA1-D10", "label": "Desk 10", "position": { "x": 0.3, "y": 0.38 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Hotdesks", "features": ["quiet-area"] },
+            { "id": "GLA1-D11", "label": "Desk 11", "position": { "x": 0.7, "y": 0.34 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Exec", "features": ["dual-monitor"] },
+            { "id": "GLA1-D12", "label": "Desk 12", "position": { "x": 0.76, "y": 0.34 }, "size": { "width": 0.06, "height": 0.04 }, "rotation": 90, "zone": "Exec", "features": ["standing-desk"] }
           ]
         }
       ]
