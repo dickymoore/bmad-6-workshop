@@ -31,7 +31,7 @@
 18. When you're finished, have a look at the changed file.
 19. Crtl+C to exit Codex. You can see how to resume.
 20. git stash
-21. git checkout stage-2.
+21. git checkout stage-2
 
 # Office Floorplans Assets
 
