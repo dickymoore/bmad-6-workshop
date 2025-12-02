@@ -57,6 +57,34 @@ workflow_status:
     name: "Planning"
     workflows:
       - id: "prd"
+        status: "docs/prd.md"
+      - id: "validate-prd"
+        status: "manual-validation-complete"
+      - id: "create-design"
+        status: "docs/ux-design-specification.md"
+        note: "completed (UI exists)"
+  - phase: 2
+    name: "Solutioning"
+    workflows:
+      - id: "create-architecture"
+        status: "required"
+      - id: "create-epics-and-stories"
+        status: "required"
+      - id: "test-design"
+        status: "recommended"
+      - id: "validate-architecture"
+        status: "optional"
+      - id: "implementation-readiness"
+        status: "required"
+  - phase: 3
+    name: "Implementation"
+    workflows:
+      - id: "sprint-planning"
+        status: "required"
+  - phase: 1
+    name: "Planning"
+    workflows:
+      - id: "prd"
         status: "required"
       - id: "validate-prd"
         status: "optional"
