@@ -1,0 +1,6 @@
+# CIS Module Configuration
+project_name: bmad-6-workshop
+user_name: DICKY
+communication_language: English
+document_output_language: English
+output_folder: "{project-root}/docs"

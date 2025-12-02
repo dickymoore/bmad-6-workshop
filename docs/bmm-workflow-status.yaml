@@ -1,0 +1,83 @@
+# Workflow Status Template
+
+# This tracks progress through BMM methodology Analysis, Planning, and Solutioning phases.
+# Implementation phase is tracked separately in sprint-status.yaml
+
+# STATUS DEFINITIONS:
+# ==================
+# Initial Status (before completion):
+#   - required: Must be completed to progress
+#   - optional: Can be completed but not required
+#   - recommended: Strongly suggested but not required
+#   - conditional: Required only if certain conditions met (e.g., if_has_ui)
+#
+# Completion Status:
+#   - {file-path}: File created/found (e.g., "docs/product-brief.md")
+#   - skipped: Optional/conditional workflow that was skipped
+
+# Elicitation Notes (local desk booking, 20-user dropdown, single-machine):
+#   - Core framing: simple workspace reservations with day-level bookings, conflict prevention, basic availability.
+#   - Strengths: fixed roster simplifies UI; local-only reduces complexity; existing floorplans help mapping; clear reserve/cancel/view flows.
+#   - Weaknesses: local storage can lose data; minimal auditing; single-machine access only.
+#   - Opportunities: quick delivery; soft rule (one booking per user per day); light check-in; export/backup; simple filters.
+#   - Threats: stale availability without refresh; manual data corruption; future multi-device/more users requires rework.
+#   - Five Whys: we need coordination on who sits where; ad hoc chat is error-prone; no shared source of truth; manual lists don’t stay current; a simple booking UI with day-level state keeps everyone aligned.
+#   - PESTLE: Political none; Economic minimal cost; Social small-team clarity on seating per day; Technological simple/local with data-loss risk; Legal low if no sensitive data; Environmental none.
+#   - Six Hats: White facts (local, 20 users, day bookings, floorplans, no concurrency); Red (desire clarity, frustration with ad hoc); Black (data loss, stale UI, scaling rework); Yellow (fast, simple, no infra cost); Green (optional check-in, export/backup, filters, one booking per user/day); Blue (tight scope, prioritize reserve/cancel/view, clear availability, basic backup).
+#   - Cost-Benefit: Costs = build minimal booking UI + local persistence/backup + maintain user/desk lists + light UX; Benefits = eliminate ad hoc coordination, single source of truth, zero infra cost, fast clarity; Net = high benefit/low cost, proceed with minimal scope.
+#   - Risk Matrix: Data loss (M/M) → export/backup + local file saves; Stale availability (M/L) → refresh on change; Desk/floorplan mismatch (L/M) → single source of truth for desks; Scope creep (M/M) → document constraints (single machine, day-level, ~20 users, no auth); Roster growth/multi-device (L/M) → future pivot noted.
+#   - Service Blueprint: Customer actions (select office/floor, view floorplan, pick desk/date, book, cancel/release, view per-day list); Frontstage (selectors, clickable PNG hotspots, date picker, user dropdown, availability legend, confirmation, per-day list); Backstage (load PNG + desks JSON, compute availability, enforce one booking/user/day, save/cancel, refresh); Support (maintain ~20-user roster, keep JSON mapping in sync, backup/export, seed data); Evidence (floorplan availability, confirmations, bookings list, backup file).
+#   - Pre-mortem: Failures (lost bookings due to persistence/backup gaps; hotspots misaligned with JSON/PNGs; unclear availability; missing per-day “who’s where”; scope creep). Mitigations: save/export on change; desks JSON as single source; clear per-day availability legend + bookings list; “today/by date” occupancy view; document constraints (single machine, day-level, ~20 users; defer auth/multi-device/half-day).
+#   - Mind Map: Core (day bookings, ~20 users, local, floorplan PNGs + desk JSON); Users (employees/visitors; admin maintains roster); Offices/Floors (selectors); Desks (clickable hotspots, status); Bookings (one/user/day, cancel, who sits where); Data (bookings file, roster, desk JSON, backup/export, seed); UX (legend, per-day list, confirmations, filters); Risks (data loss, stale view, mapping drift, scope creep, multi-device future).
+#   - Empathy Map: Thinks (need to know if desk free, avoid overwrites, keep simple); Feels (relief with clear map; annoyed by stale/misaligned; worried about loss); Sees (floorplan availability, user dropdown, date picker, per-day list, backup/export, last updated); Says (“Who’s in today?”, “Which desk is mine?”, “Is data current?”); Does (select office/floor, date, desk, user; book/cancel; check per-day); Pains (misaligned hotspots, unclear availability, lost/stale data, outdated roster); Gains (quick booking, confidence, backup/export safety).
+#   - SCAMPER: Substitute chat → single availability view; combine PNG + JSON + bookings; adapt to day-level only; modify to one booking/user/day + backup/export; put data to use for printable daily snapshot; eliminate auth/multi-device/half-day; reverse: per-day list jumps to desk highlight (optional).
+#   - Red Team: Risks (stale/wrong availability, mapping drift, lost bookings, outdated roster); Attacks (unsaved state, manual file corruption, mismatched desk IDs, no stale cue); Mitigations (save on change, backup/export, validate against JSON, last-updated indicator, single data entry).
+#   - Value Chain: Primary (booking, availability display, cancel/release, export/backup); Support (roster maintenance, desks JSON, PNG loading, validation, seed); Linkages (mapping drives hotspots; save/export preserves state; roster ties attribution); Optimization (minimize steps, single-source mapping/roster, last updated indicator, obvious per-day view).
+generated: "2025-12-02"
+project: "Desk Booking Application"
+project_type: "web-app"
+user_description: "Simple local desk booking app: day-based desk reservations, fixed ~20-user dropdown, reuse office floorplan PNGs and mapping JSON, no auth/db, local file persistence, fast to ship."
+selected_track: "bmad-method"
+field_type: "greenfield"
+brainstorm_requested: true
+research_requested: true
+product_brief_requested: true
+workflow_path: ".bmad/bmm/workflows/workflow-status/paths/method-greenfield.yaml"
+workflow_status:
+  - phase: 0
+    name: "Discovery"
+    workflows:
+      - id: "brainstorm-project"
+        status: "docs/brainstorming-session-results-2025-12-02.md"
+      - id: "research"
+        status: "docs/bmm-research-technical-2025-12-02.md"
+      - id: "product-brief"
+        status: "docs/bmm-product-brief-Desk-Booking-Application-2025-12-02.md"
+  - phase: 1
+    name: "Planning"
+    workflows:
+      - id: "prd"
+        status: "required"
+      - id: "validate-prd"
+        status: "optional"
+      - id: "create-design"
+        status: "conditional"
+        note: "if_has_ui"
+  - phase: 2
+    name: "Solutioning"
+    workflows:
+      - id: "create-architecture"
+        status: "required"
+      - id: "create-epics-and-stories"
+        status: "required"
+      - id: "test-design"
+        status: "recommended"
+      - id: "validate-architecture"
+        status: "optional"
+      - id: "implementation-readiness"
+        status: "required"
+  - phase: 3
+    name: "Implementation"
+    workflows:
+      - id: "sprint-planning"
+        status: "required"
