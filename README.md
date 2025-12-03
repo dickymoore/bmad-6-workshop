@@ -1,9 +1,15 @@
-## desk Booking Application
+## Desk Booking Application
 
-# BMAD BMM Stage 4 - Ready for Dev.
-1. Look in docs/sprint-artifacts
-2. Inspect docs/sprint-artifacts/sprint-status.yaml
-3. Run Codex.
-4. /prompts:bmad-bmm-agents-pm
-5. *workflow-status
-... git checkout implementation-in-progress
+### Quickstart (Node 22.x)
+1. `npm install`
+2. `npm run dev`
+3. Data lives under `data/`:
+   - `users.json`
+   - `bookings.json`
+   - `last-updated.json`
+   - `data/backup/` (snapshots)
+
+Notes:
+- Stack: React 19.2, Vite 6.2.x, Radix UI 1.2.x primitives.
+- `.gitignore` already excludes backup artifacts, build output, and `node_modules`.
+- Story and sprint tracking files are under `docs/sprint-artifacts/`.
