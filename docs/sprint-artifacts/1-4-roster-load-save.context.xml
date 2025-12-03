@@ -1,0 +1,88 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.4</storyId>
+    <title>Roster load/save</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-03</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/1-4-roster-load-save.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>admin</asA>
+    <iWant>the app to load and persist the roster</iWant>
+    <soThat>I can pick users when booking</soThat>
+    <tasks>
+      <![CDATA[
+      - Implement roster schemas and read/write helpers with atomic writes and last-updated updates (AC1, AC2, AC3)
+      - Seed empty roster on missing/empty file; show notice (AC1)
+      - Enforce non-empty unique names; return structured errors; log warnings (AC2, AC3)
+      - Wire UI dropdown to roster state and keep in sync after saves/imports (AC4)
+      - Tests: seed behavior, duplicate rejection, last-updated update, error path, dropdown sync (AC1–AC4)
+      ]]>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <![CDATA[
+    1) Roster loads from data/users.json; missing/empty seeds empty array and shows notice. (docs/epics.md)
+    2) Roster save writes through storage, updates last-updated, returns structured errors on failure. (docs/sprint-artifacts/tech-spec-epic-1.md)
+    3) Schema enforces id/name/active; rejects empty/duplicate names with clear errors. (docs/epics.md)
+    4) UI/user dropdown reflects roster changes immediately. (docs/prd.md)
+    ]]>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <![CDATA[
+      - path: docs/epics.md; title: Epics; section: Epic 1 Story 1.4; snippet: Roster load/save requirements and empty-seed notice.
+      - path: docs/architecture.md; title: Architecture; section: Data Layout & Persistence; snippet: data/users.json location, write-through, last-updated.
+      - path: docs/sprint-artifacts/tech-spec-epic-1.md; title: Tech Spec Epic 1; section: Services and Modules; snippet: storage services, atomic writes, structured results.
+      - path: docs/prd.md; title: PRD; section: FR3 & FR12–FR15; snippet: user dropdown depends on roster; persistence reliability.
+      ]]>
+    </docs>
+    <code>
+      <![CDATA[
+      - None yet; roster helpers to be implemented in src/lib/storage/users.ts and UI in FiltersBar/UserDropdown.
+      ]]>
+    </code>
+    <dependencies>
+      <![CDATA[
+      - Node.js: 22.17.x
+      - React: 19.2.x
+      - Vite: 6.2.x
+      - Radix UI: 1.2.x
+      - zod or ajv: for schema validation
+      ]]>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <![CDATA[
+    - Keep roster ops inside data/; reject external paths.
+    - Atomic writes with last-updated update on success.
+    - Enforce unique, non-empty names; visitor handled separately.
+    - Structured { ok, error } results; no silent failures.
+    ]]>
+  </constraints>
+
+  <interfaces>
+    <![CDATA[
+    - readUsers(): Promise<Result<User[]>>
+    - writeUsers(users): Promise<Result<void>> // validates and updates last-updated
+    - Roster-aware user dropdown reloads after successful write/import
+    ]]>
+  </interfaces>
+
+  <tests>
+    <standards><![CDATA[Vitest for unit/API; component test for dropdown sync; accessibility checks for notice text.]]></standards>
+    <locations><![CDATA[tests/unit/storage/users.test.ts, tests/component/UserDropdown.spec.tsx]]></locations>
+    <ideas><![CDATA[
+    - AC1: Missing users.json seeds empty array and emits notice flag.
+    - AC2: writeUsers updates last-updated; fs failure returns { ok:false, error }.
+    - AC3: Duplicate or empty name rejected; error message exposed.
+    - AC4: Dropdown updates after write/import; notice shown when empty.
+    ]]></ideas>
+  </tests>
+</story-context>

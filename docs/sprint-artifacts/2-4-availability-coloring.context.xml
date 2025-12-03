@@ -1,0 +1,82 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.4</storyId>
+    <title>Availability coloring</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-03</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/2-4-availability-coloring.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to see booked vs free desks visually</iWant>
+    <soThat>I can choose an open desk</soThat>
+    <tasks>
+      <![CDATA[
+      - Define color tokens for free/booked/selected with WCAG AA contrast (AC1)
+      - Bind hotspot colors and legend to booking state; keep selected distinct (AC1, AC2)
+      - Recompute availability on booking create/cancel and filter change; rerender map/legend (AC3)
+      - Tests: color states render; legend sync; state updates on booking/filter change (AC1–AC3)
+      ]]>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <![CDATA[
+    1) Booked/free/selected colors match tokens and pass contrast; applied to hotspots. (docs/epics.md)
+    2) Legend reflects the same colors/states and stays in sync. (docs/epics.md)
+    3) Color updates respond immediately to booking and filter changes. (docs/prd.md)
+    ]]>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <![CDATA[
+      - path: docs/epics.md; title: Epics; section: Epic 2 Story 2.4; snippet: availability coloring and legend requirements.
+      - path: docs/prd.md; title: PRD; section: FR5; snippet: visual availability indication.
+      - path: docs/architecture.md; title: Architecture; section: Design tokens & validation alignment; snippet: color tokens and desks.json consistency.
+      ]]>
+    </docs>
+    <code>
+      <![CDATA[
+      - None yet; implement in FloorplanView/Legend with shared state and tokens file.
+      ]]>
+    </code>
+    <dependencies>
+      <![CDATA[
+      - React 19.2.x
+      - Vite 6.2.x
+      - Radix UI 1.2.x
+      ]]>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <![CDATA[
+    - Centralize tokens (e.g., src/styles/tokens.ts); avoid hardcoding colors in components.
+    - Keep deskId and booking availability aligned with desks.json and booking data.
+    - Ensure WCAG AA contrast; provide tooltip/label support for colorblind users.
+    - Keep updates lightweight for immediate visual response.
+    ]]>
+  </constraints>
+
+  <interfaces>
+    <![CDATA[
+    - getAvailabilityState({ office, floor, date }): Map<deskId, status>
+    - getColorTokens(): { free, booked, selected }
+    - subscribeToBookingChanges(callback): updates availability state
+    ]]>
+  </interfaces>
+
+  <tests>
+    <standards><![CDATA[React Testing Library + axe for accessibility; Vitest.]]></standards>
+    <locations><![CDATA[tests/component/AvailabilityColors.spec.tsx]]></locations>
+    <ideas><![CDATA[
+    - AC1: Hotspots render correct colors; contrast check passes for tokens.
+    - AC2: Legend matches hotspot colors/states.
+    - AC3: Mock booking create/cancel updates colors immediately; filter change recomputes.
+    ]]></ideas>
+  </tests>
+</story-context>

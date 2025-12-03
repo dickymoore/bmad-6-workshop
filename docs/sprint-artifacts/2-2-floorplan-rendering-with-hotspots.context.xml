@@ -1,0 +1,86 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.2</storyId>
+    <title>Floorplan rendering with hotspots</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-03</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/2-2-floorplan-rendering-with-hotspots.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to see the floorplan with clickable desk hotspots</iWant>
+    <soThat>I can inspect desks</soThat>
+    <tasks>
+      <![CDATA[
+      - Load floorplan PNG for current office/floor; show fallback if missing (AC1)
+      - Render hotspots from desks.json coordinates; handle out-of-bounds gracefully (AC1, AC4)
+      - Add tooltip/label with deskId; keyboard focus ring; aria-label includes status/user (AC2)
+      - Render legend with Free/Booked/Selected colors bound to state; ensure contrast (AC3)
+      - Tests: render hotspots, accessibility, legend updates, invalid coord handling (AC1–AC4)
+      ]]>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <![CDATA[
+    1) Floorplan PNG loads per office/floor; hotspots positioned from desks.json. (docs/epics.md)
+    2) Hotspots show deskId tooltip/focus ring; aria-label includes status. (docs/epics.md)
+    3) Legend shows Free/Booked/Selected colors matching tokens and updates with state. (docs/epics.md)
+    4) Missing/invalid desk coordinates handled gracefully without breaking view. (docs/architecture.md)
+    ]]>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <![CDATA[
+      - path: docs/epics.md; title: Epics; section: Epic 2 Story 2.2; snippet: PNG overlay, tooltip, legend requirements.
+      - path: docs/prd.md; title: PRD; section: FR4, FR5; snippet: floorplan view and availability colors.
+      - path: docs/architecture.md; title: Architecture; section: Desk mapping & assets; snippet: desks.json alignment, validation, asset sourcing.
+      ]]>
+    </docs>
+    <code>
+      <![CDATA[
+      - None yet; implement in src/components/FloorplanView with overlay SVG and asset loader.
+      ]]>
+    </code>
+    <dependencies>
+      <![CDATA[
+      - React 19.2.x
+      - Vite 6.2.x
+      - Radix UI 1.2.x (tooltip)
+      - date-fns (optional for date formatting used by legend/list sync)
+      ]]>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <![CDATA[
+    - desks.json is canonical for deskId and coordinates; keep sync with validation used in storage.
+    - Do not crash on missing assets/coords; show fallback and log warning.
+    - Ensure keyboard accessibility for hotspots; WCAG AA contrast for legend/colors.
+    - Keep rendering lightweight; avoid heavy pan/zoom for MVP.
+    ]]>
+  </constraints>
+
+  <interfaces>
+    <![CDATA[
+    - loadFloorplanAsset(office, floor): Promise<string> // path/URL
+    - getDesksMeta(): Promise<{ desks: DeskMeta[] }>
+    - onFilterChange -> rerender overlay with new office/floor/date
+    ]]>
+  </interfaces>
+
+  <tests>
+    <standards><![CDATA[React Testing Library for components; axe for accessibility; optional Playwright visual smoke.]]></standards>
+    <locations><![CDATA[tests/component/FloorplanView.spec.tsx]]></locations>
+    <ideas><![CDATA[
+    - AC1: Renders PNG and hotspots from desks.json fixture.
+    - AC2: Keyboard tab focuses hotspots; tooltip shows deskId/status.
+    - AC3: Legend reflects booking state colors.
+    - AC4: Invalid coordinate skipped with console warning; component still mounts.
+    ]]></ideas>
+  </tests>
+</story-context>

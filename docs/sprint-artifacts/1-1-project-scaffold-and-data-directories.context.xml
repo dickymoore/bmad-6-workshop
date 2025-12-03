@@ -1,0 +1,98 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.1</storyId>
+    <title>Project scaffold and data directories</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-03</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/1-1-project-scaffold-and-data-directories.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>the repository scaffolded with the agreed stack and data folders</iWant>
+    <soThat>the desk booking app runs locally with a predictable structure</soThat>
+    <tasks>
+      <![CDATA[
+      - Initialize Vite React TS project; ensure npm run dev succeeds on Node 22.x (AC1)
+      - Pin React 19.2, Vite 6.2.x, Radix UI 1.2.x; set engines.node >=22 <23 (AC1, AC4)
+      - Create data/, data/backup/ and seed users.json, bookings.json ([]) plus last-updated.json with { updatedAt: "" } (AC2, AC5)
+      - Update .gitignore to exclude data/backup/*, dist/, node_modules/, temp files (AC3)
+      - Add quickstart note (README/CONTRIBUTING) covering commands and data layout (AC6)
+      - Smoke: npm run dev; fail if seed files missing/invalid (AC1, AC5)
+      - Add minimal validation script/test to assert seed JSON validity and data dirs exist (AC5)
+      ]]>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <![CDATA[
+    1) From fresh clone, npm install && npm run dev succeeds on Node 22.x with React 19.2 + Vite 6.x. (docs/architecture.md)
+    2) data/ contains users.json, bookings.json, last-updated.json, backup/ after setup. (docs/architecture.md)
+    3) .gitignore excludes data/backup/*, build output, node_modules. (docs/architecture.md)
+    4) package manifest pins React 19.2, Vite 6.2.x, Radix UI 1.2.x; engines.node >=22 <23. (docs/architecture.md)
+    5) Seed JSON files are valid (users/bookings empty arrays; last-updated has ISO string placeholder). (docs/sprint-artifacts/tech-spec-epic-1.md)
+    6) Quickstart notes describe setup commands and data layout for new contributors. (docs/prd.md)
+    ]]>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <![CDATA[
+      - path: docs/prd.md; title: PRD — Desk Booking; section: FR12–FR15 Persistence; snippet: Defines write-through JSON storage, backup/import, and validation expectations for bookings/users.
+      - path: docs/architecture.md; title: Architecture; section: Project Initialization & Data Layout; snippet: Specifies React 19.2, Vite 6.2.x, Node 22 LTS, data/ folder structure, backup path, write-through model.
+      - path: docs/sprint-artifacts/tech-spec-epic-1.md; title: Tech Spec Epic 1; section: Services and Modules; snippet: Describes storage services, schema validation, backup/import behavior, and seed file schemas.
+      ]]>
+    </docs>
+    <code>
+      <![CDATA[
+      - None yet (greenfield for Epic 1); create storage modules under src/lib/storage per architecture.
+      ]]>
+    </code>
+    <dependencies>
+      <![CDATA[
+      - Node.js: 22.17.x (engines)
+      - React: 19.2.x
+      - Vite: 6.2.x
+      - Radix UI: 1.2.x
+      - uuid: ^9 (booking IDs)
+      - zod or ajv: latest compatible for schema validation
+      ]]>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <![CDATA[
+    - Client-only SPA; no server or DB.
+    - Synchronous write-through JSON saves; update last-updated on every write/import.
+    - DeskId validation against desks.json is required for all booking writes (foundation for later stories).
+    - Paths must stay inside project data/; reject absolute paths outside root.
+    - Use atomic writes (temp + rename) to avoid partial files.
+    ]]>
+  </constraints>
+
+  <interfaces>
+    <![CDATA[
+    - readUsers(): Promise<Result<User[]>>
+    - writeUsers(users): Promise<Result<void>>
+    - readBookings(): Promise<Result<Booking[]>>
+    - writeBookings(bookings): Promise<Result<void>> // validates deskId, updates last-updated
+    - exportBackup(): Promise<Result<{ path }>>
+    - importBackup(path): Promise<Result<void>>
+    - readLastUpdated()/writeLastUpdated(ts)
+    ]]>
+  </interfaces>
+
+  <tests>
+    <standards><![CDATA[Use Vitest for unit/API; Playwright optional for bootstrap smoke. Assert schema validation, atomic writes, and seed-file presence.]]></standards>
+    <locations><![CDATA[tests/unit/**/*, tests/api/**/* (to be created); CI smoke: npm run dev]]></locations>
+    <ideas><![CDATA[
+    - AC1: CI smoke — npm install && npm run dev on Node 22; expect success.
+    - AC2/5: Unit — seed files exist and parse; last-updated JSON matches schema.
+    - AC3: Unit — .gitignore contains data/backup/* and dist/.
+    - AC4: Unit — package.json versions/engines match architecture.
+    - AC6: Doc test — README quickstart includes commands and data layout.
+    ]]></ideas>
+  </tests>
+</story-context>

@@ -1,0 +1,81 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4.4</storyId>
+    <title>Roster edit UI</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-03</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/4-4-roster-edit-ui.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>admin</asA>
+    <iWant>to edit the user list</iWant>
+    <soThat>I can keep the roster current</soThat>
+    <tasks>
+      <![CDATA[
+      - Build roster manager UI for add/edit/deactivate with validation (non-empty, unique names) (AC1)
+      - Persist changes via storage; update last-updated; refresh dropdown state (AC2)
+      - Handle errors with toast/inline; rollback on failure; prevent partial saves (AC3)
+      - Tests: add/edit/deactivate; dup/empty blocked; dropdown refresh; error handling
+      ]]>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <![CDATA[
+    1) Admin can add/edit/deactivate users; saves to users.json; validation prevents empty/duplicate names. (docs/epics.md)
+    2) Changes propagate to booking user dropdown and refresh last-updated. (docs/prd.md)
+    3) Errors show toast/inline; no partial saves. (docs/epics.md)
+    ]]>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <![CDATA[
+      - path: docs/epics.md; title: Epics; section: Epic 4 Story 4.4; snippet: roster edit requirements.
+      - path: docs/prd.md; title: PRD; section: FR3, FR12–FR15; snippet: roster support and persistence.
+      - path: docs/architecture.md; title: Architecture; section: Roster storage & validation; snippet: users.json handling, atomic writes.
+      ]]>
+    </docs>
+    <code>
+      <![CDATA[
+      - None yet; implement RosterManager component and storage integration.
+      ]]>
+    </code>
+    <dependencies>
+      <![CDATA[
+      - React 19.2.x
+      - Vite 6.2.x
+      - Radix UI 1.2.x (Dialog/Form)
+      ]]>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <![CDATA[
+    - Enforce unique, non-empty names; keep visitor separate.
+    - Atomic writes to users.json; update last-updated on success.
+    - UI must sync dropdown immediately after save.
+    ]]>
+  </constraints>
+
+  <interfaces>
+    <![CDATA[
+    - readUsers()/writeUsers(users): Promise<Result<void>>
+    - validateUser(user): Result<void>
+    - refreshRosterState(): void
+    ]]>
+  </interfaces>
+
+  <tests>
+    <standards><![CDATA[React Testing Library + Vitest; accessibility checks for forms.]]></standards>
+    <locations><![CDATA[tests/component/RosterManager.spec.tsx]]></locations>
+    <ideas><![CDATA[
+    - AC1: Add/edit/deactivate flows succeed; dup/empty blocked.
+    - AC2: Dropdown updates after save; last-updated updated.
+    - AC3: Simulated write failure shows error and rolls back UI changes.
+    ]]></ideas>
+  </tests>
+</story-context>

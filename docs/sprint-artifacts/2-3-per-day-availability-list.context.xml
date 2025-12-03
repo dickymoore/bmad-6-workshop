@@ -1,0 +1,84 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.3</storyId>
+    <title>Per-day availability list</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-03</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/2-3-per-day-availability-list.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>a per-day “who’s where” list</iWant>
+    <soThat>I can quickly see desk assignments</soThat>
+    <tasks>
+      <![CDATA[
+      - Build BookingList component sourcing bookings filtered by office/floor/date (AC1)
+      - Implement sort toggle (desk/user), default desk (AC2)
+      - On row select, trigger floorplan highlight or details panel, keeping state in sync (AC3)
+      - Provide empty/loading/error states; keyboard accessibility (AC1–AC3)
+      - Tests: filter logic, sort, highlight callback, empty/error handling
+      ]]>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <![CDATA[
+    1) List shows user, deskId, office, floor for selected date from filtered bookings. (docs/epics.md)
+    2) Sorting by desk or user available; default desk. (docs/epics.md)
+    3) Selecting a row highlights corresponding desk (or shows details) without desync. (docs/epics.md)
+    ]]>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <![CDATA[
+      - path: docs/epics.md; title: Epics; section: Epic 2 Story 2.3; snippet: list requirements, sort, highlight.
+      - path: docs/prd.md; title: PRD; section: FR10, FR11; snippet: per-day list and filter synchronization.
+      - path: docs/architecture.md; title: Architecture; section: Data & Mapping; snippet: deskId/office/floor alignment with bookings and desks.json.
+      ]]>
+    </docs>
+    <code>
+      <![CDATA[
+      - None yet; BookingList to be implemented in src/components/BookingList with shared state hooks.
+      ]]>
+    </code>
+    <dependencies>
+      <![CDATA[
+      - React 19.2.x
+      - Vite 6.2.x
+      - Radix UI 1.2.x (table/scroll area optional)
+      ]]>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <![CDATA[
+    - Use shared filter state from Story 2.1; align with floorplan state from Story 2.2.
+    - Keep deskId/office/floor consistent with desks.json and booking storage.
+    - Ensure keyboard accessibility; aria-live for highlight status.
+    - Avoid heavy virtualized list unless necessary (small dataset).
+    ]]>
+  </constraints>
+
+  <interfaces>
+    <![CDATA[
+    - getFilteredBookings({ office, floor, date }): Booking[]
+    - onRowSelect(deskId): triggers floorplan highlight
+    - setSort(orderBy: 'desk'|'user')
+    ]]>
+  </interfaces>
+
+  <tests>
+    <standards><![CDATA[React Testing Library + Vitest; consider axe for accessibility.]]></standards>
+    <locations><![CDATA[tests/component/BookingList.spec.tsx]]></locations>
+    <ideas><![CDATA[
+    - AC1: Filtered list renders expected rows for fixture data.
+    - AC2: Sort toggle switches order; default desk.
+    - AC3: Row select calls highlight callback with deskId; state remains aligned after filter change.
+    - Empty/error states render correct messaging.
+    ]]></ideas>
+  </tests>
+</story-context>

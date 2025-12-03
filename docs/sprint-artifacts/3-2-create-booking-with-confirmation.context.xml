@@ -1,0 +1,83 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.2</storyId>
+    <title>Create booking with confirmation</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-03</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/3-2-create-booking-with-confirmation.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to confirm a booking after selecting a free desk</iWant>
+    <soThat>my seat is reserved</soThat>
+    <tasks>
+      <![CDATA[
+      - On hotspot click (free), open confirm UI showing user/desk/date; confirm calls booking create (AC1)
+      - Create booking with UUID, office/floor/deskId/date/userId; write via storage; update last-updated; refresh state; success toast (AC2)
+      - Handle errors (validation/fs): show error toast/inline; no partial state (AC3)
+      - Tests: modal data correctness; success path saves and refreshes; error path rolled back
+      ]]>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <![CDATA[
+    1) Clicking free desk opens confirm UI showing user/desk/date; confirm saves and updates map/list. (docs/epics.md)
+    2) Booking saved with UUID, office, floor, deskId, date, userId; success toast; state refreshes. (docs/prd.md)
+    3) Errors surface clearly; no partial writes/state. (docs/epics.md)
+    ]]>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <![CDATA[
+      - path: docs/epics.md; title: Epics; section: Epic 3 Story 3.2; snippet: confirm flow, success/error behavior.
+      - path: docs/prd.md; title: PRD; section: FR6, FR18; snippet: booking creation and feedback requirements.
+      - path: docs/architecture.md; title: Architecture; section: Storage & validation; snippet: write-through booking with validation and last-updated.
+      ]]>
+    </docs>
+    <code>
+      <![CDATA[
+      - None yet; implement BookingConfirm component and storage integration.
+      ]]>
+    </code>
+    <dependencies>
+      <![CDATA[
+      - React 19.2.x
+      - Vite 6.2.x
+      - Radix UI 1.2.x (Dialog/Toast)
+      - uuid for booking IDs
+      ]]>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <![CDATA[
+    - Use storage helper with deskId validation; update last-updated on success.
+    - Prevent booking if user not selected or desk not free.
+    - Avoid optimistic state without rollback; if used, ensure rollback on failure.
+    - Keep confirm UI concise and accessible.
+    ]]>
+  </constraints>
+
+  <interfaces>
+    <![CDATA[
+    - createBooking(payload): Promise<Result<Booking>>
+    - showConfirm({ user, deskId, office, floor, date }): void
+    - onBookingCreated(callback): subscribe for state refresh
+    ]]>
+  </interfaces>
+
+  <tests>
+    <standards><![CDATA[React Testing Library + Vitest; toast assertions; optional Playwright happy-path smoke.]]></standards>
+    <locations><![CDATA[tests/component/BookingConfirm.spec.tsx]]></locations>
+    <ideas><![CDATA[
+    - AC1: Clicking free desk opens modal with correct data.
+    - AC2: Confirm writes booking and triggers state refresh + success toast.
+    - AC3: Simulated storage error shows error toast and leaves state unchanged.
+    ]]></ideas>
+  </tests>
+</story-context>

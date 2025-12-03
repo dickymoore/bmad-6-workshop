@@ -1,0 +1,65 @@
+# generated: 2025-12-03
+# project: bmad-6-workshop
+# project_key: DBA
+# tracking_system: file-system
+# story_location: /home/codexuser/bmad-6-workshop/docs/sprint-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic exists in epic file but not contexted
+#   - contexted: Epic tech context created (required before drafting stories)
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - drafted: Story file created in stories folder
+#   - ready-for-dev: Draft approved and story context created
+#   - in-progress: Developer actively working on implementation
+#   - review: Under SM review (via code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - completed: Retrospective has been done
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epics should be 'contexted' before stories can be 'drafted'
+# - Stories typically flow backlog → drafted → ready-for-dev → in-progress → review → done
+# - Retrospectives are optional but recommended after each epic
+
+generated: 2025-12-03
+project: bmad-6-workshop
+project_key: DBA
+tracking_system: file-system
+story_location: /home/codexuser/bmad-6-workshop/docs/sprint-artifacts
+
+development_status:
+  epic-1: contexted
+  1-1-project-scaffold-and-data-directories: ready-for-dev
+  1-2-json-storage-service-with-schema-validation: ready-for-dev
+  1-3-last-updated-service-hook: ready-for-dev
+  1-4-roster-load-save: ready-for-dev
+  epic-1-retrospective: docs/sprint-artifacts/epic-1-retrospective.md
+
+  epic-2: backlog
+  2-1-office-floor-date-selectors: ready-for-dev
+  2-2-floorplan-rendering-with-hotspots: ready-for-dev
+  2-3-per-day-availability-list: ready-for-dev
+  2-4-availability-coloring: ready-for-dev
+  epic-2-retrospective: docs/sprint-artifacts/epic-2-retrospective.md
+
+  epic-3: backlog
+  3-1-select-user-for-booking: ready-for-dev
+  3-2-create-booking-with-confirmation: ready-for-dev
+  3-3-enforce-one-booking-per-user-day: ready-for-dev
+  3-4-cancel-release-booking: ready-for-dev
+  3-5-desk-validation: ready-for-dev
+  epic-3-retrospective: docs/sprint-artifacts/epic-3-retrospective.md
+
+  epic-4: backlog
+  4-1-backup-export-snapshot: ready-for-dev
+  4-2-import-restore-with-validation: ready-for-dev
+  4-3-toasts-and-inline-feedback: ready-for-dev
+  4-4-roster-edit-ui: ready-for-dev
+  epic-4-retrospective: docs/sprint-artifacts/epic-4-retrospective.md

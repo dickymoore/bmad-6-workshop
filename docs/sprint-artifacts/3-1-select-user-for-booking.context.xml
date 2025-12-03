@@ -1,0 +1,82 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.1</storyId>
+    <title>Select user for booking</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-03</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/3-1-select-user-for-booking.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to pick myself (or a visitor) from a dropdown</iWant>
+    <soThat>my booking is attributed</soThat>
+    <tasks>
+      <![CDATA[
+      - Load roster from storage (users.json) and include Visitor option; handle empty roster with notice/disable (AC1, AC3)
+      - Bind selected user to booking payload and confirmation modal (AC2)
+      - Validate selection; block booking when none selected; accessible labels/keyboard (AC1–AC3)
+      - Tests: roster options render; selection flows to payload; empty roster blocks booking with notice
+      ]]>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <![CDATA[
+    1) Dropdown lists roster entries and visitor option. (docs/epics.md)
+    2) Selected user carried into booking confirmation and saved. (docs/prd.md)
+    3) Empty roster shows notice and prevents booking until populated. (docs/epics.md)
+    ]]>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <![CDATA[
+      - path: docs/epics.md; title: Epics; section: Epic 3 Story 3.1; snippet: roster dropdown + visitor + notice.
+      - path: docs/prd.md; title: PRD; section: FR3; snippet: user dropdown requirement for booking attribution.
+      - path: docs/architecture.md; title: Architecture; section: Data models & storage; snippet: users.json roster, booking schema userId alignment.
+      ]]>
+    </docs>
+    <code>
+      <![CDATA[
+      - None yet; implement in UserSelect component and booking flow.
+      ]]>
+    </code>
+    <dependencies>
+      <![CDATA[
+      - React 19.2.x
+      - Vite 6.2.x
+      - Radix UI 1.2.x (Select)
+      ]]>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <![CDATA[
+    - User IDs must match users.json; visitor gets unique id (e.g., visitor-uuid).
+    - Prevent booking when roster empty or no selection; show clear notice/toast.
+    - Keep state shared with booking flow; avoid desync with confirmation modal.
+    ]]>
+  </constraints>
+
+  <interfaces>
+    <![CDATA[
+    - readUsers(): Promise<Result<User[]>>
+    - getVisitorOption(): User
+    - setSelectedUser(userId): void
+    - getSelectedUser(): User | null
+    ]]>
+  </interfaces>
+
+  <tests>
+    <standards><![CDATA[React Testing Library + Vitest; accessibility via axe.]]></standards>
+    <locations><![CDATA[tests/component/UserSelect.spec.tsx]]></locations>
+    <ideas><![CDATA[
+    - AC1: Renders roster options + visitor from fixture.
+    - AC2: Selecting user populates booking payload and confirmation modal.
+    - AC3: Empty roster disables confirm and shows notice.
+    ]]></ideas>
+  </tests>
+</story-context>

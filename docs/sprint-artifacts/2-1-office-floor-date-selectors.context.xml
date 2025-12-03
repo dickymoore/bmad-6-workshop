@@ -1,0 +1,84 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2.1</storyId>
+    <title>Office/floor/date selectors</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-03</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/2-1-office-floor-date-selectors.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to choose office, floor, and date</iWant>
+    <soThat>I can view relevant desks</soThat>
+    <tasks>
+      <![CDATA[
+      - Parse offices/floors from desks.json; set defaults; handle missing/empty gracefully (AC1)
+      - Implement day-level date picker defaulting to today; store as YYYY-MM-DD; avoid TZ shifts (AC2)
+      - On change of office/floor/date, update shared state and trigger floorplan + list refresh (AC3)
+      - Accessibility: labeled controls, keyboard support, status text on change (AC1–AC3)
+      - Tests: selectors from desks.json fixture; date default; change triggers refresh; state propagated
+      ]]>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <![CDATA[
+    1) Office/floor dropdowns populate from desks.json metadata. (docs/epics.md)
+    2) Date picker is day-level, defaults to today (local). (docs/epics.md)
+    3) Changing office/floor/date updates floorplan view and per-day list. (docs/epics.md, docs/prd.md)
+    ]]>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <![CDATA[
+      - path: docs/epics.md; title: Epics; section: Epic 2 Story 2.1; snippet: Selector requirements and notes (no TZ conversion).
+      - path: docs/prd.md; title: PRD; section: FR1, FR2, FR11; snippet: Office/floor/date filters drive availability and list updates.
+      - path: docs/architecture.md; title: Architecture; section: Desk data source; snippet: desks.json as single source for offices/floors and validation alignment.
+      ]]>
+    </docs>
+    <code>
+      <![CDATA[
+      - None yet; selectors to be implemented in FiltersBar and shared state module.
+      ]]>
+    </code>
+    <dependencies>
+      <![CDATA[
+      - React 19.2.x
+      - Vite 6.2.x
+      - Radix UI 1.2.x (for selects/date input if used)
+      - date-fns (optional) for date handling without TZ shifts
+      ]]>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <![CDATA[
+    - desks.json is canonical; do not hardcode office/floor lists elsewhere.
+    - Dates stored as local YYYY-MM-DD strings; no timezone conversion.
+    - Selector state must be shared so floorplan and list stay in sync.
+    - Avoid fetching external data; all local assets.
+    ]]>
+  </constraints>
+
+  <interfaces>
+    <![CDATA[
+    - getDesksMeta(): Promise<{ offices: OfficeMeta[], floors: FloorMeta[] }>
+    - setFilterState({ office, floor, date }): void
+    - onFilterChange(callback): subscribes floorplan/list components
+    ]]>
+  </interfaces>
+
+  <tests>
+    <standards><![CDATA[Vitest + React Testing Library for components; optional Playwright smoke.]]></standards>
+    <locations><![CDATA[tests/component/FiltersBar.spec.tsx, tests/unit/desks-meta.test.ts]]></locations>
+    <ideas><![CDATA[
+    - AC1: Render selectors with options from desks.json fixture.
+    - AC2: Date defaults to today; format YYYY-MM-DD; change updates state.
+    - AC3: Changing filters triggers mocked refresh callbacks for floorplan/list.
+    ]]></ideas>
+  </tests>
+</story-context>

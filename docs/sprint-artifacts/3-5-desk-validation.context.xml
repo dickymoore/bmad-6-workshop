@@ -1,0 +1,80 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.5</storyId>
+    <title>Desk validation</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-03</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/3-5-desk-validation.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>system</asA>
+    <iWant>to ensure deskIds are valid before save</iWant>
+    <soThat>data stays consistent</soThat>
+    <tasks>
+      <![CDATA[
+      - Validate deskId against desks.json (office/floor) in storage write/import; return INVALID_DESK error (AC1, AC3)
+      - Drop/flag invalid records on load/import; log warnings (AC2)
+      - Client pre-check before confirm; block invalid desk selection with message (AC3)
+      - Tests: invalid desk rejected on write; invalid imports dropped; UI blocks stale hotspot
+      ]]>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <![CDATA[
+    1) Booking create/update rejects deskIds not in desks.json for office/floor with clear error. (docs/epics.md)
+    2) Startup/import skips invalid booking records without crash; logs errors. (docs/prd.md)
+    3) Validation runs client-side and storage-side; no invalid deskIds persist. (docs/architecture.md)
+    ]]>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <![CDATA[
+      - path: docs/epics.md; title: Epics; section: Epic 3 Story 3.5; snippet: desk validation requirement.
+      - path: docs/prd.md; title: PRD; section: FR9, FR15; snippet: desk validation and skip invalid records on load.
+      - path: docs/architecture.md; title: Architecture; section: Desk validation responsibility; snippet: desks.json as source of truth, validation on write/import.
+      ]]>
+    </docs>
+    <code>
+      <![CDATA[
+      - None yet; implement validation helper in src/lib/storage/validation.ts and reuse in booking flows.
+      ]]>
+    </code>
+    <dependencies>
+      <![CDATA[
+      - React 19.2.x
+      - Vite 6.2.x
+      - Radix UI 1.2.x (toast)
+      ]]>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <![CDATA[
+    - desks.json is canonical; cache metadata to avoid repeated reads.
+    - Validation must execute in storage layer as source of truth; client pre-check for UX only.
+    - Invalid records must not persist; log concise warnings.
+    ]]>
+  </constraints>
+
+  <interfaces>
+    <![CDATA[
+    - validateDeskId(office, floor, deskId): Result<void>
+    - filterInvalidBookings(bookings): { valid: Booking[], invalid: Booking[] }
+    ]]>
+  </interfaces>
+
+  <tests>
+    <standards><![CDATA[Vitest unit/API; component test for invalid desk blocking.]]></standards>
+    <locations><![CDATA[tests/unit/desk-validation.test.ts, tests/component/DeskValidation.spec.tsx]]></locations>
+    <ideas><![CDATA[
+    - AC1: write with invalid desk returns error; valid writes succeed.
+    - AC2: import with invalid records drops them, logs warning.
+    - AC3: UI pre-check blocks stale hotspot; shows message.
+    ]]></ideas>
+  </tests>
+</story-context>

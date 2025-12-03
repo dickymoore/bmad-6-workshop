@@ -1,0 +1,81 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3.3</storyId>
+    <title>Enforce one booking per user/day</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-03</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/3-3-enforce-one-booking-per-user-day.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>system</asA>
+    <iWant>to block users from holding multiple desks on the same day</iWant>
+    <soThat>conflicts are prevented</soThat>
+    <tasks>
+      <![CDATA[
+      - Client pre-check: detect existing booking for user/date; block confirm with message (AC1, AC2)
+      - Storage enforcement: reject writes with user/date conflict; return structured error (AC1, AC2)
+      - Visitor handling: ensure visitor-uuid gets conflict checks (AC3)
+      - Error UX: toast/inline message; leave UI state unchanged; rollback optimistic if used (AC1–AC3)
+      - Tests: client conflict, storage conflict, visitor conflict, error handling
+      ]]>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <![CDATA[
+    1) Booking create blocked if user already has booking on date; clear message; no write. (docs/epics.md)
+    2) Conflict validation runs client-side and storage-side to prevent races. (docs/epics.md)
+    3) Visitor bookings treated as unique ids and also prevented from double-booking. (docs/epics.md)
+    ]]>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <![CDATA[
+      - path: docs/epics.md; title: Epics; section: Epic 3 Story 3.3; snippet: conflict rule and checks.
+      - path: docs/prd.md; title: PRD; section: FR8; snippet: one booking per user/day requirement.
+      - path: docs/architecture.md; title: Architecture; section: Storage validation; snippet: validation responsibility, deskId alignment.
+      ]]>
+    </docs>
+    <code>
+      <![CDATA[
+      - None yet; implement conflict checks in storage and booking flow.
+      ]]>
+    </code>
+    <dependencies>
+      <![CDATA[
+      - React 19.2.x
+      - Vite 6.2.x
+      - Radix UI 1.2.x (toast)
+      ]]>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <![CDATA[
+    - Enforce conflicts at storage as source of truth; UI pre-check for UX only.
+    - Use userId + date key; include visitor-uuid.
+    - No partial writes; rollback optimistic updates on failure.
+    ]]>
+  </constraints>
+
+  <interfaces>
+    <![CDATA[
+    - checkConflict(userId, date): Promise<boolean>
+    - createBooking(payload): Promise<Result<Booking>> // returns error code CONFLICT if blocked
+    ]]>
+  </interfaces>
+
+  <tests>
+    <standards><![CDATA[Vitest unit/API; React Testing Library for modal; consider Playwright conflict E2E.]]></standards>
+    <locations><![CDATA[tests/unit/booking-conflict.test.ts, tests/component/BookingConfirm.conflict.spec.tsx]]></locations>
+    <ideas><![CDATA[
+    - AC1: Existing booking prevents new booking; error shown; no write.
+    - AC2: Simulated race (two create calls) -> one succeeds, other gets CONFLICT.
+    - AC3: Visitor booking conflict detected.
+    ]]></ideas>
+  </tests>
+</story-context>

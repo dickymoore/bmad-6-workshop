@@ -1,0 +1,79 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4.1</storyId>
+    <title>Backup/export snapshot</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-03</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/4-1-backup-export-snapshot.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to export users/bookings to a timestamped JSON</iWant>
+    <soThat>I can back up state</soThat>
+    <tasks>
+      <![CDATA[
+      - Implement export helper: mkdirp backup dir, build filename backup-YYYYMMDD-HHMMSS.json, atomic write users/bookings/lastUpdated (AC1, AC3)
+      - Wire UI trigger; show success toast with path; error toast on failure (AC2)
+      - Handle permission/missing dir errors; return { ok:false, error }; no partial files (AC3)
+      - Tests: filename/content; permission failure; toast path
+      ]]>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <![CDATA[
+    1) Export writes backup-YYYYMMDD-HHMMSS.json with users, bookings, lastUpdated. (docs/epics.md)
+    2) Success toast shows backup path; errors surfaced; no partial files. (docs/prd.md)
+    3) Backup dir auto-created; permission errors handled with messaging. (docs/epics.md)
+    ]]>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <![CDATA[
+      - path: docs/epics.md; title: Epics; section: Epic 4 Story 4.1; snippet: backup/export requirements.
+      - path: docs/prd.md; title: PRD; section: FR16, FR18; snippet: backup/export and feedback expectations.
+      - path: docs/architecture.md; title: Architecture; section: Backup/import; snippet: backup path, write-through, .gitignore.
+      ]]>
+    </docs>
+    <code>
+      <![CDATA[
+      - None yet; implement in src/lib/storage/backup.ts and UI in BackupControls.
+      ]]>
+    </code>
+    <dependencies>
+      <![CDATA[
+      - Node.js: 22.17.x
+      - React: 19.2.x
+      - Vite: 6.2.x
+      ]]>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <![CDATA[
+    - Atomic write; no partial files on error.
+    - Backup dir must exist or be created; handle permission errors.
+    - Keep backups git-ignored.
+    ]]>
+  </constraints>
+
+  <interfaces>
+    <![CDATA[
+    - exportBackup(): Promise<Result<{ path }>>
+    ]]>
+  </interfaces>
+
+  <tests>
+    <standards><![CDATA[Vitest unit; component test for UI toast.]]></standards>
+    <locations><![CDATA[tests/unit/backup-export.test.ts, tests/component/BackupControls.spec.tsx]]></locations>
+    <ideas><![CDATA[
+    - AC1: Export creates file with correct name/content.
+    - AC2: Success toast shows path.
+    - AC3: Simulated permission error returns error and no file.
+    ]]></ideas>
+  </tests>
+</story-context>

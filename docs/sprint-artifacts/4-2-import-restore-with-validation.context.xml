@@ -1,0 +1,80 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4.2</storyId>
+    <title>Import/restore with validation</title>
+    <status>drafted</status>
+    <generatedAt>2025-12-03</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/4-2-import-restore-with-validation.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to import a backup safely</iWant>
+    <soThat>I don’t corrupt data</soThat>
+    <tasks>
+      <![CDATA[
+      - Validate backup schema/version; on success write users/bookings/lastUpdated atomically and refresh state; success toast (AC1)
+      - Reject invalid backup with clear error; no data change (AC2)
+      - Pre-import backup current data; rollback on write failure (AC3)
+      - Tests: valid import, invalid import no-op, rollback on failure
+      ]]>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <![CDATA[
+    1) Import validates schema; on success replaces data, updates last-updated, shows success toast. (docs/epics.md)
+    2) Invalid backup rejected with error; current data unchanged. (docs/prd.md)
+    3) Pre-import temp backup created; rollback used if write fails. (docs/epics.md)
+    ]]>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <![CDATA[
+      - path: docs/epics.md; title: Epics; section: Epic 4 Story 4.2; snippet: import validation and rollback.
+      - path: docs/prd.md; title: PRD; section: FR17, FR18; snippet: import/restore requirements and feedback.
+      - path: docs/architecture.md; title: Architecture; section: Backup/import; snippet: schema validation, rollback guidance.
+      ]]>
+    </docs>
+    <code>
+      <![CDATA[
+      - None yet; implement in src/lib/storage/backup.ts and UI in BackupControls import flow.
+      ]]>
+    </code>
+    <dependencies>
+      <![CDATA[
+      - React 19.2.x
+      - Vite 6.2.x
+      - zod/ajv for schema validation
+      ]]>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <![CDATA[
+    - Atomic writes; rollback on failure.
+    - Block imports from paths outside data/; validate schema/version.
+    - Keep last-updated updated on success.
+    ]]>
+  </constraints>
+
+  <interfaces>
+    <![CDATA[
+    - importBackup(path): Promise<Result<void>>
+    - validateBackup(payload): Result<Backup>
+    ]]>
+  </interfaces>
+
+  <tests>
+    <standards><![CDATA[Vitest unit/API; component test for import UI flow.]]></standards>
+    <locations><![CDATA[tests/unit/backup-import.test.ts, tests/component/BackupImport.spec.tsx]]></locations>
+    <ideas><![CDATA[
+    - AC1: Valid import replaces data, updates last-updated, shows success toast.
+    - AC2: Invalid import rejected, data unchanged.
+    - AC3: Simulated write failure triggers rollback and error toast.
+    ]]></ideas>
+  </tests>
+</story-context>
