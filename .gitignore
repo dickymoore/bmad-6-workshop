@@ -1,2 +1,9 @@
 node_modules
 .next
+dist/
+data/backup/*
+!data/backup/.gitkeep
+test-results/
+.DS_Store
+*.log
+/.vite
