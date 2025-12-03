@@ -1,0 +1,16 @@
+{
+  "name": "desk-booking-tests",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^9.0.3",
+    "@playwright/test": "^1.48.2",
+    "dotenv": "^16.4.5"
+  }
+}

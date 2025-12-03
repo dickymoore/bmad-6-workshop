@@ -67,20 +67,20 @@ workflow_status:
     name: "Solutioning"
     workflows:
       - id: "create-architecture"
-        status: "required"
+        status: "docs/architecture.md"
       - id: "create-epics-and-stories"
-        status: "required"
+        status: "docs/epics.md"
       - id: "test-design"
         status: "recommended"
       - id: "validate-architecture"
-        status: "optional"
+        status: "docs/validation-report-architecture-2025-12-02.md"
       - id: "implementation-readiness"
-        status: "required"
+        status: "docs/implementation-readiness-report-2025-12-02.md"
   - phase: 3
     name: "Implementation"
     workflows:
       - id: "sprint-planning"
-        status: "required"
+        status: "docs/sprint-artifacts/sprint-status.yaml"
   - phase: 1
     name: "Planning"
     workflows:
