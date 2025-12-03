@@ -6,15 +6,18 @@ import { SelectedUserProvider } from '../../src/lib/booking/selection';
 import { LastUpdatedProvider } from '../../src/lib/last-updated/context';
 import { RosterProvider } from '../../src/lib/roster/context';
 import { writeUsers } from '../../src/lib/storage/users';
+import { FeedbackProvider } from '../../src/lib/feedback/context';
 
 const shell = (ui: React.ReactElement) => (
-  <LastUpdatedProvider>
-    <RosterProvider>
-      <SelectedUserProvider>
-        <FiltersProvider>{ui}</FiltersProvider>
-      </SelectedUserProvider>
-    </RosterProvider>
-  </LastUpdatedProvider>
+  <FeedbackProvider>
+    <LastUpdatedProvider>
+      <RosterProvider>
+        <SelectedUserProvider>
+          <FiltersProvider>{ui}</FiltersProvider>
+        </SelectedUserProvider>
+      </RosterProvider>
+    </LastUpdatedProvider>
+  </FeedbackProvider>
 );
 
 describe('BookingConfirm invalid desk pre-check', () => {
@@ -26,6 +29,6 @@ describe('BookingConfirm invalid desk pre-check', () => {
   it('blocks confirm when desk is invalid for office/floor', () => {
     render(shell(<BookingConfirm selectedDeskId="BAD" />));
     fireEvent.click(screen.getByRole('button', { name: /Confirm booking/i }));
-    expect(screen.getByText(/deskId not found/i)).toBeInTheDocument();
+    expect(screen.getByText(/desk is invalid/i)).toBeInTheDocument();
   });
 });

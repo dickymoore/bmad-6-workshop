@@ -54,7 +54,7 @@ describe('Backup and restore', () => {
     const payload = {
       users: [{ id: 'u1', name: userName, active: true }],
       bookings: [],
-      lastUpdated: new Date().toISOString(),
+      lastUpdated: { updatedAt: new Date().toISOString() },
     };
     fs.writeFileSync(backupPath, JSON.stringify(payload, null, 2));
 

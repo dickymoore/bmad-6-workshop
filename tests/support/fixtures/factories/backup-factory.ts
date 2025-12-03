@@ -5,7 +5,7 @@ import { createBookingFactory, type BookingFactory } from './booking-factory';
 type BackupPayload = {
   users: Array<{ id: string; name: string; active: boolean }>;
   bookings: Array<ReturnType<BookingFactory['generateBooking']>>;
-  lastUpdated: string;
+  lastUpdated: { updatedAt: string };
   version?: string;
 };
 
@@ -20,7 +20,7 @@ export function createBackupFactory() {
     return {
       users,
       bookings,
-      lastUpdated: overrides.lastUpdated || new Date().toISOString(),
+      lastUpdated: overrides.lastUpdated || { updatedAt: new Date().toISOString() },
       version: overrides.version || '1.0.0',
     };
   }

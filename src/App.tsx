@@ -14,17 +14,20 @@ import { BookingCancel } from './components/BookingCancel';
 import { useState } from 'react';
 import { SelectedUserProvider } from './lib/booking/selection';
 import { BackupControls } from './components/BackupControls';
+import { FeedbackProvider } from './lib/feedback/context';
+import { ToastViewport } from './components/ToastViewport';
 
 export default function App() {
   const [selectedDeskId, setSelectedDeskId] = useState<string | undefined>();
   const [cancelDeskId, setCancelDeskId] = useState<string | undefined>();
 
   return (
-    <LastUpdatedProvider>
-      <RosterProvider>
-        <SelectedUserProvider>
-          <FiltersProvider>
-            <main className="page">
+    <FeedbackProvider>
+      <LastUpdatedProvider>
+        <RosterProvider>
+          <SelectedUserProvider>
+            <FiltersProvider>
+              <main className="page">
             <header>
               <p className="eyebrow">Desk Booking</p>
               <h1>Office, Floor, and Date Filters</h1>
@@ -58,10 +61,12 @@ export default function App() {
             <div className="grid two-column">
               <BackupControls />
             </div>
-          </main>
-        </FiltersProvider>
-      </SelectedUserProvider>
-      </RosterProvider>
-    </LastUpdatedProvider>
+              <ToastViewport />
+            </main>
+          </FiltersProvider>
+        </SelectedUserProvider>
+        </RosterProvider>
+      </LastUpdatedProvider>
+    </FeedbackProvider>
   );
 }

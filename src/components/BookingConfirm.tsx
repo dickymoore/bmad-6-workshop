@@ -4,6 +4,7 @@ import { useSelectedUser } from '../lib/booking/selection';
 import { createBooking, checkUserDateConflict } from '../lib/booking/create';
 import { validateDeskForBooking } from '../lib/storage/bookings';
 import { todayLocalISO } from '../lib/date';
+import { useFeedback } from '../lib/feedback/context';
 
 export type BookingConfirmProps = {
   selectedDeskId?: string;
@@ -16,6 +17,7 @@ export const BookingConfirm: React.FC<BookingConfirmProps> = ({ selectedDeskId, 
   const [message, setMessage] = useState<string | undefined>();
   const [error, setError] = useState<string | undefined>();
   const [submitting, setSubmitting] = useState(false);
+  const { showSuccess, showError } = useFeedback();
 
   const selectedUserName = useMemo(
     () => options.find((u) => u.id === selectedUserId)?.name ?? 'Unknown',
@@ -36,14 +38,16 @@ export const BookingConfirm: React.FC<BookingConfirmProps> = ({ selectedDeskId, 
     const existing = JSON.parse(localStorage.getItem('desk-booking:bookings') || '[]');
     if (checkUserDateConflict(existing, selectedUserId, state.date || todayLocalISO())) {
       setSubmitting(false);
-      setError('User already has a booking on this date');
+      const msg = showError('booking.create', 'User already has a booking on this date');
+      setError(msg);
       return;
     }
 
     const deskValidation = validateDeskForBooking(state.office, state.floor, selectedDeskId);
     if (!deskValidation.ok) {
       setSubmitting(false);
-      setError(deskValidation.error);
+      const msg = showError('booking.create', deskValidation.error);
+      setError(msg);
       return;
     }
 
@@ -58,11 +62,13 @@ export const BookingConfirm: React.FC<BookingConfirmProps> = ({ selectedDeskId, 
     );
 
     if (!result.ok) {
-      setError(result.error);
+      const msg = showError('booking.create', result.error);
+      setError(msg);
       setSubmitting(false);
       return;
     }
 
+    showSuccess('booking.create');
     setMessage('Booking confirmed');
     setSubmitting(false);
     onBooked?.();

@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useFilters } from '../lib/filters/context';
 import { cancelBooking, readBookings } from '../lib/storage/bookings';
 import { todayLocalISO } from '../lib/date';
+import { useFeedback } from '../lib/feedback/context';
 
 type Props = {
   deskId?: string;
@@ -13,6 +14,7 @@ export const BookingCancel: React.FC<Props> = ({ deskId, onCancelled }) => {
   const [error, setError] = useState<string | undefined>();
   const [message, setMessage] = useState<string | undefined>();
   const [busy, setBusy] = useState(false);
+  const { showSuccess, showError } = useFeedback();
 
   const booking = useMemo(() => {
     const res = readBookings();
@@ -25,7 +27,8 @@ export const BookingCancel: React.FC<Props> = ({ deskId, onCancelled }) => {
 
   const handleCancel = () => {
     if (!booking) {
-      setError('Booking not found');
+      const msg = showError('booking.cancel', 'Booking not found');
+      setError(msg);
       return;
     }
     setBusy(true);
@@ -33,9 +36,11 @@ export const BookingCancel: React.FC<Props> = ({ deskId, onCancelled }) => {
     const result = cancelBooking(booking.id);
     if (!result.ok) {
       setBusy(false);
-      setError(result.error);
+      const msg = showError('booking.cancel', result.error);
+      setError(msg);
       return;
     }
+    showSuccess('booking.cancel');
     setMessage('Booking cancelled');
     setBusy(false);
     onCancelled?.();
@@ -71,4 +76,3 @@ export const BookingCancel: React.FC<Props> = ({ deskId, onCancelled }) => {
     </section>
   );
 };
-

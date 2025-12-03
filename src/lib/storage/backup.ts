@@ -2,7 +2,7 @@ import type { Result } from './last-updated';
 import { BackupSchema } from './schema';
 import { readBookings, writeBookings } from './bookings';
 import { readUsers, writeUsers } from './users';
-import { readLastUpdated, touchLastUpdated } from './last-updated';
+import { readLastUpdated, touchLastUpdated, writeLastUpdated } from './last-updated';
 
 const BACKUP_KEY = 'desk-booking:backup:last';
 const DEFAULT_BACKUP_DIR = 'data/backup';
@@ -85,17 +85,69 @@ export const exportBackup = async (options: ExportOptions = {}): Promise<Result<
   }
 };
 
+type Snapshot = {
+  users: ReturnType<typeof readUsers>['data'];
+  bookings: ReturnType<typeof readBookings>['data'];
+  lastUpdated: string;
+};
+
+const makeSnapshot = (): Result<Snapshot> => {
+  const users = readUsers();
+  if (!users.ok) return users;
+  const bookings = readBookings();
+  if (!bookings.ok) return bookings;
+  const lastUpdated = readLastUpdated();
+  if (!lastUpdated.ok) return lastUpdated;
+  return {
+    ok: true,
+    data: { users: users.data, bookings: bookings.data, lastUpdated: lastUpdated.data.updatedAt },
+  } as Result<Snapshot>;
+};
+
+const restoreSnapshot = (snapshot: Snapshot) => {
+  writeUsers(snapshot.users);
+  writeBookings(snapshot.bookings);
+  writeLastUpdated(snapshot.lastUpdated || new Date().toISOString());
+};
+
+const describeImportError = (message: string) =>
+  message.includes('deskId') ? `${message} (check desks.json mapping)` : message;
+
 export const importBackup = (payload: unknown): Result<void> => {
   const parsed = BackupSchema.safeParse(payload);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues.map((i) => i.message).join('; ') };
   }
-  const { users, bookings, lastUpdated } = parsed.data;
-  const usersResult = writeUsers(users);
-  if (!usersResult.ok) return usersResult;
-  const bookingsResult = writeBookings(bookings);
-  if (!bookingsResult.ok) return bookingsResult;
-  touchLastUpdated(lastUpdated.updatedAt);
-  localStorage.setItem(BACKUP_KEY, JSON.stringify(parsed.data));
-  return { ok: true, data: undefined } as Result<void>;
+
+  const snapshot = makeSnapshot();
+  if (!snapshot.ok) return snapshot;
+
+  const targetUpdatedAt =
+    typeof parsed.data.lastUpdated === 'string' ? parsed.data.lastUpdated : parsed.data.lastUpdated.updatedAt;
+
+  try {
+    const usersResult = writeUsers(parsed.data.users);
+    if (!usersResult.ok) throw new Error(usersResult.error);
+
+    const bookingsResult = writeBookings(parsed.data.bookings);
+    if (!bookingsResult.ok) throw new Error(bookingsResult.error);
+
+    const lastUpdatedResult = writeLastUpdated(targetUpdatedAt);
+    if (!lastUpdatedResult.ok) throw new Error(lastUpdatedResult.error);
+
+    localStorage.setItem(
+      BACKUP_KEY,
+      JSON.stringify({
+        importedAt: new Date().toISOString(),
+        schemaVersion: parsed.data.schemaVersion ?? '1.0.0',
+        source: 'import',
+      }),
+    );
+
+    return { ok: true, data: undefined } as Result<void>;
+  } catch (error: any) {
+    restoreSnapshot(snapshot.data);
+    const message = describeImportError(error?.message ?? 'Failed to import backup');
+    return { ok: false, error: `Import failed: ${message}` };
+  }
 };

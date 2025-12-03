@@ -1,6 +1,6 @@
 # Story 4.1: Backup/export snapshot
 
-Status: review
+Status: done
 
 ## Story
 
@@ -59,6 +59,7 @@ OpenAI GPT-5 (Codex SM mode)
 ### Completion Notes List
 
 - 2025-12-03: Added fs-backed exportBackup (mkdirp data/backup, atomic temp+rename, permission messaging), BackupControls UI with success/error toast, and `npm run test:unit` (pass). Ensured data/backup/.gitkeep persists.
+- 2025-12-03: Fixed BackupControls import crash (removed undefined setToast), verified `npm run test:unit` passes; shared feedback stable across export/import.
 
 ### File List
 
@@ -71,9 +72,62 @@ OpenAI GPT-5 (Codex SM mode)
 - MOD: tests/unit/storage.backup.test.ts
 - NEW: tests/component/BackupControls.spec.tsx
 - NEW: data/backup/.gitkeep
+- MOD: src/lib/feedback/context.tsx
+- MOD: src/lib/feedback/messages.ts
+- MOD: src/components/ToastViewport.tsx
+- MOD: tests/unit/feedback.test.ts
 
 ## Change Log
 
 - 2025-12-03: Initial draft created from epics, PRD, architecture.
 - 2025-12-03: Generated story context and marked ready-for-dev.
 - 2025-12-03: Implemented backup export helper + UI/toasts, added unit/component coverage, sprint-status updated to review.
+- 2025-12-03: Fixed BackupControls feedback crash; unit suite passing.
+- 2025-12-03: Senior Developer Review appended; status moved to done.
+
+## Senior Developer Review (AI)
+
+**Reviewer:** DICKY  
+**Date:** 2025-12-03  
+**Outcome:** Approve  
+**Summary:** Export/feedback implementation meets ACs; atomic write, permission messaging, and toasts verified. No outstanding issues.
+
+### Key Findings
+- None (all checks passed).
+
+### Acceptance Criteria Coverage
+| AC | Description | Status | Evidence |
+| --- | --- | --- | --- |
+| 1 | Export writes backup-YYYYMMDD-HHMMSS.json with users/bookings/lastUpdated | IMPLEMENTED | src/lib/storage/backup.ts:42-85 (mkdirp + atomic temp/rename + payload); tests/unit/storage.backup.test.ts:22-37 |
+| 2 | Success toast shows path; errors surfaced; no partial files | IMPLEMENTED | src/components/BackupControls.tsx:13-24,78-82 (toast + inline); tests/component/BackupControls.spec.tsx:13-46 |
+| 3 | Backup dir auto-created; permission errors handled | IMPLEMENTED | src/lib/storage/backup.ts:42-85 (recursive mkdir, describeFsError); tests/unit/storage.backup.test.ts:39-55 |
+
+Summary: 3/3 ACs implemented.
+
+### Task Completion Validation
+| Task | Marked As | Verified As | Evidence |
+| --- | --- | --- | --- |
+| Implement export helper (AC1, AC3) | Complete | VERIFIED COMPLETE | src/lib/storage/backup.ts:42-85 |
+| UX + feedback (AC2) | Complete | VERIFIED COMPLETE | src/components/BackupControls.tsx:13-110; tests/component/BackupControls.spec.tsx:13-46 |
+| Error handling (AC3) | Complete | VERIFIED COMPLETE | src/lib/storage/backup.ts:21-27,42-85; tests/unit/storage.backup.test.ts:39-55 |
+| Tests (AC1–AC3) | Complete | VERIFIED COMPLETE | tests/unit/storage.backup.test.ts; tests/component/BackupControls.spec.tsx |
+
+Summary: 4/4 completed tasks verified; 0 questionable; 0 false completions.
+
+### Test Coverage and Gaps
+- Unit: backup export payload, filename, permission failure, import rollback (tests/unit/storage.backup.test.ts).
+- Component: export toasts path and error surfacing (tests/component/BackupControls.spec.tsx).
+- No gaps noted for this story scope.
+
+### Architectural Alignment
+- Uses atomic temp+rename, respects data/backup path, and structured errors per architecture.md; no violations observed.
+
+### Security Notes
+- Local filesystem only; permission errors surfaced; no external I/O introduced.
+
+### Best-Practices and References
+- Atomic writes with temp file + rename.
+- User-facing feedback via centralized toasts (role="status").
+
+### Action Items
+- None.

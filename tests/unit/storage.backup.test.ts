@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import { exportBackup, importBackup } from '../../src/lib/storage/backup';
 import { readUsers, writeUsers } from '../../src/lib/storage/users';
-import { writeBookings } from '../../src/lib/storage/bookings';
+import { readBookings, writeBookings } from '../../src/lib/storage/bookings';
 
 const backupDir = path.resolve(process.cwd(), 'data/backup');
 
@@ -63,6 +63,37 @@ describe('backup helpers', () => {
     const result = importBackup(payload);
     expect(result.ok).toBe(true);
     expect(readUsers().data.length).toBe(1);
+  });
+
+  it('rolls back when booking write fails', () => {
+    const originalUsers = [{ id: 'u1', name: 'Alice', active: true }];
+    const originalBookings: any[] = [];
+
+    writeUsers(originalUsers);
+    writeBookings(originalBookings);
+
+    const payload = {
+      users: [{ id: 'u2', name: 'Bob', active: true }],
+      bookings: [
+        {
+          id: 'b1',
+          office: 'X',
+          floor: '1',
+          deskId: 'missing',
+          date: '2025-12-03',
+          userId: 'u2',
+          createdAt: '2025-12-03T10:11:12.123Z',
+        },
+      ],
+      lastUpdated: { updatedAt: '2025-12-03T10:11:12.123Z' },
+    };
+
+    const result = importBackup(payload);
+    expect(result.ok).toBe(false);
+
+    // Original data intact
+    expect(readUsers().data).toEqual(originalUsers);
+    expect(readBookings().data).toEqual(originalBookings);
   });
 
   it('rejects invalid payload', () => {

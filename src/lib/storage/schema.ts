@@ -33,8 +33,14 @@ export const BookingSchema = z.object({
 
 export const BookingsSchema = z.array(BookingSchema);
 
+const LastUpdatedSchema = z.union([
+  z.object({ updatedAt: z.string().datetime({ offset: true }) }),
+  z.string().datetime({ offset: true }),
+]);
+
 export const BackupSchema = z.object({
   users: UsersSchema,
   bookings: BookingsSchema,
-  lastUpdated: z.object({ updatedAt: z.string().datetime({ offset: true }) }),
+  lastUpdated: LastUpdatedSchema,
+  schemaVersion: z.string().optional(),
 });

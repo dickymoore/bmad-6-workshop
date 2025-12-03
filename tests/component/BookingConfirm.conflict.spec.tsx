@@ -7,15 +7,18 @@ import { LastUpdatedProvider } from '../../src/lib/last-updated/context';
 import { RosterProvider } from '../../src/lib/roster/context';
 import { writeUsers } from '../../src/lib/storage/users';
 import { writeBookings } from '../../src/lib/storage/bookings';
+import { FeedbackProvider } from '../../src/lib/feedback/context';
 
 const shell = (ui: React.ReactElement) => (
-  <LastUpdatedProvider>
-    <RosterProvider>
-      <SelectedUserProvider>
-        <FiltersProvider>{ui}</FiltersProvider>
-      </SelectedUserProvider>
-    </RosterProvider>
-  </LastUpdatedProvider>
+  <FeedbackProvider>
+    <LastUpdatedProvider>
+      <RosterProvider>
+        <SelectedUserProvider>
+          <FiltersProvider>{ui}</FiltersProvider>
+        </SelectedUserProvider>
+      </RosterProvider>
+    </LastUpdatedProvider>
+  </FeedbackProvider>
 );
 
 describe('BookingConfirm conflict UX', () => {

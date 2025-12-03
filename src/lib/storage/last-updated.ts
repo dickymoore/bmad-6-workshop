@@ -48,7 +48,7 @@ export const writeLastUpdated = (updatedAt: string): Result<LastUpdated> => {
   }
 };
 
-export const touchLastUpdated = (): Result<LastUpdated> => {
-  const iso = new Date().toISOString();
+export const touchLastUpdated = (timestamp?: string): Result<LastUpdated> => {
+  const iso = timestamp ?? new Date().toISOString();
   return writeLastUpdated(iso);
 };
