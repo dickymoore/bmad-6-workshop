@@ -1,6 +1,6 @@
 # Story 4.1: Backup/export snapshot
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -14,16 +14,16 @@ As a user, I want to export users/bookings to a timestamped JSON so I can back u
 
 ## Tasks / Subtasks
 
-- [ ] Implement export helper (AC1, AC3)  
-  - [ ] mkdirp `data/backup/`; write atomic file with timestamped name; include users, bookings, lastUpdated.  
-- [ ] UX + feedback (AC2)  
-  - [ ] Trigger from UI; show success toast with path; show error toast on failure.  
-- [ ] Error handling (AC3)  
-  - [ ] Detect permission/missing dir errors; return { ok:false, error }; no partial files.  
-- [ ] Tests (AC1–AC3)  
-  - [ ] Unit: filename format and contents.  
-  - [ ] Unit: permission failure returns error, no file created.  
-  - [ ] Component/API: success toast path.  
+- [x] Implement export helper (AC1, AC3)  
+  - [x] mkdirp `data/backup/`; write atomic file with timestamped name; include users, bookings, lastUpdated.  
+- [x] UX + feedback (AC2)  
+  - [x] Trigger from UI; show success toast with path; show error toast on failure.  
+- [x] Error handling (AC3)  
+  - [x] Detect permission/missing dir errors; return { ok:false, error }; no partial files.  
+- [x] Tests (AC1–AC3)  
+  - [x] Unit: filename format and contents.  
+  - [x] Unit: permission failure returns error, no file created.  
+  - [x] Component/API: success toast path.  
 
 ## Dev Notes
 
@@ -58,12 +58,22 @@ OpenAI GPT-5 (Codex SM mode)
 
 ### Completion Notes List
 
+- 2025-12-03: Added fs-backed exportBackup (mkdirp data/backup, atomic temp+rename, permission messaging), BackupControls UI with success/error toast, and `npm run test:unit` (pass). Ensured data/backup/.gitkeep persists.
+
 ### File List
 
-- NEW: docs/sprint-artifacts/4-1-backup-export-snapshot.md
-- NEW: docs/sprint-artifacts/4-1-backup-export-snapshot.context.xml
+- MOD: docs/sprint-artifacts/4-1-backup-export-snapshot.md
+- MOD: docs/sprint-artifacts/sprint-status.yaml
+- MOD: src/lib/storage/backup.ts
+- NEW: src/components/BackupControls.tsx
+- MOD: src/App.tsx
+- MOD: src/index.css
+- MOD: tests/unit/storage.backup.test.ts
+- NEW: tests/component/BackupControls.spec.tsx
+- NEW: data/backup/.gitkeep
 
 ## Change Log
 
 - 2025-12-03: Initial draft created from epics, PRD, architecture.
 - 2025-12-03: Generated story context and marked ready-for-dev.
+- 2025-12-03: Implemented backup export helper + UI/toasts, added unit/component coverage, sprint-status updated to review.
