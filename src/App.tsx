@@ -16,6 +16,7 @@ import { SelectedUserProvider } from './lib/booking/selection';
 import { BackupControls } from './components/BackupControls';
 import { FeedbackProvider } from './lib/feedback/context';
 import { ToastViewport } from './components/ToastViewport';
+import { RosterManager } from './components/RosterManager';
 
 export default function App() {
   const [selectedDeskId, setSelectedDeskId] = useState<string | undefined>();
@@ -60,6 +61,7 @@ export default function App() {
             </div>
             <div className="grid two-column">
               <BackupControls />
+              <RosterManager />
             </div>
               <ToastViewport />
             </main>

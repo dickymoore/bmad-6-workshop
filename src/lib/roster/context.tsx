@@ -5,7 +5,7 @@ export type RosterContextValue = {
   users: User[];
   status: 'ready' | 'loading' | 'error';
   error?: string;
-  save: (users: User[]) => Promise<boolean>;
+  save: (users: User[]) => Promise<{ ok: true } | { ok: false; error: string }>;
 };
 
 const RosterContext = createContext<RosterContextValue | undefined>(undefined);
@@ -38,11 +38,11 @@ export const RosterProvider = ({ children }: { children: React.ReactNode }) => {
       setUsers(nextUsers);
       setStatus('ready');
       setError(undefined);
-      return true;
+      return { ok: true as const };
     }
     setStatus('error');
     setError(result.error);
-    return false;
+    return { ok: false as const, error: result.error };
   }, []);
 
   return (

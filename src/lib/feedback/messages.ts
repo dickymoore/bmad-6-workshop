@@ -1,10 +1,11 @@
-type Action = 'booking.create' | 'booking.cancel' | 'backup.export' | 'backup.import';
+type Action = 'booking.create' | 'booking.cancel' | 'backup.export' | 'backup.import' | 'roster.save';
 
 const successCopy: Record<Action, (args?: { path?: string }) => string> = {
   'booking.create': () => 'Booking confirmed',
   'booking.cancel': () => 'Booking cancelled',
   'backup.export': (args) => `Backup saved${args?.path ? ` to ${args.path}` : ''}`,
   'backup.import': () => 'Backup imported successfully',
+  'roster.save': () => 'Roster saved',
 };
 
 const errorHints: Array<{ match: RegExp; message: string }> = [
@@ -13,6 +14,8 @@ const errorHints: Array<{ match: RegExp; message: string }> = [
   { match: /permission denied/i, message: 'Permission denied. Check write access.' },
   { match: /invalid json/i, message: 'Backup file is not valid JSON' },
   { match: /booking not found/i, message: 'Booking not found for that desk/date' },
+  { match: /duplicate/i, message: 'Duplicate user names are not allowed' },
+  { match: /empty/i, message: 'Name cannot be empty' },
 ];
 
 const fallbackErrors: Record<Action, string> = {
@@ -20,6 +23,7 @@ const fallbackErrors: Record<Action, string> = {
   'booking.cancel': 'Could not cancel booking. Please try again.',
   'backup.export': 'Backup failed. Please retry.',
   'backup.import': 'Import failed. Check the file and try again.',
+  'roster.save': 'Could not save roster. Please try again.',
 };
 
 export function successMessage(action: Action, args?: { path?: string }) {

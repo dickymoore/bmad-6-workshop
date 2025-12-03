@@ -57,9 +57,9 @@ development_status:
   3-5-desk-validation: done
   epic-3-retrospective: done
 
-  epic-4: contexted
+  epic-4: done
   4-1-backup-export-snapshot: done
   4-2-import-restore-with-validation: done
   4-3-toasts-and-inline-feedback: done
-  4-4-roster-edit-ui: ready-for-dev
-  epic-4-retrospective: docs/sprint-artifacts/epic-4-retrospective.md
+  4-4-roster-edit-ui: done
+  epic-4-retrospective: done
