@@ -7,13 +7,24 @@ import { LastUpdatedProvider } from './lib/last-updated/context';
 import { LastUpdatedBadge } from './components/LastUpdatedBadge';
 import { RosterProvider } from './lib/roster/context';
 import { UserDropdown } from './components/UserDropdown';
+import { FloorplanView } from './components/Floorplan/FloorplanView';
+import { BookingList } from './components/BookingList';
+import { BookingConfirm } from './components/BookingConfirm';
+import { BookingCancel } from './components/BookingCancel';
+import { useState } from 'react';
+import { SelectedUserProvider } from './lib/booking/selection';
+import { BackupControls } from './components/BackupControls';
 
 export default function App() {
+  const [selectedDeskId, setSelectedDeskId] = useState<string | undefined>();
+  const [cancelDeskId, setCancelDeskId] = useState<string | undefined>();
+
   return (
     <LastUpdatedProvider>
       <RosterProvider>
-        <FiltersProvider>
-          <main className="page">
+        <SelectedUserProvider>
+          <FiltersProvider>
+            <main className="page">
             <header>
               <p className="eyebrow">Desk Booking</p>
               <h1>Office, Floor, and Date Filters</h1>
@@ -28,11 +39,28 @@ export default function App() {
               <FiltersSummary />
             </div>
             <div className="grid two-column">
-              <FloorplanPlaceholder />
-              <PerDayListPlaceholder />
+              <FloorplanView
+                selectedDeskId={selectedDeskId}
+                onDeskSelect={setSelectedDeskId}
+                onFreeDeskClick={setSelectedDeskId}
+                onBookedDeskClick={setCancelDeskId}
+              />
+              <BookingList
+                selectedDeskId={selectedDeskId}
+                onSelectDesk={setSelectedDeskId}
+                onSelectBookedDesk={setCancelDeskId}
+              />
+            </div>
+            <div className="grid two-column">
+              <BookingConfirm selectedDeskId={selectedDeskId} onBooked={() => setSelectedDeskId(undefined)} />
+              <BookingCancel deskId={cancelDeskId} onCancelled={() => setCancelDeskId(undefined)} />
+            </div>
+            <div className="grid two-column">
+              <BackupControls />
             </div>
           </main>
         </FiltersProvider>
+      </SelectedUserProvider>
       </RosterProvider>
     </LastUpdatedProvider>
   );

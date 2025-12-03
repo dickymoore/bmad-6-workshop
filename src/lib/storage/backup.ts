@@ -1,29 +1,87 @@
-import { BackupSchema, BookingsSchema, UsersSchema } from './schema';
-import { writeBookings } from './bookings';
-import { writeUsers } from './users';
-import { touchLastUpdated, type Result } from './last-updated';
+import type { Result } from './last-updated';
+import { BackupSchema } from './schema';
+import { readBookings, writeBookings } from './bookings';
+import { readUsers, writeUsers } from './users';
+import { readLastUpdated, touchLastUpdated } from './last-updated';
 
 const BACKUP_KEY = 'desk-booking:backup:last';
+const DEFAULT_BACKUP_DIR = 'data/backup';
 
-export const exportBackup = (): Result<{ payload: unknown }> => {
+type ExportOptions = { baseDir?: string };
+
+const formatTimestamp = (date: Date) => {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return [
+    date.getFullYear(),
+    pad(date.getMonth() + 1),
+    pad(date.getDate()),
+  ].join('') + '-' + [pad(date.getHours()), pad(date.getMinutes()), pad(date.getSeconds())].join('');
+};
+
+const describeFsError = (error: any) => {
+  if (!error) return 'Unknown filesystem error';
+  const code = error.code || error?.cause?.code;
+  if (code === 'EACCES' || code === 'EPERM') return 'Permission denied writing backup. Check write access to data/backup.';
+  if (code === 'ENOENT') return 'Backup directory missing and could not be created.';
+  return error.message ?? 'Failed to write backup file';
+};
+
+const loadFs = async () => {
+  if (typeof process === 'undefined' || !process.versions?.node) {
+    return { ok: false as const, error: 'File system unavailable in this environment' };
+  }
   try {
-    const usersRaw = localStorage.getItem('desk-booking:users');
-    const bookingsRaw = localStorage.getItem('desk-booking:bookings');
-    const users = usersRaw ? JSON.parse(usersRaw) : [];
-    const bookings = bookingsRaw ? JSON.parse(bookingsRaw) : [];
-    const parsedUsers = UsersSchema.safeParse(users);
-    const parsedBookings = BookingsSchema.safeParse(bookings);
-    if (!parsedUsers.success) return { ok: false, error: 'Users invalid, cannot export' };
-    if (!parsedBookings.success) return { ok: false, error: 'Bookings invalid, cannot export' };
-    const payload = {
-      users: parsedUsers.data,
-      bookings: parsedBookings.data,
-      lastUpdated: { updatedAt: new Date().toISOString() },
-    };
-    localStorage.setItem(BACKUP_KEY, JSON.stringify(payload));
-    return { ok: true, data: { payload } };
+    const fs = await import('node:fs/promises');
+    const path = await import('node:path');
+    return { ok: true as const, data: { fs, path } };
   } catch (error: any) {
-    return { ok: false, error: error?.message ?? 'Failed to export backup' };
+    return { ok: false as const, error: error?.message ?? 'Cannot access filesystem' };
+  }
+};
+
+export const exportBackup = async (options: ExportOptions = {}): Promise<Result<{ path: string }>> => {
+  const fsResult = await loadFs();
+  if (!fsResult.ok) return fsResult;
+  const { fs, path } = fsResult.data;
+
+  const usersResult = readUsers();
+  if (!usersResult.ok) return { ok: false, error: `Failed to read users: ${usersResult.error}` };
+  const bookingsResult = readBookings();
+  if (!bookingsResult.ok) return { ok: false, error: `Failed to read bookings: ${bookingsResult.error}` };
+  const lastUpdatedResult = readLastUpdated();
+  if (!lastUpdatedResult.ok) return { ok: false, error: `Failed to read lastUpdated: ${lastUpdatedResult.error}` };
+
+  const lastUpdatedValue = lastUpdatedResult.data.updatedAt;
+  const lastUpdated =
+    typeof lastUpdatedValue === 'string' && lastUpdatedValue.trim() && !Number.isNaN(Date.parse(lastUpdatedValue))
+      ? lastUpdatedValue
+      : new Date().toISOString();
+
+  const payload = {
+    users: usersResult.data,
+    bookings: bookingsResult.data,
+    lastUpdated: { updatedAt: lastUpdated },
+  };
+
+  const validation = BackupSchema.safeParse(payload);
+  if (!validation.success) {
+    return { ok: false, error: `Backup validation failed: ${validation.error.issues.map((i) => i.message).join('; ')}` };
+  }
+
+  const backupDir = path.resolve(process.cwd(), options.baseDir ?? DEFAULT_BACKUP_DIR);
+  const filename = `backup-${formatTimestamp(new Date())}.json`;
+  const targetPath = path.join(backupDir, filename);
+  const tempPath = `${targetPath}.tmp`;
+
+  try {
+    await fs.mkdir(backupDir, { recursive: true });
+    await fs.writeFile(tempPath, JSON.stringify(validation.data, null, 2), { flag: 'w' });
+    await fs.rename(tempPath, targetPath);
+    localStorage.setItem(BACKUP_KEY, targetPath);
+    return { ok: true, data: { path: targetPath } } as Result<{ path: string }>;
+  } catch (error: any) {
+    await fs.rm(tempPath, { force: true }).catch(() => {});
+    return { ok: false, error: describeFsError(error) };
   }
 };
 

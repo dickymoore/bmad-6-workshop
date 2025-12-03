@@ -2,12 +2,15 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { RosterProvider } from '../../src/lib/roster/context';
 import { UserDropdown } from '../../src/components/UserDropdown';
+import { SelectedUserProvider } from '../../src/lib/booking/selection';
 
 const renderWithRoster = (users: any[]) => {
   localStorage.setItem('desk-booking:users', JSON.stringify(users));
   return render(
     <RosterProvider>
-      <UserDropdown />
+      <SelectedUserProvider>
+        <UserDropdown />
+      </SelectedUserProvider>
     </RosterProvider>,
   );
 };
@@ -21,7 +24,8 @@ describe('UserDropdown', () => {
   it('renders users in dropdown when roster present', () => {
     renderWithRoster([{ id: '1', name: 'Alice', active: true }]);
     const dropdown = screen.getByLabelText(/user dropdown/i) as HTMLSelectElement;
-    expect(dropdown.options.length).toBe(1);
+    expect(dropdown.options.length).toBe(2); // includes visitor
     expect(dropdown.options[0].textContent).toBe('Alice');
+    expect(dropdown.options[1].textContent).toBe('Visitor');
   });
 });

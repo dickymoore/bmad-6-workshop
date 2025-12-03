@@ -1,6 +1,7 @@
 import { touchLastUpdated } from './last-updated';
 import { BookingsSchema, BookingSchema } from './schema';
 import { getDeskIndex } from './desks-index';
+import { validateDesk } from './validation';
 
 export type Booking = {
   id: string;
@@ -56,4 +57,24 @@ export const writeBookings = (bookings: Booking[]): Result<void> => {
   touchLastUpdated();
   emit(bookings);
   return { ok: true, data: undefined } as Result<void>;
+};
+
+export const validateDeskForBooking = (office: string, floor: string, deskId: string): Result<void> & { code?: string } => {
+  const validation = validateDesk(office, floor, deskId);
+  if (!validation.ok) {
+    return { ok: false, error: validation.error, code: validation.code };
+  }
+  return { ok: true, data: undefined } as Result<void>;
+};
+
+export const cancelBooking = (bookingId: string): Result<void> => {
+  const existing = readBookings();
+  if (!existing.ok) return { ok: false, error: existing.error };
+
+  const next = existing.data.filter((b) => b.id !== bookingId);
+  if (next.length === existing.data.length) {
+    return { ok: false, error: 'Booking not found' };
+  }
+
+  return writeBookings(next);
 };

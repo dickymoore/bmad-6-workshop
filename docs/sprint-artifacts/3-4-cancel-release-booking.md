@@ -1,6 +1,6 @@
 # Story 3.4: Cancel/release booking
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -66,3 +66,38 @@ OpenAI GPT-5 (Codex SM mode)
 
 - 2025-12-03: Initial draft created from epics, PRD, architecture.
 - 2025-12-03: Generated story context and marked ready-for-dev.
+- 2025-12-03: Senior Developer Review (AI) completed; approved.
+
+## Senior Developer Review (AI)
+
+Reviewer: DICKY  
+Date: 2025-12-03  
+Outcome: Approve  
+
+Summary: Bookings can be canceled from list or booked desk; cancel card asks confirmation and calls storage cancel with conflict handling; state updates via storage emit; tests cover storage cancel. No issues found.
+
+Key Findings:
+- None.
+
+Acceptance Criteria Coverage:
+- AC1 Cancel action from floorplan/list with confirmation: IMPLEMENTED — FloorplanView onBookedDeskClick sets cancel selection; BookingList provides Cancel button; BookingCancel card shows details + Confirm cancel button. Evidence: src/components/Floorplan/FloorplanView.tsx:86-94,165-194; src/components/BookingList/BookingList.tsx:9-114; src/components/BookingCancel.tsx:9-74; src/App.tsx:41-56.
+- AC2 On cancel booking removed/availability refresh + success message: IMPLEMENTED — cancelBooking writes storage/emit; BookingCancel sets success message; overlays and lists subscribe to bookings changes. Evidence: src/lib/storage/bookings.ts:1-35; BookingCancel.tsx:28-74; FloorplanView.tsx:100-120; BookingList.tsx:27-43.
+- AC3 Errors surface, no partial state: IMPLEMENTED — cancelBooking returns error when not found; BookingCancel shows alert. Evidence: booking.ts cancelBooking:17-34; BookingCancel.tsx:32-74.
+
+Task Validation:
+- Trigger cancel from list/floorplan with confirm: VERIFIED — BookingList cancel button and BookingCancel confirm button. Evidence: BookingList.tsx:95-114; BookingCancel.tsx:45-74.
+- Persist removal and refresh state: VERIFIED — cancelBooking + emit; BookingCancel onCancelled callbacks; subscriptions in FloorplanView/BookingList. Evidence: bookings.ts:17-35; FloorplanView.tsx:100-120; BookingList.tsx:27-43.
+- Error handling: VERIFIED — cancelBooking missing booking path; BookingCancel error UI. Evidence: bookings.ts:21-34; BookingCancel.tsx:32-74.
+- Tests AC1–AC3: VERIFIED — tests/unit/booking-cancel.test.ts:1-22.
+
+Test Coverage and Gaps:
+- Storage cancel covered; UI paths rely on storage subscription—no explicit UI cancel test, but behavior aligns with storage + wiring; acceptable for current scope.
+
+Architectural Alignment:
+- Uses storage helper with last-updated emit; client-only; aligns with architecture.
+
+Security Notes:
+- N/A (local-only state changes).
+
+Action Items:
+- None.

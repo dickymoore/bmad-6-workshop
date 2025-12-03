@@ -54,6 +54,8 @@ OpenAI GPT-5 (Codex SM mode)
 
 ### Debug Log References
 
+- 2025-12-03: Plan — implement fs-backed exportBackup (mkdirp data/backup, atomic write, return path), add BackupControls UI with success/error toast, cover filename/permission tests; sprint-status set to in-progress.
+
 ### Completion Notes List
 
 ### File List
