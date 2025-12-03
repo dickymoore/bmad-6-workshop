@@ -1,14 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import fs from 'node:fs';
-import path from 'node:path';
 import { RosterProvider } from '../../src/lib/roster/context';
 import { UserDropdown } from '../../src/components/UserDropdown';
 
-const usersPath = path.resolve(process.cwd(), 'data/users.json');
-
 const renderWithRoster = (users: any[]) => {
-  fs.writeFileSync(usersPath, JSON.stringify(users), 'utf8');
+  localStorage.setItem('desk-booking:users', JSON.stringify(users));
   return render(
     <RosterProvider>
       <UserDropdown />

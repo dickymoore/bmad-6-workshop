@@ -35,16 +35,16 @@ As a developer, I want a storage module that reads/writes JSON with schema valid
 
 ## Dev Notes
 
-- Architecture: Client-only SPA; storage layer is single source of truth for bookings/users with synchronous JSON writes and last-updated tracking. citedocs/architecture.md  
-- Tech spec alignment: Implement `storage/fs-adapter`, `storage/schema`, `bookings-service`, `users-service`, and `last-updated` helpers exactly as scoped in the Epic 1 tech spec; enforce deskId validation and atomic writes. citedocs/sprint-artifacts/tech-spec-epic-1.md  
-- PRD linkage: Supports FR12–FR15 reliability requirements (write-through persistence, validation, import safety). citedocs/prd.md  
+- Architecture: Client-only SPA; storage layer uses browser localStorage as the single source of truth for bookings/users with last-updated tracking. citedocs/architecture.md  
+- Tech spec alignment: Implement `storage/schema`, `bookings-service`, `users-service`, and `last-updated` helpers per Epic 1 tech spec; enforce deskId validation and atomic (localStorage) writes. citedocs/sprint-artifacts/tech-spec-epic-1.md  
+- PRD linkage: Supports FR12–FR15 reliability requirements (persistence, validation). citedocs/prd.md  
 - Error handling: No silent failures—return `{ ok:false, error }`, log via console.error, and let UI surface toasts.  
-- Data safety: Keep all file operations inside `data/`; reject absolute paths outside project root.  
+- Data safety: Namespaced localStorage keys; desk validation prevents invalid writes.  
 
 ### Project Structure Notes
 
-- Place schemas and helpers under `src/lib/storage/`; keep data files in `data/` with backups in `data/backup/`. citedocs/architecture.md  
-- Ensure future booking features call these helpers instead of direct fs access to keep validation centralized.  
+- Place schemas and helpers under `src/lib/storage/`; persistence is in localStorage (no fs on browser).  
+- Ensure future booking features call these helpers instead of bypassing validation.  
 
 ### References
 
@@ -68,26 +68,35 @@ OpenAI GPT-5 (Codex SM mode)
 ### Completion Notes List
 
 - 2025-12-03: Added zod schemas for users/bookings/backup; deskId office/floor validation via desks index.
-- 2025-12-03: Storage helpers now log skipped invalid rows, enforce atomic writes, and return structured results.
+- 2025-12-03: Storage helpers now log skipped invalid rows, enforce atomic localStorage writes, and return structured results.
 - 2025-12-03: Tests cover validation, deskId rejection, last-updated touch, and error paths; build/tests passing (Node 20 run; engines expect Node 22).
+
+### Senior Developer Review (AI)
+
+- Reviewer: DICKY  
+- Date: 2025-12-03  
+- Outcome: Approved (browser localStorage persistence)
+- Findings: None (High/Med/Low = 0/0/0)
+- AC Coverage: 5/5 implemented (users/bookings load, skip+log invalid, update last-updated, deskId validation, structured results)
 
 ### File List
 
 - UPDATED: package.json
 - UPDATED: package-lock.json
 - UPDATED: vitest.config.ts
-- NEW: src/lib/storage/fs-adapter.ts
 - NEW: src/lib/storage/desks-index.ts
 - NEW: src/lib/storage/schema.ts
 - UPDATED: src/lib/storage/last-updated.ts
 - UPDATED: src/lib/storage/users.ts
 - UPDATED: src/lib/storage/bookings.ts
+- NEW: src/lib/storage/backup.ts
 - UPDATED: src/App.tsx (providers)
 - UPDATED: src/index.css
 - UPDATED: tests/unit/seed.test.ts
 - NEW: tests/unit/storage.bookings.test.ts
 - UPDATED: tests/unit/storage.users.test.ts
 - UPDATED: tests/unit/last-updated.test.ts
+- NEW: tests/unit/storage.backup.test.ts
 - UPDATED: tests/component/FiltersBar.spec.tsx
 - UPDATED: tests/component/UserDropdown.spec.tsx
 - UPDATED: tests/component/LastUpdatedBadge.spec.tsx

@@ -1,24 +1,16 @@
-import fs from 'node:fs';
-import path from 'node:path';
 import { readLastUpdated, writeLastUpdated, touchLastUpdated, isIsoString } from '../../src/lib/storage/last-updated';
-
-const fixtureDir = path.resolve(process.cwd(), 'data');
-const filePath = path.join(fixtureDir, 'last-updated.json');
-
-const readFile = () => JSON.parse(fs.readFileSync(filePath, 'utf8'));
 
 describe('last-updated storage helper', () => {
   beforeEach(() => {
-    if (!fs.existsSync(fixtureDir)) fs.mkdirSync(fixtureDir, { recursive: true });
-    fs.writeFileSync(filePath, JSON.stringify({ updatedAt: '' }), 'utf8');
+    localStorage.clear();
+    localStorage.setItem('desk-booking:last-updated', JSON.stringify({ updatedAt: '' }));
   });
 
   it('seeds empty file on read when missing', () => {
-    fs.unlinkSync(filePath);
     const result = readLastUpdated();
     expect(result.ok).toBe(true);
     expect(result.data.updatedAt).toBe('');
-    expect(fs.existsSync(filePath)).toBe(true);
+    expect(localStorage.getItem('desk-booking:last-updated')).toBeTruthy();
   });
 
   it('validates iso format helper', () => {
@@ -30,7 +22,8 @@ describe('last-updated storage helper', () => {
     const iso = '2025-12-03T10:11:12.123Z';
     const result = writeLastUpdated(iso);
     expect(result.ok).toBe(true);
-    expect(readFile().updatedAt).toBe(iso);
+    const stored = JSON.parse(localStorage.getItem('desk-booking:last-updated') ?? '{}');
+    expect(stored.updatedAt).toBe(iso);
   });
 
   it('rejects invalid timestamp', () => {
@@ -41,6 +34,7 @@ describe('last-updated storage helper', () => {
   it('touchLastUpdated writes current time', () => {
     const result = touchLastUpdated();
     expect(result.ok).toBe(true);
-    expect(isIsoString(readFile().updatedAt)).toBe(true);
+    const stored = JSON.parse(localStorage.getItem('desk-booking:last-updated') ?? '{}');
+    expect(isIsoString(stored.updatedAt)).toBe(true);
   });
 });

@@ -1,4 +1,3 @@
-import { readJsonFile, writeJsonFile, type Result } from './fs-adapter';
 import { touchLastUpdated } from './last-updated';
 import { BookingsSchema, BookingSchema } from './schema';
 import { getDeskIndex } from './desks-index';
@@ -14,7 +13,7 @@ export type Booking = {
   releasedAt?: string; // ISO optional
 };
 
-const BOOKINGS_PATH = 'bookings.json';
+const BOOKINGS_KEY = 'desk-booking:bookings';
 const deskIndex = getDeskIndex();
 
 type Listener = (bookings: Booking[]) => void;
@@ -27,11 +26,11 @@ export const onBookingsChanged = (fn: Listener) => {
 const emit = (bookings: Booking[]) => subscribers.forEach((fn) => fn(bookings));
 
 export const readBookings = (): Result<Booking[]> => {
-  const result = readJsonFile<Booking[]>(BOOKINGS_PATH, []);
-  if (!result.ok) return result;
+  const raw = localStorage.getItem(BOOKINGS_KEY);
+  const data = raw ? JSON.parse(raw) : [];
   const bookings: Booking[] = [];
-  if (Array.isArray(result.data)) {
-    result.data.forEach((row, idx) => {
+  if (Array.isArray(data)) {
+    data.forEach((row, idx) => {
       const parsed = BookingSchema.safeParse(row);
       if (parsed.success) {
         bookings.push(parsed.data);
@@ -40,7 +39,7 @@ export const readBookings = (): Result<Booking[]> => {
       }
     });
   }
-  return { ok: true, data: bookings };
+  return { ok: true, data: bookings } as Result<Booking[]>;
 };
 
 export const writeBookings = (bookings: Booking[]): Result<void> => {
@@ -49,8 +48,11 @@ export const writeBookings = (bookings: Booking[]): Result<void> => {
     const msg = parsed.error.issues.map((i) => i.message).join('; ');
     return { ok: false, error: `Booking validation failed: ${msg}` };
   }
-  const writeResult = writeJsonFile(BOOKINGS_PATH, bookings);
-  if (!writeResult.ok) return writeResult;
+  try {
+    localStorage.setItem(BOOKINGS_KEY, JSON.stringify(bookings, null, 2));
+  } catch (error: any) {
+    return { ok: false, error: error?.message ?? 'Failed to write bookings' };
+  }
   touchLastUpdated();
   emit(bookings);
   return { ok: true, data: undefined } as Result<void>;

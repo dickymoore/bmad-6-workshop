@@ -1,26 +1,15 @@
-import fs from 'node:fs';
-import path from 'node:path';
 import { readUsers, writeUsers, onUsersChanged, type User } from '../../src/lib/storage/users';
 
-const dataDir = path.resolve(process.cwd(), 'data');
-const usersPath = path.join(dataDir, 'users.json');
-const lastUpdatedPath = path.join(dataDir, 'last-updated.json');
-
-const resetFiles = () => {
-  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-  fs.writeFileSync(usersPath, JSON.stringify([]), 'utf8');
-  fs.writeFileSync(lastUpdatedPath, JSON.stringify({ updatedAt: '' }), 'utf8');
-};
+const reset = () => localStorage.clear();
 
 describe('users storage', () => {
-  beforeEach(() => resetFiles());
+  beforeEach(() => reset());
 
   it('seeds empty array when file missing', () => {
-    fs.unlinkSync(usersPath);
     const result = readUsers();
     expect(result.ok).toBe(true);
     expect(result.data).toEqual([]);
-    expect(fs.existsSync(usersPath)).toBe(true);
+    expect(localStorage.getItem('desk-booking:users')).toBeTruthy();
   });
 
   it('rejects duplicate names', () => {
@@ -40,7 +29,7 @@ describe('users storage', () => {
 
   it('skips invalid rows on read with warning', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    fs.writeFileSync(usersPath, JSON.stringify([{ id: '', name: '', active: true }]), 'utf8');
+    localStorage.setItem('desk-booking:users', JSON.stringify([{ id: '', name: '', active: true }]));
     const result = readUsers();
     expect(result.ok).toBe(true);
     expect(result.data).toEqual([]);
@@ -55,9 +44,9 @@ describe('users storage', () => {
     ];
     const result = writeUsers(users);
     expect(result.ok).toBe(true);
-    const stored = JSON.parse(fs.readFileSync(usersPath, 'utf8'));
+    const stored = JSON.parse(localStorage.getItem('desk-booking:users') ?? '[]');
     expect(stored.length).toBe(2);
-    const last = JSON.parse(fs.readFileSync(lastUpdatedPath, 'utf8'));
+    const last = JSON.parse(localStorage.getItem('desk-booking:last-updated') ?? '{}');
     expect(typeof last.updatedAt).toBe('string');
     expect(last.updatedAt.length).toBeGreaterThan(0);
   });
