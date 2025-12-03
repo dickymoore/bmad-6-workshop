@@ -42,14 +42,14 @@ development_status:
   1-4-roster-load-save: ready-for-dev
   epic-1-retrospective: docs/sprint-artifacts/epic-1-retrospective.md
 
-  epic-2: backlog
+  epic-2: contexted
   2-1-office-floor-date-selectors: ready-for-dev
   2-2-floorplan-rendering-with-hotspots: ready-for-dev
   2-3-per-day-availability-list: ready-for-dev
   2-4-availability-coloring: ready-for-dev
   epic-2-retrospective: docs/sprint-artifacts/epic-2-retrospective.md
 
-  epic-3: backlog
+  epic-3: contexted
   3-1-select-user-for-booking: ready-for-dev
   3-2-create-booking-with-confirmation: ready-for-dev
   3-3-enforce-one-booking-per-user-day: ready-for-dev
@@ -57,7 +57,7 @@ development_status:
   3-5-desk-validation: ready-for-dev
   epic-3-retrospective: docs/sprint-artifacts/epic-3-retrospective.md
 
-  epic-4: backlog
+  epic-4: contexted
   4-1-backup-export-snapshot: ready-for-dev
   4-2-import-restore-with-validation: ready-for-dev
   4-3-toasts-and-inline-feedback: ready-for-dev
