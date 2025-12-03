@@ -39,12 +39,15 @@ playwright.config.ts   (to be generated)
 ## Selector Strategy
 - Use `data-testid` on UI elements; avoid brittle CSS/XPath.
 
-## Commands (will be added)
+## Commands
 ```
 npm install @playwright/test @faker-js/faker
-npm run test:e2e        # playwright test
-npm run test:e2e:ui     # optional UI mode
-npm run test:e2e:report # open HTML report
+npm run test:e2e         # all e2e tests
+npm run test:e2e:smoke   # @smoke
+npm run test:e2e:p0      # @p0
+npm run test:e2e:p1      # @p0|@p1
+npm run test:e2e:ui      # headed UI mode
+npm run test:e2e:report  # open HTML report
 ```
 
 ## Next Steps to generate scaffold
@@ -64,11 +67,16 @@ If you prefer Cypress instead, say so before scaffold and I’ll switch plans.
 
 ## Running
 ```bash
-npm install          # already installed test deps here
-npx playwright install chromium  # done once; if libs missing, see below
-npm run test:e2e
-npm run test:e2e:ui   # optional UI mode
-npm run test:e2e:report
+npm install                      # deps
+npx playwright install chromium  # once
+npm run test:e2e                 # all e2e
+npm run test:e2e:smoke           # @smoke
+npm run test:e2e:p0              # @p0
+npm run test:e2e:p1              # @p0|@p1
+npm run test:e2e:ui              # headed UI mode
+npm run test:e2e:report          # open HTML report
+npm run test:ct                  # component tests (Playwright CT)
+npm run test:unit                # vitest unit tests
 ```
 
 ## If browsers complain about missing system deps
@@ -120,3 +128,13 @@ E2E_RUN=1 BASE_URL=http://localhost:3000 npm run test:e2e -- --grep "booking"
 - `@backup` — export/import path
 
 Add tags with `test.describe.configure({ tag: '@booking' })` and run with `--grep @booking`.
+
+## Notes
+- E2E specs are gated by `E2E_RUN=1` so CI doesn’t fail when the app isn’t running.
+- Component specs are currently minimal and may remain skipped until real components are wired; CT config is ready (`playwright-ct.config.ts`).
+- Unit/API placeholders are skipped until logic or endpoints exist; Vitest is configured for `tests/unit`.
+
+## New test scaffolds status
+- E2E: added availability, booking-rules, backup-import (gated by `E2E_RUN=1`).
+- API/component/unit: placeholder files added and skipped until backend/CT/vitest are configured.
+- Fixtures/factories: user, booking, desk, backup factories; merged fixtures exported from `tests/support/fixtures`.

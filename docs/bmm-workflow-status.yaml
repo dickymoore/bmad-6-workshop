@@ -71,7 +71,7 @@ workflow_status:
       - id: "create-epics-and-stories"
         status: "docs/epics.md"
       - id: "test-design"
-        status: "recommended"
+        status: "docs/test-design-epic-3.md"
       - id: "validate-architecture"
         status: "docs/validation-report-architecture-2025-12-02.md"
       - id: "implementation-readiness"
@@ -80,7 +80,7 @@ workflow_status:
     name: "Implementation"
     workflows:
       - id: "sprint-planning"
-        status: "docs/sprint-artifacts/sprint-status.yaml"
+        status: "required"
   - phase: 1
     name: "Planning"
     workflows:
@@ -99,7 +99,7 @@ workflow_status:
       - id: "create-epics-and-stories"
         status: "required"
       - id: "test-design"
-        status: "recommended"
+        status: "docs/test-design-epic-3.md"
       - id: "validate-architecture"
         status: "optional"
       - id: "implementation-readiness"
