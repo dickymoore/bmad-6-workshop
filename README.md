@@ -7,10 +7,10 @@
 4. *workflow-status 
 5. *develop-story 4-4
 6. *code-review 4-4
-7. *epic-retrospective epic-4
-8. Mark Epic 4 as done.
+7. /prompts:bmad-bmm-agents-sm
+8. *epic-retrospective epic-4
+9. Mark Epic 4 as done in docs/sprint-artifacts/sprint-status.yaml
 ... Run the application!
-
 
 
 ### Quickstart (Node 22.x)
