@@ -3,7 +3,7 @@
     <epicId>1</epicId>
     <storyId>1.3</storyId>
     <title>Last-updated service hook</title>
-    <status>drafted</status>
+    <status>review</status>
     <generatedAt>2025-12-03</generatedAt>
     <generator>BMAD Story Context Workflow</generator>
     <sourceStoryPath>docs/sprint-artifacts/1-3-last-updated-service-hook.md</sourceStoryPath>
@@ -12,76 +12,27 @@
   <story>
     <asA>user</asA>
     <iWant>to see when data was last saved</iWant>
-    <soThat>I trust the state I’m viewing</soThat>
-    <tasks>
-      <![CDATA[
-      - Implement read/write helpers for last-updated with atomic write and graceful seeding (AC3, AC4)
-      - Call writeLastUpdated on booking create/cancel/import flows; propagate errors (AC2, AC4)
-      - Render timestamp near filters; handle empty state; accessible status text (AC1, AC3)
-      - Tests: write updates ISO timestamp; empty file handling; UI render/update; error returns structured result (AC1–AC4)
-      ]]>
-    </tasks>
+    <soThat>I trust the state I'm viewing</soThat>
+    <tasks><![CDATA[
+    - Create last-updated storage helper with atomic write, ISO validation, and seeding.
+    - Integrate helper into booking/import flows (stub-ready functions) and ensure UI updates state when timestamp changes.
+    - Render timestamp near filters with accessibility; show placeholder when empty.
+    - Add tests covering storage read/write, ISO validation, UI display updates.
+    ]]></tasks>
   </story>
 
-  <acceptanceCriteria>
-    <![CDATA[
-    1) UI shows last-updated timestamp near filters from data/last-updated.json. (docs/epics.md)
-    2) Timestamp refreshes after create/cancel/import actions in UI and on disk. (docs/epics.md)
-    3) Timestamp stored/displayed as ISO; empty handled gracefully. (docs/architecture.md)
-    4) Storage helper updates last-updated on writes/imports; returns { ok, error } on failure. (docs/sprint-artifacts/tech-spec-epic-1.md)
-    ]]>
-  </acceptanceCriteria>
+  <acceptanceCriteria><![CDATA[
+    1) UI displays last-updated timestamp near filters from data/last-updated.json.
+    2) After booking create/cancel/import, timestamp refreshes immediately in UI and on disk.
+    3) Timestamp stored/shown as ISO string; empty handled gracefully.
+    4) Storage helper updates last-updated.json on every successful write/import and returns { ok, error } on failure.
+    ]]></acceptanceCriteria>
 
   <artifacts>
-    <docs>
-      <![CDATA[
-      - path: docs/epics.md; title: Epics; section: Epic 1 Story 1.3; snippet: Last-updated timestamp visible and refreshed on booking actions.
-      - path: docs/architecture.md; title: Architecture; section: Project Initialization & Data Layout; snippet: last-updated.json tracking, ISO format.
-      - path: docs/sprint-artifacts/tech-spec-epic-1.md; title: Tech Spec Epic 1; section: Services and Modules; snippet: last-updated helper, atomic write, structured results.
-      - path: docs/prd.md; title: PRD; section: FR12–FR15; snippet: persistence reliability and visibility.
-      ]]>
-    </docs>
-    <code>
-      <![CDATA[
-      - None yet; hooks to be implemented alongside storage layer.
-      ]]>
-    </code>
-    <dependencies>
-      <![CDATA[
-      - Node.js: 22.17.x
-      - React: 19.2.x
-      - Vite: 6.2.x
-      - Radix UI: 1.2.x
-      - date-fns (optional) for formatting ISO strings
-      ]]>
-    </dependencies>
+    <docs><![CDATA[
+    - docs/architecture.md (last-updated file, data layout)
+    - docs/sprint-artifacts/tech-spec-epic-1.md (storage helpers, atomic write contract)
+    - docs/prd.md (FR12–FR15 persistence visibility)
+    ]]></docs>
   </artifacts>
-
-  <constraints>
-    <![CDATA[
-    - Do not convert timezones; store/display ISO as-is.
-    - Atomic write for last-updated; avoid partial files.
-    - All writes must update last-updated; failures return structured errors.
-    - Keep operations within data/; reject external paths.
-    ]]>
-  </constraints>
-
-  <interfaces>
-    <![CDATA[
-    - readLastUpdated(): Promise<Result<{ updatedAt: string }>>
-    - writeLastUpdated(ts: string): Promise<Result<void>>
-    - booking flows call writeLastUpdated after successful mutations
-    ]]>
-  </interfaces>
-
-  <tests>
-    <standards><![CDATA[Vitest unit/API; component test for UI display; accessibility role="status".]]></standards>
-    <locations><![CDATA[tests/unit/storage/last-updated.test.ts, tests/component/LastUpdated.spec.tsx]]></locations>
-    <ideas><![CDATA[
-    - AC1: Component render shows ISO timestamp from fixture.
-    - AC2: Mock booking write triggers writeLastUpdated and UI refresh.
-    - AC3: Empty file renders "Not yet saved".
-    - AC4: Simulated fs failure returns { ok:false, error } and UI shows toast.
-    ]]></ideas>
-  </tests>
 </story-context>

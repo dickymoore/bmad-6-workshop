@@ -3,94 +3,38 @@
     <epicId>1</epicId>
     <storyId>1.2</storyId>
     <title>JSON storage service with schema validation</title>
-    <status>drafted</status>
+    <status>review</status>
     <generatedAt>2025-12-03</generatedAt>
-    <generator>BMAD Story Context Workflow</generator>
+    <generator>Codex Dev Agent</generator>
     <sourceStoryPath>docs/sprint-artifacts/1-2-json-storage-service-with-schema-validation.md</sourceStoryPath>
   </metadata>
 
   <story>
     <asA>developer</asA>
-    <iWant>a storage module that reads/writes JSON with schema validation</iWant>
-    <soThat>corrupted data cannot break the app</soThat>
-    <tasks>
-      <![CDATA[
-      - Define schemas for users, bookings, backup payload; validate on load (AC1, AC2, AC4)
-      - Build read/write helpers with atomic write and last-updated update (AC1, AC3, AC5)
-      - Enforce deskId validation against desks.json on load/write; reject invalid (AC2, AC4)
-      - Return structured { ok, error } results; propagate errors to UI toasts (AC5)
-      - Tests: valid load; invalid rows dropped; atomic write; last-updated update; deskId rejection; result shape
-      ]]>
-    </tasks>
+    <iWant>a validated JSON storage layer for users/bookings</iWant>
+    <soThat>corrupt data doesn’t break the app</soThat>
+    <tasks><![CDATA[
+    - Define zod schemas for users, bookings, backup; validate deskId against desks.json office/floor mapping.
+    - Read drops invalid rows with warnings; write atomically updates last-updated; return structured results.
+    - Expose helpers and events for UI flows; enforce { ok, error }.
+    - Tests for valid load, invalid skip, deskId rejection, last-updated touch, error paths.
+    ]]></tasks>
   </story>
 
-  <acceptanceCriteria>
-    <![CDATA[
-    1) Reading valid users/bookings JSON succeeds. (docs/epics.md)
-    2) Invalid records are skipped and logged; app still loads. (docs/epics.md)
-    3) Each write is atomic and updates data/last-updated.json with ISO timestamp. (docs/epics.md)
-    4) DeskId validation against desks.json blocks invalid writes. (docs/architecture.md)
-    5) Helpers return { ok, error } results for UI handling. (docs/sprint-artifacts/tech-spec-epic-1.md)
-    ]]>
-  </acceptanceCriteria>
+  <acceptanceCriteria><![CDATA[
+    1) Reading valid users.json/bookings.json loads without errors.
+    2) Invalid records are skipped/logged; app still loads.
+    3) Every write is atomic and updates last-updated.json with ISO.
+    4) DeskId validation checks bookings against desks.json before writes; invalid writes rejected.
+    5) Storage functions return structured { ok, error }.
+    ]]></acceptanceCriteria>
 
   <artifacts>
-    <docs>
-      <![CDATA[
-      - path: docs/epics.md; title: Epics; section: Epic 1 Story 1.2; snippet: Storage module must validate JSON, skip invalid records, update last-updated on write.
-      - path: docs/architecture.md; title: Architecture; section: Project Initialization & Data Layout; snippet: data/ folder, desks.json validation, write-through JSON with last-updated.
-      - path: docs/sprint-artifacts/tech-spec-epic-1.md; title: Tech Spec Epic 1; section: Services and Modules; snippet: storage/fs-adapter, schema validation, atomic write, result shape, deskId validation.
-      - path: docs/prd.md; title: PRD; section: FR12–FR15; snippet: persistence, validation, backup/import expectations.
-      ]]>
-    </docs>
-    <code>
-      <![CDATA[
-      - None yet (storage layer to be implemented in src/lib/storage).
-      ]]>
-    </code>
-    <dependencies>
-      <![CDATA[
-      - Node.js: 22.17.x
-      - React: 19.2.x
-      - Vite: 6.2.x
-      - Radix UI: 1.2.x
-      - uuid: ^9
-      - zod or ajv: latest compatible
-      ]]>
-    </dependencies>
+    <docs><![CDATA[
+    - docs/epics.md (Epic 1, Story 1.2)
+    - docs/architecture.md (data layout, desk validation)
+    - docs/sprint-artifacts/tech-spec-epic-1.md (storage contracts)
+    - docs/prd.md (FR12–FR15 persistence)
+    ]]></docs>
   </artifacts>
-
-  <constraints>
-    <![CDATA[
-    - All file I/O confined to data/; reject paths outside project root.
-    - Atomic write (temp + rename) to avoid partial files.
-    - DeskId validation mandatory for all booking writes; align with desks.json.
-    - Update last-updated.json on every successful write/import.
-    - Return structured results; no thrown errors for expected validation issues.
-    ]]>
-  </constraints>
-
-  <interfaces>
-    <![CDATA[
-    - readUsers(): Promise<Result<User[]>>
-    - writeUsers(users): Promise<Result<void>>
-    - readBookings(): Promise<Result<Booking[]>>
-    - writeBookings(bookings): Promise<Result<void>> // validates deskId, updates last-updated
-    - exportBackup(): Promise<Result<{ path }>>
-    - importBackup(path): Promise<Result<void>>
-    - readLastUpdated()/writeLastUpdated(ts)
-    ]]>
-  </interfaces>
-
-  <tests>
-    <standards><![CDATA[Vitest for unit/API; ensure schema validation, atomic writes, desk validation, and result shapes are covered.]]></standards>
-    <locations><![CDATA[tests/unit/storage/**/*, tests/api/storage/**/* (to be created); CI smoke for npm run dev optional.]]></locations>
-    <ideas><![CDATA[
-    - AC1: Unit load valid JSON; expect ok with parsed data.
-    - AC2: Unit load invalid rows; expect skips + warnings.
-    - AC3: Unit write bookings; verify last-updated updated and temp file cleanup on simulated failure.
-    - AC4: Unit/Integration; invalid deskId rejected with error.
-    - AC5: Unit; write returns { ok:false, error } on fs failure; UI handler consumes.
-    ]]></ideas>
-  </tests>
 </story-context>

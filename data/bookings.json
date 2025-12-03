@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "id": "1",
+    "office": "office-lon",
+    "floor": "lon-1",
+    "deskId": "LON1-D01",
+    "date": "2025-12-03",
+    "userId": "u1",
+    "createdAt": "2025-12-03T10:11:12.123Z"
+  }
+]

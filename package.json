@@ -1,25 +1,44 @@
 {
-  "name": "desk-booking-tests",
+  "name": "desk-booking-app",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.1.0",
   "type": "module",
+  "engines": {
+    "node": ">=22 <23"
+  },
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test:unit": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:report": "playwright show-report",
     "test:e2e:smoke": "playwright test --grep '@smoke'",
     "test:e2e:p0": "playwright test --grep '@p0'",
-    "test:e2e:p1": "playwright test --grep '@p0|@p1'",
-    "test:ct": "playwright test -c playwright-ct.config.ts",
-    "test:unit": "vitest"
+    "test:e2e:p1": "playwright test --grep '@p0|@p1'"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "1.2.4",
+    "@radix-ui/react-tooltip": "1.2.8",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "jsdom": "^27.2.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.0.3",
     "@playwright/experimental-ct-react": "^1.57.0",
     "@playwright/test": "^1.48.2",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "5.1.1",
     "dotenv": "^16.4.5",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "typescript": "^5.6.3",
+    "vite": "6.2.5",
     "vitest": "^4.0.15"
   }
 }

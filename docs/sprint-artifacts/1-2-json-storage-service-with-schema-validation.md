@@ -1,6 +1,6 @@
 # Story 1.2: JSON storage service with schema validation
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -16,22 +16,22 @@ As a developer, I want a storage module that reads/writes JSON with schema valid
 
 ## Tasks / Subtasks
 
-- [ ] Define schemas (AC1, AC2, AC4)  
-  - [ ] Create zod/ajv schemas for users, bookings, backup payload.  
-  - [ ] Load and validate data on startup; drop/collect invalid rows; log warnings.  
-- [ ] Implement storage adapter (AC1, AC3, AC5)  
-  - [ ] Add read/write helpers using atomic write (temp + rename).  
-  - [ ] Update `last-updated.json` on every successful write/import.  
-  - [ ] Ensure helpers return `{ ok, data? } | { ok: false, error }`.  
-- [ ] Desk validation (AC2, AC4)  
-  - [ ] Load `desks.json`; on write, reject bookings whose deskId is missing/mismatched office/floor.  
-  - [ ] Add warning logs for dropped records on load.  
-- [ ] Tests (AC1–AC5)  
-  - [ ] Unit: valid load passes; invalid rows dropped; deskId validation blocks bad data.  
-  - [ ] Unit: write updates last-updated; atomic write leaves no partial file on failure.  
-  - [ ] API/unit: helpers return structured result and propagate errors.  
-- [ ] Integration hooks (AC5)  
-  - [ ] Expose helper signatures for booking flows; document error shapes for UI toasts.  
+- [x] Define schemas (AC1, AC2, AC4)  
+  - [x] Create zod schemas for users, bookings, backup payload.  
+  - [x] Load and validate data on startup; drop/collect invalid rows; log warnings.  
+- [x] Implement storage adapter (AC1, AC3, AC5)  
+  - [x] Add read/write helpers using atomic write (temp + rename).  
+  - [x] Update `last-updated.json` on every successful write/import.  
+  - [x] Ensure helpers return `{ ok, data? } | { ok: false, error }`.  
+- [x] Desk validation (AC2, AC4)  
+  - [x] Load `desks.json`; on write, reject bookings whose deskId is missing/mismatched office/floor.  
+  - [x] Add warning logs for dropped records on load.  
+- [x] Tests (AC1–AC5)  
+  - [x] Unit: valid load passes; invalid rows dropped; deskId validation blocks bad data.  
+  - [x] Unit: write updates last-updated; atomic write leaves no partial file on failure.  
+  - [x] API/unit: helpers return structured result and propagate errors.  
+- [x] Integration hooks (AC5)  
+  - [x] Expose helper signatures for booking flows; document error shapes for UI toasts.  
 
 ## Dev Notes
 
@@ -67,10 +67,33 @@ OpenAI GPT-5 (Codex SM mode)
 
 ### Completion Notes List
 
+- 2025-12-03: Added zod schemas for users/bookings/backup; deskId office/floor validation via desks index.
+- 2025-12-03: Storage helpers now log skipped invalid rows, enforce atomic writes, and return structured results.
+- 2025-12-03: Tests cover validation, deskId rejection, last-updated touch, and error paths; build/tests passing (Node 20 run; engines expect Node 22).
+
 ### File List
 
-- NEW: docs/sprint-artifacts/1-2-json-storage-service-with-schema-validation.md
-- NEW: docs/sprint-artifacts/1-2-json-storage-service-with-schema-validation.context.xml
+- UPDATED: package.json
+- UPDATED: package-lock.json
+- UPDATED: vitest.config.ts
+- NEW: src/lib/storage/fs-adapter.ts
+- NEW: src/lib/storage/desks-index.ts
+- NEW: src/lib/storage/schema.ts
+- UPDATED: src/lib/storage/last-updated.ts
+- UPDATED: src/lib/storage/users.ts
+- UPDATED: src/lib/storage/bookings.ts
+- UPDATED: src/App.tsx (providers)
+- UPDATED: src/index.css
+- UPDATED: tests/unit/seed.test.ts
+- NEW: tests/unit/storage.bookings.test.ts
+- UPDATED: tests/unit/storage.users.test.ts
+- UPDATED: tests/unit/last-updated.test.ts
+- UPDATED: tests/component/FiltersBar.spec.tsx
+- UPDATED: tests/component/UserDropdown.spec.tsx
+- UPDATED: tests/component/LastUpdatedBadge.spec.tsx
+- UPDATED: docs/sprint-artifacts/1-2-json-storage-service-with-schema-validation.md
+- UPDATED: docs/sprint-artifacts/1-2-json-storage-service-with-schema-validation.context.xml
+- UPDATED: docs/sprint-artifacts/sprint-status.yaml
 
 ## Change Log
 
