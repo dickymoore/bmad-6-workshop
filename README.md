@@ -6,4 +6,5 @@
 3. *workflow-status
 4. continue
 5. When ready, exit codex.
-6. 
+6. git stash
+7. git checkout stage-3
