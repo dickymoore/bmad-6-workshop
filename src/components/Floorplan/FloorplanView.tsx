@@ -172,19 +172,18 @@ export const FloorplanView: React.FC<FloorplanViewProps> = ({ selectedDeskId, on
             {desksWithStatus.map((desk) => (
               <Tooltip.Root key={desk.id} delayDuration={0}>
                 <Tooltip.Trigger asChild>
-                  <button
-                    className="hotspot"
-                    data-status={desk.status}
-                    style={{
-                      left: `${desk.x * 100}%`,
-                      top: `${desk.y * 100}%`,
-                      width: `${desk.width * 100}%`,
-                      height: `${desk.height * 100}%`,
-                      backgroundColor: deskStatusColor[desk.status],
-                      borderColor: desk.status === 'booked' ? availabilityColors.booked : availabilityColors.selected,
-                      ['--rotation' as any]: `${desk.rotation}deg`,
-                    }}
-                    aria-label={labelForDesk(desk)}
+              <button
+                className="hotspot"
+                data-status={desk.status}
+                style={{
+                  left: `${desk.x * 100}%`,
+                  top: `${desk.y * 100}%`,
+                  width: `${(desk.rotation % 180 === 0 ? desk.width : desk.height) * 100}%`,
+                  height: `${(desk.rotation % 180 === 0 ? desk.height : desk.width) * 100}%`,
+                  backgroundColor: deskStatusColor[desk.status],
+                  borderColor: desk.status === 'booked' ? availabilityColors.booked : availabilityColors.selected,
+                }}
+                aria-label={labelForDesk(desk)}
                     onFocus={() => {
                       setHoveredDeskId(desk.id);
                       onDeskSelect?.(desk.id);

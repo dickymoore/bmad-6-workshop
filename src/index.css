@@ -151,7 +151,6 @@ h1 {
   cursor: pointer;
   padding: 0;
   transition: transform 120ms ease, box-shadow 120ms ease;
-  transform: rotate(var(--rotation, 0deg));
   transform-origin: center center;
 }
 
@@ -171,7 +170,7 @@ h1 {
 }
 
 .hotspot:hover {
-  transform: rotate(var(--rotation, 0deg)) scale(1.04);
+  transform: scale(1.04);
 }
 
 .legend {
