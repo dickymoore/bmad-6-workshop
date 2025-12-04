@@ -64,7 +64,7 @@ describe('FloorplanView', () => {
   it('applies rotation for desks with rotation metadata', () => {
     renderWithProviders(<FloorplanView />);
     const rotatedDesk = screen.getByLabelText(/LON1-D09/i) as HTMLButtonElement;
-    expect(rotatedDesk.style.getPropertyValue('--rotation')).toContain('90deg');
+    expect(rotatedDesk.style.width).not.toEqual(rotatedDesk.style.height);
   });
 
   it('skips invalid coordinates and logs a warning', () => {

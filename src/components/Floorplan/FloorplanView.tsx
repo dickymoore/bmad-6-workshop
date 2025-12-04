@@ -36,6 +36,16 @@ const statusLabel: Record<DeskStatus, string> = {
   selected: 'Selected',
 };
 
+// Orientation-specific tuning for hotspot size. Adjust here if vertical overlays need tightening/loosening.
+const HOTSPOT_SCALE = {
+  horizontal: { w: 1, h: 1 },
+  vertical: { w: 0.8, h: 1.35 },
+};
+
+const HOTSPOT_OFFSET = {
+  vertical: { x: -0.5, y: -0.55 },
+};
+
 const getDesksFor = (
   officeId: string,
   floorId: string,
@@ -176,10 +186,34 @@ export const FloorplanView: React.FC<FloorplanViewProps> = ({ selectedDeskId, on
                 className="hotspot"
                 data-status={desk.status}
                 style={{
-                  left: `${desk.x * 100}%`,
-                  top: `${desk.y * 100}%`,
-                  width: `${(desk.rotation % 180 === 0 ? desk.width : desk.height) * 100}%`,
-                  height: `${(desk.rotation % 180 === 0 ? desk.height : desk.width) * 100}%`,
+                  left: `${(() => {
+                    const isVertical = desk.rotation % 180 !== 0;
+                    const renderedW = isVertical
+                      ? desk.height * HOTSPOT_SCALE.vertical.w
+                      : desk.width * HOTSPOT_SCALE.horizontal.w;
+                    const offsetX = isVertical ? (renderedW - desk.width) * HOTSPOT_OFFSET.vertical.x : 0;
+                    return (desk.x + offsetX) * 100;
+                  })()}%`,
+                  top: `${(() => {
+                    const isVertical = desk.rotation % 180 !== 0;
+                    const renderedH = isVertical
+                      ? desk.width * HOTSPOT_SCALE.vertical.h
+                      : desk.height * HOTSPOT_SCALE.horizontal.h;
+                    const offsetY = isVertical ? (renderedH - desk.height) * HOTSPOT_OFFSET.vertical.y : 0;
+                    return (desk.y + offsetY) * 100;
+                  })()}%`,
+                  width: `${(() => {
+                    const isVertical = desk.rotation % 180 !== 0;
+                    return (isVertical
+                      ? desk.height * HOTSPOT_SCALE.vertical.w
+                      : desk.width * HOTSPOT_SCALE.horizontal.w) * 100;
+                  })()}%`,
+                  height: `${(() => {
+                    const isVertical = desk.rotation % 180 !== 0;
+                    return (isVertical
+                      ? desk.width * HOTSPOT_SCALE.vertical.h
+                      : desk.height * HOTSPOT_SCALE.horizontal.h) * 100;
+                  })()}%`,
                   backgroundColor: deskStatusColor[desk.status],
                   borderColor: desk.status === 'booked' ? availabilityColors.booked : availabilityColors.selected,
                 }}

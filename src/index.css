@@ -152,6 +152,7 @@ h1 {
   padding: 0;
   transition: transform 120ms ease, box-shadow 120ms ease;
   transform-origin: center center;
+  transform: none;
 }
 
 .hotspot[data-status='booked'] {
@@ -170,7 +171,7 @@ h1 {
 }
 
 .hotspot:hover {
-  transform: scale(1.04);
+  transform: scale(1.05);
 }
 
 .legend {
