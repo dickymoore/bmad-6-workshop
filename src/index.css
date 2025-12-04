@@ -14,8 +14,8 @@ body {
 }
 
 main.page {
-  padding: 48px 24px;
-  max-width: 960px;
+  padding: 48px 28px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -44,12 +44,8 @@ h1 {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: 1fr;
   gap: 16px;
-}
-
-.grid.two-column {
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 }
 
 .last-updated {
