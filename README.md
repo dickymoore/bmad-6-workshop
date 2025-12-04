@@ -1,22 +1,5 @@
 ## Desk Booking App
 
-# BMAD BMM Stage 4 - Development complete - or is it?
-
-1. npm install
-2. npm drun dev
-3. open http://localhost:5173
-4. Notice there's a bug! The floorplan isn't showing.
-5. Run codex
-6. /prompts:bmad-bmm-agents-pm
-7. *correct-course
-8. Follow the prompts and explain the problem.
-9. progress to the end
-10. Check the app again
-11. Repeat until happy
-12. git checkout mvp
-
-# Desk Booking App
-
 Single-page React app for browsing office floorplans, booking desks, managing a per-day roster, and exporting/importing backups. Runs locally; all data lives in browser storage plus optional JSON snapshots on disk.
 
 ## Features
