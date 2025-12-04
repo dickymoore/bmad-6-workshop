@@ -16,6 +16,7 @@ export type DeskMeta = {
   y: number;
   width: number;
   height: number;
+  rotation: number;
 };
 
 type DeskWithStatus = DeskMeta & {
@@ -35,7 +36,10 @@ const statusLabel: Record<DeskStatus, string> = {
   selected: 'Selected',
 };
 
-const getDesksFor = (officeId: string, floorId: string): { desks: DeskMeta[]; warnings: string[] } => {
+const getDesksFor = (
+  officeId: string,
+  floorId: string,
+): { desks: DeskMeta[]; warnings: string[]; layout?: { width: number; height: number } } => {
   const warnings: string[] = [];
   const office = (offices.offices ?? []).find((o: any) => o.id === officeId);
   const floor = office?.floors?.find((f: any) => f.id === floorId);
@@ -48,6 +52,7 @@ const getDesksFor = (officeId: string, floorId: string): { desks: DeskMeta[]; wa
     const y = Number(desk.position?.y ?? NaN);
     const width = Number(desk.size?.width ?? NaN);
     const height = Number(desk.size?.height ?? NaN);
+    const rotation = Number(desk.rotation ?? 0);
     const valid = [x, y, width, height].every((n) => Number.isFinite(n));
     const inBounds = x >= 0 && y >= 0 && width > 0 && height > 0 && x + width <= 1 && y + height <= 1;
 
@@ -56,10 +61,10 @@ const getDesksFor = (officeId: string, floorId: string): { desks: DeskMeta[]; wa
       return;
     }
 
-    desks.push({ id, x, y, width, height });
+    desks.push({ id, x, y, width, height, rotation });
   });
 
-  return { desks, warnings };
+  return { desks, warnings, layout: floor.layout };
 };
 
 const deriveStatuses = (
@@ -106,7 +111,7 @@ export const FloorplanView: React.FC<FloorplanViewProps> = ({ selectedDeskId, on
 
   const usersById = useMemo(() => new Map(users.map((u) => [u.id, u.name])), [users]);
 
-  const { desks, warnings } = useMemo(() => getDesksFor(state.office, state.floor), [state.office, state.floor]);
+  const { desks, warnings, layout } = useMemo(() => getDesksFor(state.office, state.floor), [state.office, state.floor]);
 
   useEffect(() => {
     warnings.forEach((msg) => console.warn(msg));
@@ -130,6 +135,7 @@ export const FloorplanView: React.FC<FloorplanViewProps> = ({ selectedDeskId, on
   }, [desksWithStatus]);
 
   const src = buildFloorplanSrc(state.office, state.floor);
+  const aspectRatio = layout?.width && layout?.height ? `${layout.width} / ${layout.height}` : undefined;
 
   useEffect(() => {
     setImageError(false);
@@ -146,11 +152,12 @@ export const FloorplanView: React.FC<FloorplanViewProps> = ({ selectedDeskId, on
   return (
     <section className="card" aria-label="Floorplan with hotspots">
       <Tooltip.Provider delayDuration={0}>
-        <div className="floorplan">
+        <div className="floorplan" style={aspectRatio ? { aspectRatio } : undefined}>
           <img
             src={src}
             alt={`${state.office} ${state.floor} floorplan`}
             className="floorplan-img"
+            style={aspectRatio ? { aspectRatio, objectFit: 'fill' } : undefined}
             onError={() => {
               console.error(`Missing floorplan asset for ${state.office} ${state.floor}: ${src}`);
               setImageError(true);
@@ -175,6 +182,7 @@ export const FloorplanView: React.FC<FloorplanViewProps> = ({ selectedDeskId, on
                       height: `${desk.height * 100}%`,
                       backgroundColor: deskStatusColor[desk.status],
                       borderColor: desk.status === 'booked' ? availabilityColors.booked : availabilityColors.selected,
+                      ['--rotation' as any]: `${desk.rotation}deg`,
                     }}
                     aria-label={labelForDesk(desk)}
                     onFocus={() => {

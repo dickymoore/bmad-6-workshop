@@ -34,34 +34,34 @@ export default function App() {
               <h1>Office, Floor, and Date Filters</h1>
               <p className="lede">Choose an office, floor, and date to drive the floorplan and per-day availability list.</p>
             </header>
-            <div className="grid two-column">
+            <div className="filters-row">
               <FiltersBar />
-              <LastUpdatedBadge />
             </div>
-            <div className="grid two-column">
-              <UserDropdown />
-              <FiltersSummary />
-            </div>
-            <div className="grid two-column">
-              <FloorplanView
-                selectedDeskId={selectedDeskId}
-                onDeskSelect={setSelectedDeskId}
-                onFreeDeskClick={setSelectedDeskId}
-                onBookedDeskClick={setCancelDeskId}
-              />
-              <BookingList
-                selectedDeskId={selectedDeskId}
-                onSelectDesk={setSelectedDeskId}
-                onSelectBookedDesk={setCancelDeskId}
-              />
-            </div>
-            <div className="grid two-column">
-              <BookingConfirm selectedDeskId={selectedDeskId} onBooked={() => setSelectedDeskId(undefined)} />
-              <BookingCancel deskId={cancelDeskId} onCancelled={() => setCancelDeskId(undefined)} />
-            </div>
-            <div className="grid two-column">
-              <BackupControls />
-              <RosterManager />
+            <div className="layout-cols">
+              <div className="layout-main">
+                <FloorplanView
+                  selectedDeskId={selectedDeskId}
+                  onDeskSelect={setSelectedDeskId}
+                  onFreeDeskClick={setSelectedDeskId}
+                  onBookedDeskClick={setCancelDeskId}
+                />
+              </div>
+              <div className="layout-side">
+                <div className="top-inline">
+                  <UserDropdown />
+                  <FiltersSummary />
+                  <LastUpdatedBadge />
+                </div>
+                <BookingList
+                  selectedDeskId={selectedDeskId}
+                  onSelectDesk={setSelectedDeskId}
+                  onSelectBookedDesk={setCancelDeskId}
+                />
+                <BookingConfirm selectedDeskId={selectedDeskId} onBooked={() => setSelectedDeskId(undefined)} />
+                <BookingCancel deskId={cancelDeskId} onCancelled={() => setCancelDeskId(undefined)} />
+                <BackupControls />
+                <RosterManager />
+              </div>
             </div>
               <ToastViewport />
             </main>

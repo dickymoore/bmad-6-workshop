@@ -61,6 +61,12 @@ describe('FloorplanView', () => {
     expect(booked.getAttribute('data-status')).toBe('booked');
   });
 
+  it('applies rotation for desks with rotation metadata', () => {
+    renderWithProviders(<FloorplanView />);
+    const rotatedDesk = screen.getByLabelText(/LON1-D09/i) as HTMLButtonElement;
+    expect(rotatedDesk.style.getPropertyValue('--rotation')).toContain('90deg');
+  });
+
   it('skips invalid coordinates and logs a warning', () => {
     const lon1 = (offices as any).offices[0].floors[0];
     const originalLength = lon1.desks.length;

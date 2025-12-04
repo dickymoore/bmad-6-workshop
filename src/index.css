@@ -15,7 +15,8 @@ body {
 
 main.page {
   padding: 48px 28px;
-  max-width: 1200px;
+  max-width: 1536px;
+  width: 100%;
   margin: 0 auto;
 }
 
@@ -46,6 +47,63 @@ h1 {
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
+}
+
+.filters-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  width: 100%;
+  gap: 12px;
+  align-items: end;
+}
+
+.filters-inline {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px;
+  align-items: end;
+}
+
+.top-inline {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px;
+  align-items: center;
+}
+
+.layout-cols {
+  display: grid;
+  grid-template-columns: minmax(660px, 1.8fr) minmax(320px, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.layout-main {
+  min-width: 0;
+}
+
+.layout-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 12px;
+}
+
+.card.subtle {
+  padding: 10px 12px;
+  background: #0f172a;
+  border-style: dashed;
+  color: #cbd5e1;
+}
+
+@media (max-width: 1100px) {
+  .layout-cols {
+    grid-template-columns: 1fr;
+  }
+  .layout-side {
+    position: static;
+  }
 }
 
 .last-updated {
@@ -93,6 +151,8 @@ h1 {
   cursor: pointer;
   padding: 0;
   transition: transform 120ms ease, box-shadow 120ms ease;
+  transform: rotate(var(--rotation, 0deg));
+  transform-origin: center center;
 }
 
 .hotspot[data-status='booked'] {
@@ -111,7 +171,7 @@ h1 {
 }
 
 .hotspot:hover {
-  transform: scale(1.04);
+  transform: rotate(var(--rotation, 0deg)) scale(1.04);
 }
 
 .legend {
@@ -231,7 +291,7 @@ h1 {
   background: #111827;
   border: 1px solid #1f2937;
   border-radius: 12px;
-  padding: 16px;
+  padding: 2px 4px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
 }
 

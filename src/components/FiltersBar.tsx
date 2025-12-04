@@ -12,7 +12,7 @@ export const FiltersBar: React.FC = () => {
   const onDateChange = (e: React.ChangeEvent<HTMLInputElement>) => setDate(e.target.value);
 
   return (
-    <section aria-label="Filters" className="card filters">
+    <section aria-label="Filters" className="card filters-inline">
       <div className="field">
         <label htmlFor="office-select">Office</label>
         <select
@@ -59,9 +59,6 @@ export const FiltersBar: React.FC = () => {
           aria-live="polite"
           max="9999-12-31"
         />
-        <p role="status" className="help">
-          Showing availability for {state.date}
-        </p>
       </div>
     </section>
   );
@@ -75,6 +72,7 @@ export const FiltersSummary: React.FC = () => {
       <p>
         Office: <code>{state.office}</code> · Floor: <code>{state.floor}</code> · Date: <code>{formatLocalDate(new Date(state.date))}</code>
       </p>
+      <p className="help">Showing availability for {state.date}</p>
     </div>
   );
 };
