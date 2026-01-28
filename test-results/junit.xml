@@ -1,8 +1,0 @@
-<testsuites id="" name="" tests="1" failures="0" skipped="1" errors="0" time="0.141822">
-<testsuite name="smoke.spec.ts" timestamp="2025-12-02T17:52:07.650Z" hostname="chromium" tests="1" failures="0" skipped="1" time="0" errors="0">
-<testcase name="Smoke › app serves homepage" classname="smoke.spec.ts" time="0">
-<skipped>
-</skipped>
-</testcase>
-</testsuite>
-</testsuites>
