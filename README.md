@@ -3,7 +3,7 @@
 # BMAD BMM Stage 4 - Development complete - or is it?
 
 1. npm install
-2. npm drun dev
+2. npm run dev
 3. open http://localhost:5173
 4. Notice there's a bug! The floorplan isn't showing.
 5. Run codex
