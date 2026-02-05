@@ -31,19 +31,38 @@ const loadFs = async () => {
     return { ok: false as const, error: 'File system unavailable in this environment' };
   }
   try {
-    const fs = await import('node:fs/promises');
-    const path = await import('node:path');
+    const fs = await import(/* @vite-ignore */ 'node:fs/promises');
+    const path = await import(/* @vite-ignore */ 'node:path');
     return { ok: true as const, data: { fs, path } };
   } catch (error: any) {
     return { ok: false as const, error: error?.message ?? 'Cannot access filesystem' };
   }
 };
 
-export const exportBackup = async (options: ExportOptions = {}): Promise<Result<{ path: string }>> => {
-  const fsResult = await loadFs();
-  if (!fsResult.ok) return fsResult;
-  const { fs, path } = fsResult.data;
+const downloadBackup = (filename: string, json: string): Result<{ path: string }> => {
+  if (typeof document === 'undefined') {
+    return { ok: false, error: 'File system unavailable in this environment' };
+  }
 
+  try {
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    localStorage.setItem(BACKUP_KEY, filename);
+    return { ok: true, data: { path: filename } } as Result<{ path: string }>;
+  } catch (error: any) {
+    return { ok: false, error: error?.message ?? 'Failed to download backup file' };
+  }
+};
+
+const buildPayload = (): Result<{ payload: unknown; json: string; filename: string }> => {
   const usersResult = readUsers();
   if (!usersResult.ok) return { ok: false, error: `Failed to read users: ${usersResult.error}` };
   const bookingsResult = readBookings();
@@ -68,14 +87,33 @@ export const exportBackup = async (options: ExportOptions = {}): Promise<Result<
     return { ok: false, error: `Backup validation failed: ${validation.error.issues.map((i) => i.message).join('; ')}` };
   }
 
-  const backupDir = path.resolve(process.cwd(), options.baseDir ?? DEFAULT_BACKUP_DIR);
+  const json = JSON.stringify(validation.data, null, 2);
   const filename = `backup-${formatTimestamp(new Date())}.json`;
-  const targetPath = path.join(backupDir, filename);
+
+  return { ok: true, data: { payload: validation.data, json, filename } } as Result<{
+    payload: unknown;
+    json: string;
+    filename: string;
+  }>;
+};
+
+export const exportBackup = async (options: ExportOptions = {}): Promise<Result<{ path: string }>> => {
+  const payload = buildPayload();
+  if (!payload.ok) return payload;
+
+  const fsResult = await loadFs();
+  if (!fsResult.ok) {
+    return downloadBackup(payload.data.filename, payload.data.json);
+  }
+
+  const { fs, path } = fsResult.data;
+  const backupDir = path.resolve(process.cwd(), options.baseDir ?? DEFAULT_BACKUP_DIR);
+  const targetPath = path.join(backupDir, payload.data.filename);
   const tempPath = `${targetPath}.tmp`;
 
   try {
     await fs.mkdir(backupDir, { recursive: true });
-    await fs.writeFile(tempPath, JSON.stringify(validation.data, null, 2), { flag: 'w' });
+    await fs.writeFile(tempPath, payload.data.json, { flag: 'w' });
     await fs.rename(tempPath, targetPath);
     localStorage.setItem(BACKUP_KEY, targetPath);
     return { ok: true, data: { path: targetPath } } as Result<{ path: string }>;
