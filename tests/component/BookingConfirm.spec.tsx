@@ -8,6 +8,7 @@ import { LastUpdatedProvider } from '../../src/lib/last-updated/context';
 import { RosterProvider } from '../../src/lib/roster/context';
 import { writeUsers } from '../../src/lib/storage/users';
 import { writeBookings } from '../../src/lib/storage/bookings';
+import { todayLocalISO } from '../../src/lib/date';
 import { FeedbackProvider } from '../../src/lib/feedback/context';
 
 const shell = (ui: React.ReactElement) => (
@@ -49,7 +50,7 @@ describe('BookingConfirm', () => {
         office: 'office-lon',
         floor: 'lon-1',
         deskId: 'LON1-D01',
-        date: '2025-12-03',
+        date: todayLocalISO(),
         userId: 'u1',
         createdAt: new Date().toISOString(),
       },
