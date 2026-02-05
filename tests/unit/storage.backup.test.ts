@@ -6,12 +6,10 @@ import { exportBackup, importBackup } from '../../src/lib/storage/backup';
 import { readUsers, writeUsers } from '../../src/lib/storage/users';
 import { readBookings, writeBookings } from '../../src/lib/storage/bookings';
 
-const backupDir = path.resolve(process.cwd(), 'data/backup');
+const createTempBackupDir = async () => fs.mkdtemp(path.join(os.tmpdir(), 'backup-'));
 
 const reset = async () => {
   localStorage.clear();
-  await fs.rm(backupDir, { recursive: true, force: true });
-  await fs.mkdir(backupDir, { recursive: true });
 };
 
 describe('backup helpers', () => {
@@ -24,7 +22,8 @@ describe('backup helpers', () => {
     writeUsers([{ id: 'u1', name: 'Alice', active: true }]);
     writeBookings([]);
 
-    const result = await exportBackup();
+    const backupDir = await createTempBackupDir();
+    const result = await exportBackup({ baseDir: backupDir });
     expect(result.ok).toBe(true);
     const filePath = result.ok ? result.data.path : '';
     expect(path.dirname(filePath)).toBe(backupDir);
@@ -34,6 +33,8 @@ describe('backup helpers', () => {
     expect(file.users[0].name).toBe('Alice');
     expect(file.bookings).toEqual([]);
     expect(file.lastUpdated.updatedAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+
+    await fs.rm(backupDir, { recursive: true, force: true });
   });
 
   it('surfaces permission errors without leaving partial files', async () => {

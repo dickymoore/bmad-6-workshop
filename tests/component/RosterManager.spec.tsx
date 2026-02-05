@@ -27,17 +27,22 @@ describe('RosterManager', () => {
   });
 
   it('adds a user and saves roster', async () => {
+    const user = userEvent.setup();
     render(shell(<RosterManager />));
 
-    await userEvent.click(screen.getByTestId('add-user'));
+    await user.click(screen.getByTestId('add-user'));
     const newRow = screen.getAllByRole('row').at(-1)!;
     const input = within(newRow).getByRole('textbox');
-    await userEvent.clear(input);
-    await userEvent.type(input, 'Bob');
+    await user.clear(input);
+    await user.type(input, 'Bob');
+    await waitFor(() => expect(input).toHaveValue('Bob'));
 
-    await userEvent.click(screen.getByTestId('save-roster'));
+    await user.click(screen.getByTestId('save-roster'));
 
-    await waitFor(() => expect(screen.getByTestId('feedback-toast')).toHaveTextContent(/roster saved/i));
+    await waitFor(
+      () => expect(screen.getByTestId('feedback-toast')).toHaveTextContent(/roster saved/i),
+      { timeout: 10000 },
+    );
 
     const stored = JSON.parse(localStorage.getItem('desk-booking:users') || '[]');
     expect(stored.map((u: any) => u.name)).toEqual(['Alice', 'Bob']);

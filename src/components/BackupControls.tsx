@@ -68,7 +68,7 @@ export const BackupControls = () => {
         <div>
           <p className="eyebrow" style={{ marginBottom: 4 }}>Data safety</p>
           <h2 style={{ margin: 0 }}>Export snapshot</h2>
-          <p className="help" style={{ margin: 0 }}>Writes users, bookings, lastUpdated to data/backup with timestamped name.</p>
+          <p className="help" style={{ margin: 0 }}>Exports users, bookings, lastUpdated. In browser it downloads a JSON file; in Node it writes to data/backup.</p>
         </div>
         <button data-testid="export-backup" onClick={handleExport} disabled={busy}>
           {busy ? 'Exporting…' : 'Export backup'}
