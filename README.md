@@ -2,6 +2,10 @@
 
 # BMAD BMM Stage 4 - Development complete - or is it?
 
+## App location (workshop note)
+- Run the desk booking app from the repo root (Vite).
+- `office-floorplans/` is the floorplan demo/asset source used by the app.
+
 1. npm install
 2. npm run dev
 3. open http://localhost:5173
