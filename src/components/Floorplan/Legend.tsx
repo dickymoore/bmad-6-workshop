@@ -13,7 +13,7 @@ const swatches: Array<{ label: string; key: DeskStatus; color: string }> = [
 ];
 
 export const Legend: React.FC<LegendProps> = ({ counts }) => (
-  <div className="legend" aria-label="Legend">
+  <div className="legend" aria-label="Legend" data-testid="legend">
     {swatches.map((s) => (
       <span key={s.key} className="legend-item">
         <span className="legend-dot" style={{ backgroundColor: s.color }} aria-hidden />
