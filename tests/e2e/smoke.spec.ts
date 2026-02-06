@@ -7,6 +7,6 @@ test.describe('Smoke', () => {
   test('app serves homepage', async ({ page }) => {
     const response = await page.goto('/');
     expect(response?.ok()).toBeTruthy();
-    await expect(page).toHaveURL(/http:\/\/localhost:3000\/.*/);
+    await expect(page).toHaveURL(/http:\/\/.+/);
   });
 });

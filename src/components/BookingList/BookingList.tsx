@@ -100,6 +100,7 @@ export const BookingList: React.FC<BookingListProps> = ({ selectedDeskId, onSele
                 <button
                   type="button"
                   className="ghost"
+                  data-testid={`cancel-${row.deskId}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     onSelectBookedDesk?.(row.deskId);
@@ -116,7 +117,7 @@ export const BookingList: React.FC<BookingListProps> = ({ selectedDeskId, onSele
   };
 
   return (
-    <section className="card" aria-label="Per-day availability list">
+    <section className="card" aria-label="Per-day availability list" data-testid="booking-list">
       <header className="list-header-bar">
         <div>
           <p className="eyebrow">Availability</p>

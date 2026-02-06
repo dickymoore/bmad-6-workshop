@@ -184,6 +184,7 @@ export const FloorplanView: React.FC<FloorplanViewProps> = ({ selectedDeskId, on
                 <Tooltip.Trigger asChild>
               <button
                 className="hotspot"
+                data-testid={`desk-${desk.id}`}
                 data-status={desk.status}
                 style={{
                   left: `${(() => {
