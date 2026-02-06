@@ -7,12 +7,17 @@ Usage:
   ./workshop-reviewer.sh                # check current branch (HEAD)
   ./workshop-reviewer.sh <branch>       # check a specific branch
   ./workshop-reviewer.sh --all          # check all workshop branches
+  ./workshop-reviewer.sh --dev [branch] # start the correct dev server
+  ./workshop-reviewer.sh --dev --all    # smoke-check dev server on all branches
+  ./workshop-reviewer.sh --e2e [branch] # run Playwright e2e (app stages only)
+  ./workshop-reviewer.sh --e2e --all    # run Playwright e2e on app branches
   ./workshop-reviewer.sh --help
 
 This script validates that each workshop stage branch is in the expected
 "pre-artifact" state and prints a short facilitation guide for that stage.
 
 Note: checks are based on the committed tree of the branch, not your working tree.
+Note: --dev/--e2e may switch branches; keep your working tree clean.
 USAGE
 }
 
@@ -27,6 +32,10 @@ branches=(
   complete
   mvp
 )
+
+mode="check"
+run_all=false
+target_branch=""
 
 require_patterns=()
 forbid_patterns=()
@@ -208,21 +217,254 @@ check_branch() {
   echo
 }
 
+pick_port() {
+  python - <<'PY'
+import socket
+s = socket.socket()
+s.bind(('localhost', 0))
+print(s.getsockname()[1])
+s.close()
+PY
+}
+
+ensure_clean_tree() {
+  if [[ -n "$(git status --porcelain)" ]]; then
+    echo "Working tree is not clean; commit or stash before switching branches." >&2
+    exit 2
+  fi
+}
+
+has_root_app() {
+  [[ -f package.json ]]
+}
+
+has_floorplans_app() {
+  [[ -f office-floorplans/package.json ]]
+}
+
+has_e2e_script() {
+  python - <<'PY'
+import json
+from pathlib import Path
+path = Path('package.json')
+if not path.exists():
+  raise SystemExit(1)
+data = json.loads(path.read_text())
+raise SystemExit(0 if 'test:e2e' in data.get('scripts', {}) else 1)
+PY
+}
+
+wait_for_server() {
+  local url="$1"
+  local pid="$2"
+  for _ in $(seq 1 60); do
+    if curl -fsS "$url" >/dev/null 2>&1; then
+      return 0
+    fi
+    if ! kill -0 "$pid" 2>/dev/null; then
+      return 1
+    fi
+    sleep 1
+  done
+  return 1
+}
+
+start_dev_server() {
+  local app_dir="$1"
+  local port="$2"
+  local log="$3"
+
+  if [[ "$app_dir" == "office-floorplans" ]]; then
+    pushd "$app_dir" >/dev/null
+    npm run dev -- --port "$port" >"$log" 2>&1 &
+    local pid=$!
+    popd >/dev/null
+  else
+    npm run dev -- --port "$port" --strictPort >"$log" 2>&1 &
+    local pid=$!
+  fi
+
+  echo "$pid"
+}
+
+run_dev_check() {
+  local branch="$1"
+  local app_dir="$2"
+  local port
+  port=$(pick_port)
+  local url="http://localhost:$port"
+  local log="/tmp/workshop-dev-${branch}.log"
+
+  local pid
+  pid=$(start_dev_server "$app_dir" "$port" "$log")
+
+  if wait_for_server "$url" "$pid"; then
+    kill "$pid" 2>/dev/null || true
+    wait "$pid" 2>/dev/null || true
+    echo "  DEV OK ($url)"
+    return 0
+  fi
+
+  kill "$pid" 2>/dev/null || true
+  wait "$pid" 2>/dev/null || true
+  echo "  DEV FAIL (see $log)"
+  return 1
+}
+
+run_dev_interactive() {
+  local app_dir="$1"
+  local port
+  port=$(pick_port)
+  local url="http://localhost:$port"
+
+  echo "Starting dev server in ${app_dir:-.} on $url"
+  if [[ "$app_dir" == "office-floorplans" ]]; then
+    pushd "$app_dir" >/dev/null
+    npm run dev -- --port "$port"
+    popd >/dev/null
+  else
+    npm run dev -- --port "$port" --strictPort
+  fi
+}
+
+run_e2e() {
+  local branch="$1"
+  local port
+  port=$(pick_port)
+  local url="http://localhost:$port"
+  local log="/tmp/workshop-e2e-${branch}.log"
+
+  if ! has_e2e_script; then
+    echo "  E2E SKIP (no test:e2e script)"
+    return 0
+  fi
+
+  npm run dev -- --port "$port" --strictPort >"$log" 2>&1 &
+  local pid=$!
+
+  if ! wait_for_server "$url" "$pid"; then
+    kill "$pid" 2>/dev/null || true
+    wait "$pid" 2>/dev/null || true
+    echo "  E2E FAIL (dev server did not start, see $log)"
+    return 1
+  fi
+
+  BASE_URL="$url" E2E_RUN=1 npm run test:e2e
+  local status=$?
+
+  kill "$pid" 2>/dev/null || true
+  wait "$pid" 2>/dev/null || true
+  return "$status"
+}
+
 if [[ ${1:-} == "--help" || ${1:-} == "-h" ]]; then
   usage
   exit 0
 fi
 
-if [[ ${1:-} == "--all" ]]; then
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --all)
+      run_all=true
+      shift
+      ;;
+    --dev)
+      mode="dev"
+      shift
+      ;;
+    --e2e)
+      mode="e2e"
+      shift
+      ;;
+    *)
+      target_branch="$1"
+      shift
+      ;;
+  esac
+done
+
+start_branch=$(git rev-parse --abbrev-ref HEAD)
+
+if [[ "$mode" != "check" ]]; then
+  if $run_all || [[ -n "$target_branch" && "$target_branch" != "$start_branch" ]]; then
+    ensure_clean_tree
+  fi
+fi
+
+if $run_all; then
+  failures=0
   for b in "${branches[@]}"; do
-    check_branch "$b"
+    git checkout "$b" >/dev/null
+    echo "==> $b"
+    if [[ "$mode" == "check" ]]; then
+      check_branch "$b"
+      continue
+    fi
+
+    app_dir=""
+    if has_root_app; then
+      app_dir="."
+    elif has_floorplans_app; then
+      app_dir="office-floorplans"
+    fi
+
+    if [[ "$mode" == "dev" ]]; then
+      if [[ -z "$app_dir" ]]; then
+        echo "  DEV SKIP (no app found)"
+      elif ! run_dev_check "$b" "$app_dir"; then
+        failures=$((failures + 1))
+      fi
+    elif [[ "$mode" == "e2e" ]]; then
+      if [[ -z "$app_dir" || "$app_dir" == "office-floorplans" ]]; then
+        echo "  E2E SKIP (no root app)"
+      elif ! run_e2e "$b"; then
+        failures=$((failures + 1))
+      else
+        echo "  E2E OK"
+      fi
+    fi
   done
+  git checkout "$start_branch" >/dev/null
+  if [[ "$failures" -gt 0 ]]; then
+    exit 1
+  fi
   exit 0
 fi
 
-branch="${1:-}"
-if [[ -z "$branch" ]]; then
-  branch=$(git rev-parse --abbrev-ref HEAD)
+branch="${target_branch:-$start_branch}"
+if [[ "$branch" != "$start_branch" ]]; then
+  git checkout "$branch" >/dev/null
 fi
 
-check_branch "$branch"
+if [[ "$mode" == "check" ]]; then
+  check_branch "$branch"
+  if [[ "$branch" != "$start_branch" ]]; then
+    git checkout "$start_branch" >/dev/null
+  fi
+  exit 0
+fi
+
+app_dir=""
+if has_root_app; then
+  app_dir="."
+elif has_floorplans_app; then
+  app_dir="office-floorplans"
+fi
+
+if [[ "$mode" == "dev" ]]; then
+  if [[ -z "$app_dir" ]]; then
+    echo "No app found for $branch." >&2
+    exit 1
+  fi
+  run_dev_interactive "$app_dir"
+else
+  if [[ -z "$app_dir" || "$app_dir" == "office-floorplans" ]]; then
+    echo "No root app with e2e tests for $branch." >&2
+    exit 1
+  fi
+  run_e2e "$branch"
+fi
+
+if [[ "$branch" != "$start_branch" ]]; then
+  git checkout "$start_branch" >/dev/null
+fi
