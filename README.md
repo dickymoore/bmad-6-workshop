@@ -12,6 +12,9 @@
 9. Mark Epic 4 as done in docs/sprint-artifacts/sprint-status.yaml
 ... Run the application!
 
+## App location (workshop note)
+- From this stage onward, run the app from the repo root (Vite).
+- `office-floorplans/` is the floorplan demo/asset source used by the app.
 
 ### Quickstart (Node 22.x)
 1. `npm install`
