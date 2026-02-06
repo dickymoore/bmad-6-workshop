@@ -1,4 +1,8 @@
 # BMAD BMM Stage 4 - Ready for Dev.
+
+## App locations (workshop note)
+- Stages `stage-1` through `ready-for-dev`: no runnable app in the repo root; the floorplan demo lives in `office-floorplans/` (Next.js).
+- Stages `implementation-in-progress`, `complete`, `mvp`: run the desk booking app from the repo root (Vite).
 1. Look in docs/sprint-artifacts
 2. Inspect docs/sprint-artifacts/sprint-status.yaml
 3. Run Codex.
@@ -16,5 +20,4 @@
 15. mark epic 1 as done
 16. Exit Codex
 17. git checkout implementation-in-progress
-
 
