@@ -2,6 +2,10 @@
 
 Single-page React app for browsing office floorplans, booking desks, managing a per-day roster, and exporting/importing backups. Runs locally; all data lives in browser storage plus optional JSON snapshots on disk.
 
+## App location (workshop note)
+- From this stage onward, run the app from the repo root (Vite).
+- `office-floorplans/` is the floorplan demo/asset source used by the app.
+
 ## Features
 - Office/floor/date filters drive both the floorplan and per-day availability list.
 - Floorplan view overlays clickable desk hotspots on PNGs; shows booked/free/selected counts with a legend and tooltips.
