@@ -22,6 +22,7 @@ export const UserDropdown: React.FC = () => {
       )}
       <select
         aria-label="User dropdown"
+        data-testid="user-select"
         disabled={!hasUsers || status === 'loading'}
         value={selectedUserId ?? ''}
         onChange={(e) => setSelectedUserId(e.target.value)}

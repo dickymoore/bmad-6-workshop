@@ -2,12 +2,13 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { test as base, expect } from '../support/fixtures';
+import { seedLocalStorage } from '../support/helpers/seed';
 
 const RUN_LIVE = process.env.E2E_RUN === '1';
-const office = process.env.E2E_OFFICE || 'LON';
-const floor = process.env.E2E_FLOOR || '1';
-const deskTestId = process.env.E2E_DESK || 'desk-1';
-const userName = process.env.E2E_USER || 'Alice';
+const office = process.env.E2E_OFFICE || 'office-lon';
+const floor = process.env.E2E_FLOOR || 'lon-1';
+const deskTestId = process.env.E2E_DESK || 'LON1-D01';
+const userName = process.env.E2E_USER || 'Visitor';
 const today = new Date().toISOString().slice(0, 10);
 
 // Gate to avoid failing when app isn’t running yet.
@@ -15,6 +16,9 @@ const describe = RUN_LIVE ? base.describe : base.describe.skip;
 
 describe('Desk booking happy path', () => {
   base('book then cancel a desk', async ({ page }) => {
+    await seedLocalStorage(page, {
+      users: [{ id: 'u1', name: userName, active: true }],
+    });
     await page.goto('/');
 
     await page.getByTestId('office-select').selectOption(office);
@@ -30,18 +34,22 @@ describe('Desk booking happy path', () => {
     await expect(confirm).toBeVisible();
     await confirm.click();
 
-    await expect(page.getByText(/booking confirmed/i)).toBeVisible();
+    await expect(page.getByTestId('feedback-toast')).toContainText(/booking confirmed/i);
     await expect(page.getByTestId('booking-list')).toContainText(userName);
     await expect(page.getByTestId('booking-list')).toContainText(deskTestId);
 
     // Cancel
     await page.getByTestId(`cancel-${deskTestId}`).click();
-    await expect(page.getByText(/booking cancelled/i)).toBeVisible();
+    await page.getByTestId('confirm-cancel').click();
+    await expect(page.getByTestId('feedback-toast')).toContainText(/booking cancelled/i);
   });
 });
 
 describe('Backup and restore', () => {
   base('export then import backup', async ({ page, tmpDir }) => {
+    await seedLocalStorage(page, {
+      users: [{ id: 'u1', name: userName, active: true }],
+    });
     await page.goto('/');
 
     // Export

@@ -17,6 +17,7 @@ export const FiltersBar: React.FC = () => {
         <label htmlFor="office-select">Office</label>
         <select
           id="office-select"
+          data-testid="office-select"
           value={state.office}
           onChange={onOfficeChange}
           aria-live="polite"
@@ -35,6 +36,7 @@ export const FiltersBar: React.FC = () => {
         <label htmlFor="floor-select">Floor</label>
         <select
           id="floor-select"
+          data-testid="floor-select"
           value={state.floor}
           onChange={onFloorChange}
           aria-live="polite"
@@ -53,6 +55,7 @@ export const FiltersBar: React.FC = () => {
         <label htmlFor="date-input">Date</label>
         <input
           id="date-input"
+          data-testid="date-picker"
           type="date"
           value={state.date}
           onChange={onDateChange}

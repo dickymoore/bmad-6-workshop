@@ -1,4 +1,7 @@
 import { expect, test as base, mergeTests } from '@playwright/test';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
 import { createUserFactory } from './factories/user-factory';
 import { createBookingFactory } from './factories/booking-factory';
 import { createDeskFactory } from './factories/desk-factory';
@@ -37,8 +40,19 @@ const backupFixture = base.extend({
   },
 });
 
+const tmpDirFixture = base.extend<{ tmpDir: string }>({
+  tmpDir: async ({}, use) => {
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'e2e-'));
+    try {
+      await use(dir);
+    } finally {
+      await fs.rm(dir, { recursive: true, force: true });
+    }
+  },
+});
+
 // Compose all fixtures for convenience
-export const test = mergeTests(base, userFixture, bookingFixture, deskFixture, backupFixture);
+export const test = mergeTests(base, userFixture, bookingFixture, deskFixture, backupFixture, tmpDirFixture);
 export { expect };
 
 export type UserFactory = ReturnType<typeof createUserFactory>;

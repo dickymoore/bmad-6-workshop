@@ -91,7 +91,7 @@ export const BookingConfirm: React.FC<BookingConfirmProps> = ({ selectedDeskId, 
         </div>
       )}
       <div className="actions">
-        <button onClick={handleConfirm} disabled={!canBook || submitting}>
+        <button onClick={handleConfirm} disabled={!canBook || submitting} data-testid="confirm-booking">
           {submitting ? 'Booking…' : 'Confirm booking'}
         </button>
       </div>

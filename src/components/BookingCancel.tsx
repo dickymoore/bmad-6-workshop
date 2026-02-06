@@ -57,7 +57,7 @@ export const BookingCancel: React.FC<Props> = ({ deskId, onCancelled }) => {
           <p><strong>Office/Floor:</strong> {booking.office} / {booking.floor}</p>
           <p><strong>Date:</strong> {booking.date || todayLocalISO()}</p>
           <div className="actions">
-            <button onClick={handleCancel} disabled={busy}>
+            <button onClick={handleCancel} disabled={busy} data-testid="confirm-cancel">
               {busy ? 'Cancelling…' : 'Confirm cancel'}
             </button>
           </div>

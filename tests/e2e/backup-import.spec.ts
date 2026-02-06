@@ -2,6 +2,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { test as base, expect } from '../support/fixtures';
+import { todayIso } from '../support/helpers/date';
 
 const RUN_LIVE = process.env.E2E_RUN === '1';
 const describe = RUN_LIVE ? base.describe : base.describe.skip;
@@ -17,13 +18,18 @@ describe('Backup and import', () => {
     await page.goto('/');
 
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'backup-'));
-    const backup = backupFactory.generateBackup();
+    const backup = backupFactory.generateBackup({
+      users: [{ id: 'u1', name: 'Alice', active: true }],
+      bookings: [],
+      lastUpdated: { updatedAt: new Date().toISOString() },
+    });
     const backupPath = path.join(dir, 'backup.json');
     fs.writeFileSync(backupPath, JSON.stringify(backup, null, 2));
 
     await page.getByTestId('import-backup-file').setInputFiles(backupPath);
     await page.getByTestId('import-backup-submit').click();
 
+    await expect(page.getByTestId('import-error')).toBeHidden();
     await expect(page.getByText(/backup imported/i)).toBeVisible();
   });
 
@@ -37,7 +43,6 @@ describe('Backup and import', () => {
     await page.getByTestId('import-backup-file').setInputFiles(badPath);
     await page.getByTestId('import-backup-submit').click();
 
-    await expect(page.getByText(/invalid|error|failed/i)).toBeVisible();
+    await expect(page.getByTestId('import-error')).toBeVisible();
   });
 });
-
