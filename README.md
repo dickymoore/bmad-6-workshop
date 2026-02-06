@@ -31,6 +31,10 @@ Kick off the workshop quickly with the steps below. All commands are run from a 
    - Open `README.md`.
    - Follow the exercises for the current stage.
 
+## App locations by stage
+- Stages `stage-1` through `ready-for-dev`: no runnable app in the repo root; the floorplan demo lives in `office-floorplans/` (Next.js).
+- Stages `implementation-in-progress`, `complete`, `mvp`: run the desk booking app from the repo root (Vite).
+
 ## Office Floorplans Assets
 The project files for the floorplans exercise live in `office-floorplans/`.
 
