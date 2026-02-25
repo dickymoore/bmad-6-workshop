@@ -74,6 +74,7 @@ set_stage_rules() {
         '^_bmad/_config/manifest\.yaml$'
         '^_bmad/bmm/config\.yaml$'
         '^\.agents/skills/'
+        '^office-floorplans/'
         '^scripts/audit-bmad-v6\.sh$'
         '^scripts/migrate-bmad-v6\.sh$'
         '^scripts/verify-bmad-v6\.sh$'
@@ -81,8 +82,6 @@ set_stage_rules() {
       forbid_patterns=(
         '^\.bmad/'
         '^docs/'
-        '^docs/prd\.md$'
-        '^docs/ux-design-specification\.md$'
         '^data/'
         '^package\.json$'
         '^src/'
@@ -179,6 +178,7 @@ set_stage_rules() {
         '^src/'
         '^data/'
         '^docs/sprint-artifacts/sprint-status\.yaml$'
+        '^tests/'
       )
       forbid_patterns=(
         '^\.bmad/'
@@ -193,6 +193,8 @@ set_stage_rules() {
         '^package\.json$'
         '^src/'
         '^data/'
+        '^docs/sprint-artifacts/sprint-status\.yaml$'
+        '^tests/'
       )
       forbid_patterns=(
         '^\.bmad/'
@@ -209,6 +211,8 @@ set_stage_rules() {
         '^public/'
         '^scripts/'
         '^data/'
+        '^docs/sprint-artifacts/sprint-status\.yaml$'
+        '^tests/'
       )
       forbid_patterns=(
         '^\.bmad/'
@@ -437,7 +441,6 @@ if $run_all; then
   failures=0
   for b in "${branches[@]}"; do
     git checkout "$b" >/dev/null
-    echo "==> $b"
     if [[ "$mode" == "check" ]]; then
       check_branch "$b"
       continue
