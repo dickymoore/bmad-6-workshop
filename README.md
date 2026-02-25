@@ -11,7 +11,7 @@
 3. open http://localhost:5173
 4. Notice there's a bug! The floorplan isn't showing.
 5. Run codex
-6. /prompts:bmad-bmm-agents-pm
+6. /bmad-agent-bmm-pm
 7. *correct-course
 8. Follow the prompts and explain the problem.
 9. progress to the end
