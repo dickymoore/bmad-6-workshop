@@ -7,7 +7,7 @@
 
 1. Run Codex.
 2. Load the business analyst: `/bmad-agent-bmm-analyst`
-3. Select or run `*workflow-init`.
+3. Select or run `*/bmad-bmm-create-product-brief`.
 4. Name the app as you like (other branches use "Desk Booking Application").
 5. Select **[a] Advanced Elicitation**.
 6. Press **[r]** to reshuffle the menu and explore different elicitation options.
