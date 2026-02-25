@@ -155,6 +155,10 @@ install_stable_bmad() {
   local npm_tag="$2"
   local user_name="$3"
 
+  [[ -n "$repo" ]] || fail "install_stable_bmad: repo path is empty"
+  [[ "$repo" != "/" ]] || fail "install_stable_bmad: refusing to operate on filesystem root"
+  [[ -d "$repo/.git" ]] || fail "install_stable_bmad: not a git repository: $repo"
+
   rm -rf "$repo/.bmad" "$repo/_bmad" "$repo/.agents"
 
   (
@@ -298,7 +302,16 @@ require_clean_tree "$REPO"
 
 START_BRANCH=$(git -C "$REPO" rev-parse --abbrev-ref HEAD)
 PAYLOAD_DIR=$(mktemp -d)
-trap 'git -C "$REPO" checkout "$START_BRANCH" >/dev/null 2>&1 || true; rm -rf "$PAYLOAD_DIR"' EXIT
+
+cleanup() {
+  rm -rf "$PAYLOAD_DIR"
+  if [[ -n "$(git -C "$REPO" status --porcelain 2>/dev/null || true)" ]]; then
+    log "cleanup: leaving working tree on $(git -C "$REPO" rev-parse --abbrev-ref HEAD) because uncommitted changes are present"
+    return
+  fi
+  git -C "$REPO" checkout "$START_BRANCH" >/dev/null 2>&1 || true
+}
+trap cleanup EXIT
 
 prepare_payload "$REPO" "$PAYLOAD_DIR"
 

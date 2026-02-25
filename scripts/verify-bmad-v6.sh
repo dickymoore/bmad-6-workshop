@@ -93,7 +93,27 @@ config_value() {
     echo ""
     return 0
   fi
-  git -C "$repo" show "$ref:_bmad/bmm/config.yaml" | awk -F': *' -v k="$key" '$1==k {print $2; exit}'
+  git -C "$repo" show "$ref:_bmad/bmm/config.yaml" | awk -v k="$key" '
+    $0 ~ "^[[:space:]]*" k ":[[:space:]]*" {
+      sub(/^[[:space:]]*[^:]+:[[:space:]]*/, "", $0)
+      gsub(/[[:space:]]+$/, "", $0)
+      print $0
+      exit
+    }'
+}
+
+normalize_yaml_scalar() {
+  local value="$1"
+  value="${value#"${value%%[![:space:]]*}"}"
+  value="${value%"${value##*[![:space:]]}"}"
+  if [[ ${#value} -ge 2 ]]; then
+    if [[ "${value:0:1}" == '"' && "${value: -1}" == '"' ]]; then
+      value="${value:1:${#value}-2}"
+    elif [[ "${value:0:1}" == "'" && "${value: -1}" == "'" ]]; then
+      value="${value:1:${#value}-2}"
+    fi
+  fi
+  echo "$value"
 }
 
 legacy_markers() {
@@ -140,25 +160,25 @@ branch_rules_require() {
       printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^_bmad/bmm/config\.yaml$' '^\.agents/skills/' '^office-floorplans/' '^scripts/audit-bmad-v6\.sh$' '^scripts/migrate-bmad-v6\.sh$' '^scripts/verify-bmad-v6\.sh$'
       ;;
     stage-2)
-      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^\.agents/skills/' '^docs/adr/ADR-001-tech-stack\.md$' '^docs/bmm-product-brief-.*\.md$' '^docs/bmm-research-technical-.*\.md$' '^docs/brainstorming-session-results-.*\.md$'
+      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^_bmad/bmm/config\.yaml$' '^\.agents/skills/' '^docs/adr/ADR-001-tech-stack\.md$' '^docs/bmm-product-brief-.*\.md$' '^docs/bmm-research-technical-.*\.md$' '^docs/brainstorming-session-results-.*\.md$' '^scripts/audit-bmad-v6\.sh$'
       ;;
     stage-3)
-      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^\.agents/skills/' '^docs/prd\.md$' '^docs/ux-design-specification\.md$'
+      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^_bmad/bmm/config\.yaml$' '^\.agents/skills/' '^docs/prd\.md$' '^docs/ux-design-specification\.md$'
       ;;
     stage-4)
-      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^\.agents/skills/' '^docs/architecture\.md$' '^docs/epics\.md$' '^docs/implementation-readiness-report-.*\.md$'
+      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^_bmad/bmm/config\.yaml$' '^\.agents/skills/' '^docs/architecture\.md$' '^docs/epics\.md$' '^docs/implementation-readiness-report-.*\.md$' '^docs/test-design-epic-1\.md$'
       ;;
     ready-for-dev)
-      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^\.agents/skills/' '^docs/sprint-artifacts/sprint-status\.yaml$' '^docs/sprint-artifacts/1-1-.*\.md$'
+      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^_bmad/bmm/config\.yaml$' '^\.agents/skills/' '^docs/sprint-artifacts/sprint-status\.yaml$' '^docs/sprint-artifacts/1-1-.*\.md$'
       ;;
     implementation-in-progress)
-      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^\.agents/skills/' '^package\.json$' '^src/' '^tests/' '^data/' '^docs/sprint-artifacts/sprint-status\.yaml$'
+      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^_bmad/bmm/config\.yaml$' '^\.agents/skills/' '^package\.json$' '^src/' '^tests/' '^data/' '^docs/sprint-artifacts/sprint-status\.yaml$'
       ;;
     complete)
-      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^\.agents/skills/' '^package\.json$' '^src/' '^tests/' '^data/' '^docs/sprint-artifacts/sprint-status\.yaml$'
+      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^_bmad/bmm/config\.yaml$' '^\.agents/skills/' '^package\.json$' '^src/' '^tests/' '^data/' '^docs/sprint-artifacts/sprint-status\.yaml$'
       ;;
     mvp)
-      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^\.agents/skills/' '^package\.json$' '^src/' '^tests/' '^data/' '^public/' '^scripts/' '^docs/sprint-artifacts/sprint-status\.yaml$'
+      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^_bmad/bmm/config\.yaml$' '^\.agents/skills/' '^package\.json$' '^src/' '^tests/' '^data/' '^public/' '^scripts/' '^docs/sprint-artifacts/sprint-status\.yaml$'
       ;;
     *)
       fail "Unknown branch rules: $1"
@@ -169,22 +189,22 @@ branch_rules_require() {
 branch_rules_forbid() {
   case "$1" in
     main)
-      printf '%s\n' '^\.bmad/' '^_bmad/' '^\.agents/' '^src/' '^tests/' '^data/'
+      printf '%s\n' '^\.bmad/' '^_bmad/' '^\.agents/' '^docs/' '^data/' '^package\.json$' '^src/' '^tests/'
       ;;
     stage-1)
-      printf '%s\n' '^\.bmad/' '^docs/prd\.md$' '^docs/ux-design-specification\.md$' '^src/' '^tests/' '^data/'
+      printf '%s\n' '^\.bmad/' '^docs/' '^data/' '^package\.json$' '^src/' '^tests/'
       ;;
     stage-2)
-      printf '%s\n' '^\.bmad/' '^docs/prd\.md$' '^docs/ux-design-specification\.md$' '^src/' '^tests/' '^data/'
+      printf '%s\n' '^\.bmad/' '^docs/prd\.md$' '^docs/ux-design-specification\.md$' '^data/' '^package\.json$' '^src/' '^tests/'
       ;;
     stage-3)
-      printf '%s\n' '^\.bmad/' '^docs/architecture\.md$' '^docs/epics\.md$' '^docs/implementation-readiness-report-.*\.md$' '^docs/sprint-artifacts/' '^src/' '^tests/' '^data/'
+      printf '%s\n' '^\.bmad/' '^docs/architecture\.md$' '^docs/epics\.md$' '^docs/implementation-readiness-report-.*\.md$' '^docs/sprint-artifacts/' '^data/' '^package\.json$' '^src/' '^tests/'
       ;;
     stage-4)
-      printf '%s\n' '^\.bmad/' '^docs/sprint-artifacts/' '^src/' '^tests/' '^data/'
+      printf '%s\n' '^\.bmad/' '^docs/sprint-artifacts/' '^data/' '^package\.json$' '^src/' '^tests/'
       ;;
     ready-for-dev)
-      printf '%s\n' '^\.bmad/' '^src/' '^tests/' '^data/'
+      printf '%s\n' '^\.bmad/' '^data/' '^package\.json$' '^src/' '^tests/'
       ;;
     implementation-in-progress|complete|mvp)
       printf '%s\n' '^\.bmad/'
@@ -272,18 +292,18 @@ for branch in "${TARGET_BRANCHES[@]}"; do
   version="n/a"
   if [[ "$branch" != "main" ]]; then
     version=$(manifest_version "$REPO" "$ref")
-    if [[ "$version" != 6.* ]] || [[ "$version" == *alpha* ]] || [[ "$version" == *Beta* ]] || [[ "$version" == *beta* ]]; then
+    if [[ ! "$version" =~ ^6\. ]] || [[ "$version" =~ [Aa]lpha ]] || [[ "$version" =~ [Bb]eta ]]; then
       branch_failed=1
       $SHOW_FAILURES && echo "[$branch] BAD_VERSION:$version"
     fi
 
-    plan_path=$(config_value "$REPO" "$ref" planning_artifacts)
-    impl_path=$(config_value "$REPO" "$ref" implementation_artifacts)
-    if [[ "$plan_path" != '"{project-root}/docs"' ]]; then
+    plan_path=$(normalize_yaml_scalar "$(config_value "$REPO" "$ref" planning_artifacts)")
+    impl_path=$(normalize_yaml_scalar "$(config_value "$REPO" "$ref" implementation_artifacts)")
+    if [[ "$plan_path" != '{project-root}/docs' ]]; then
       branch_failed=1
       $SHOW_FAILURES && echo "[$branch] BAD_CONFIG: planning_artifacts=$plan_path"
     fi
-    if [[ "$impl_path" != '"{project-root}/docs/sprint-artifacts"' ]]; then
+    if [[ "$impl_path" != '{project-root}/docs/sprint-artifacts' ]]; then
       branch_failed=1
       $SHOW_FAILURES && echo "[$branch] BAD_CONFIG: implementation_artifacts=$impl_path"
     fi

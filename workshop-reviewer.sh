@@ -445,6 +445,7 @@ if $run_all; then
       check_branch "$b"
       continue
     fi
+    echo "==> $b"
 
     app_dir=""
     if has_root_app; then

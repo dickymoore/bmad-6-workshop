@@ -169,8 +169,10 @@ for branch in "${SELECTED_BRANCHES[@]}"; do
   if [[ "$has_legacy_dir" == "yes" ]]; then
     branch_fail=1
   fi
-  if [[ "$branch" != "main" && "$version" != 6.* ]]; then
-    branch_fail=1
+  if [[ "$branch" != "main" ]]; then
+    if [[ ! "$version" =~ ^6\. ]] || [[ "$version" =~ [Aa]lpha ]] || [[ "$version" =~ [Bb]eta ]]; then
+      branch_fail=1
+    fi
   fi
   if [[ "$hit_count" -gt 0 ]]; then
     branch_fail=1
