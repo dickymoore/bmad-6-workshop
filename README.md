@@ -1,14 +1,15 @@
-## desk Booking Application
+## Desk Booking Application
 
-# BMAD BMM Stage 2
+# BMAD BMM Stage 2 (Planning)
 ## App locations (workshop note)
 - Stages `stage-1` through `ready-for-dev`: no runnable app in the repo root; the floorplan demo lives in `office-floorplans/` (Next.js).
 - Stages `implementation-in-progress`, `complete`, `mvp`: run the desk booking app from the repo root (Vite).
 
 1. Run Codex.
-2. /bmad-agent-bmm-analyst
-3. */bmad-bmm-sprint-status
-4. continue
-5. When ready, exit codex.
-6. git stash
-7. git checkout stage-3
+2. Load PM agent: `/bmad-agent-bmm-pm`.
+3. Create PRD: `/bmad-bmm-create-prd`.
+4. Create UX design spec: `/bmad-bmm-create-ux-design`.
+5. Optional quality pass: `/bmad-bmm-validate-prd`.
+6. Exit Codex.
+7. `git stash`
+8. `git checkout stage-3`
