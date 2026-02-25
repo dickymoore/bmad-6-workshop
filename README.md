@@ -53,6 +53,10 @@ For facilitators and operators preparing or delivering the workshop:
   dry-run and day-of delivery checklists.
 - [`./scripts/workshop-preflight.sh`](scripts/workshop-preflight.sh): run
   readiness checks (`./scripts/workshop-preflight.sh --all`).
+- [`./scripts/setup-workshop-session.ps1`](scripts/setup-workshop-session.ps1):
+  create/open/teardown a single facilitator session with one folder per stage.
+- [`./scripts/setup-workshop-session.sh`](scripts/setup-workshop-session.sh):
+  bash parity for single-session setup and teardown.
 - [workshop-video-script.md](workshop-video-script.md): facilitation script
   for demo recording or live delivery.
 
@@ -103,6 +107,26 @@ For facilitators and operators preparing or delivering the workshop:
 
 ```bash
 ./workshop-reviewer.sh --all
+```
+
+### `./scripts/setup-workshop-session.ps1`
+
+- Purpose: automate one workshop delivery session on Windows with
+  `prepare`/`launch`/`all`/`teardown` modes.
+- Includes: `main` plus all canonical `workshop/*` branches by default.
+- Example:
+
+```powershell
+./scripts/setup-workshop-session.ps1 -Mode all -Session Wed-AM
+```
+
+### `./scripts/setup-workshop-session.sh`
+
+- Purpose: bash parity for one-session setup and teardown.
+- Example:
+
+```bash
+./scripts/setup-workshop-session.sh --mode all --session Wed-AM
 ```
 
 ## Branch Names

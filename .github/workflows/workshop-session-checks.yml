@@ -1,0 +1,52 @@
+name: Workshop Session Checks
+
+on:
+  pull_request:
+    paths:
+      - README.md
+      - workshop-setup-runbook.md
+      - scripts/**
+      - .github/workflows/workshop-session-checks.yml
+  push:
+    branches:
+      - main
+    paths:
+      - README.md
+      - workshop-setup-runbook.md
+      - scripts/**
+      - .github/workflows/workshop-session-checks.yml
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate shell scripts
+        run: |
+          bash -n scripts/*.sh workshop-reviewer.sh
+
+      - name: Validate markdown docs
+        run: |
+          npx --yes markdownlint-cli README.md scripts/README.md workshop-setup-runbook.md
+
+      - name: Validate bash session helper
+        run: |
+          ./scripts/setup-workshop-session.sh --help >/dev/null
+
+      - name: Parse PowerShell session helper
+        shell: pwsh
+        run: |
+          $errors = @()
+          [System.Management.Automation.Language.Parser]::ParseFile('scripts/setup-workshop-session.ps1', [ref]$null, [ref]$errors) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_.ToString() }
+            exit 1
+          }
