@@ -15,7 +15,7 @@
 
 ### Baseline branch state (pre-migration)
 - Non-main workshop branches still contain `.bmad` with manifest version `6.0.0-alpha.12`.
-- Legacy command markers present (`/prompts:bmad-*`, `*workflow-init`, `*workflow-status`, `@alpha`).
+- Legacy command markers present (prompt-based alpha commands and workflow-status style tokens).
 
 ### Baseline automation results
 - `./scripts/audit-bmad-v6.sh --all`: FAIL on all 9 workshop branches (expected pre-migration).
