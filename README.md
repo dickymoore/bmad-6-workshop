@@ -30,11 +30,39 @@ Kick off the workshop quickly with the steps below. All commands are run from a 
    - Open `README.md` on the current stage.
    - Follow stage instructions in order.
 
-## Validation and Reviewer Scripts
-- `scripts/audit-bmad-v6.sh`: scans branches for legacy BMAD markers and missing stable-v6 structure.
-- `scripts/verify-bmad-v6.sh`: enforces stage contracts (expected files/artifacts per branch).
-- `workshop-reviewer.sh`: workshop facilitator checker with stage guidance plus `--dev`/`--e2e` smoke helpers.
-- Usage examples are documented in `scripts/README.md`.
+## Scripts
+
+### `./scripts/workshop-preflight.sh`
+- Purpose: one-command readiness check for the workshop environment (git/tooling/branch setup).
+- When to run: before a workshop dry-run, before facilitation, or after pulling major changes.
+- Example:
+  ```bash
+  ./scripts/workshop-preflight.sh --all
+  ```
+
+### `./scripts/audit-bmad-v6.sh`
+- Purpose: audit branches for legacy BMAD markers and missing stable-v6 structure.
+- When to run: after migration updates or before merging workshop branch changes.
+- Example:
+  ```bash
+  ./scripts/audit-bmad-v6.sh --all --show-hits
+  ```
+
+### `./scripts/verify-bmad-v6.sh`
+- Purpose: verify stage contracts (required/forbidden files and stable-v6 config expectations).
+- When to run: after editing stage artifacts/READMEs and before release or PR merge.
+- Example:
+  ```bash
+  ./scripts/verify-bmad-v6.sh --all --show-failures
+  ```
+
+### `./workshop-reviewer.sh`
+- Purpose: facilitator review script for stage checks, guidance, plus dev/e2e smoke paths.
+- When to run: during workshop prep and final quality checks across branches.
+- Example:
+  ```bash
+  ./workshop-reviewer.sh --all
+  ```
 
 ## App Locations By Stage
 - Stages `stage-1` through `ready-for-dev`: no runnable app at repo root; floorplan demo lives in `office-floorplans/` (Next.js).
