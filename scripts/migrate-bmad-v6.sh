@@ -124,21 +124,30 @@ sync_shared_assets() {
   fi
 }
 
+replace_in_file() {
+  local expr="$1"
+  local file="$2"
+  local tmp
+  tmp=$(mktemp)
+  sed -e "$expr" "$file" > "$tmp"
+  mv "$tmp" "$file"
+}
+
 replace_shared_markers() {
   local repo="$1"
   local branch="$2"
   local readme="$repo/README.md"
   [[ -f "$readme" ]] || return 0
 
-  sed -i 's|npx bmad-method@alpha install|npx bmad-method@latest install|g' "$readme"
-  sed -i 's|/prompts:bmad-bmm-agents-analyst|/bmad-agent-bmm-analyst|g' "$readme"
-  sed -i 's|/prompts:bmad-bmm-agents-architect|/bmad-agent-bmm-architect|g' "$readme"
-  sed -i 's|/prompts:bmad-bmm-agents-pm|/bmad-agent-bmm-pm|g' "$readme"
-  sed -i 's|/prompts:bmad-bmm-agents-sm|/bmad-agent-bmm-sm|g' "$readme"
-  sed -i 's|/prompts:bmad-bmm-agents-dev|/bmad-agent-bmm-dev|g' "$readme"
-  sed -i 's|/prompts:bmad-bmm-agents-tea|/bmad-agent-bmm-qa|g' "$readme"
-  sed -i 's|\\*workflow-init|/bmad-bmm-create-product-brief|g' "$readme"
-  sed -i 's|\\*workflow-status|/bmad-bmm-sprint-status|g' "$readme"
+  replace_in_file 's|npx bmad-method@alpha install|npx bmad-method@latest install|g' "$readme"
+  replace_in_file 's|/prompts:bmad-bmm-agents-analyst|/bmad-agent-bmm-analyst|g' "$readme"
+  replace_in_file 's|/prompts:bmad-bmm-agents-architect|/bmad-agent-bmm-architect|g' "$readme"
+  replace_in_file 's|/prompts:bmad-bmm-agents-pm|/bmad-agent-bmm-pm|g' "$readme"
+  replace_in_file 's|/prompts:bmad-bmm-agents-sm|/bmad-agent-bmm-sm|g' "$readme"
+  replace_in_file 's|/prompts:bmad-bmm-agents-dev|/bmad-agent-bmm-dev|g' "$readme"
+  replace_in_file 's|/prompts:bmad-bmm-agents-tea|/bmad-agent-bmm-qa|g' "$readme"
+  replace_in_file 's|\\*workflow-init|/bmad-bmm-create-product-brief|g' "$readme"
+  replace_in_file 's|\\*workflow-status|/bmad-bmm-sprint-status|g' "$readme"
 }
 
 install_stable_bmad() {
@@ -166,9 +175,9 @@ configure_bmm_paths_for_workshop() {
   local config="$repo/_bmad/bmm/config.yaml"
   [[ -f "$config" ]] || return 0
 
-  sed -i 's|^planning_artifacts:.*|planning_artifacts: "{project-root}/docs"|' "$config"
-  sed -i 's|^implementation_artifacts:.*|implementation_artifacts: "{project-root}/docs/sprint-artifacts"|' "$config"
-  sed -i 's|^project_knowledge:.*|project_knowledge: "{project-root}/docs"|' "$config"
+  replace_in_file 's|^planning_artifacts:.*|planning_artifacts: "{project-root}/docs"|' "$config"
+  replace_in_file 's|^implementation_artifacts:.*|implementation_artifacts: "{project-root}/docs/sprint-artifacts"|' "$config"
+  replace_in_file 's|^project_knowledge:.*|project_knowledge: "{project-root}/docs"|' "$config"
 }
 
 prepare_stage_directories() {

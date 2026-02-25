@@ -137,7 +137,7 @@ branch_rules_require() {
       printf '%s\n' '^README\.md$' '^office-floorplans/' '^scripts/audit-bmad-v6\.sh$' '^scripts/migrate-bmad-v6\.sh$' '^scripts/verify-bmad-v6\.sh$'
       ;;
     stage-1)
-      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^_bmad/bmm/config\.yaml$' '^\.agents/skills/' '^office-floorplans/' '^scripts/audit-bmad-v6\.sh$'
+      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^_bmad/bmm/config\.yaml$' '^\.agents/skills/' '^office-floorplans/' '^scripts/audit-bmad-v6\.sh$' '^scripts/migrate-bmad-v6\.sh$' '^scripts/verify-bmad-v6\.sh$'
       ;;
     stage-2)
       printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^\.agents/skills/' '^docs/adr/ADR-001-tech-stack\.md$' '^docs/bmm-product-brief-.*\.md$' '^docs/bmm-research-technical-.*\.md$' '^docs/brainstorming-session-results-.*\.md$'
@@ -158,7 +158,7 @@ branch_rules_require() {
       printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^\.agents/skills/' '^package\.json$' '^src/' '^tests/' '^data/' '^docs/sprint-artifacts/sprint-status\.yaml$'
       ;;
     mvp)
-      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^\.agents/skills/' '^package\.json$' '^src/' '^tests/' '^data/' '^docs/sprint-artifacts/sprint-status\.yaml$'
+      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^\.agents/skills/' '^package\.json$' '^src/' '^tests/' '^data/' '^public/' '^scripts/' '^docs/sprint-artifacts/sprint-status\.yaml$'
       ;;
     *)
       fail "Unknown branch rules: $1"

@@ -5,6 +5,12 @@
 - Stages `stage-1` through `ready-for-dev`: no runnable app in the repo root; the floorplan demo lives in `office-floorplans/` (Next.js).
 - Stages `implementation-in-progress`, `complete`, `mvp`: run the desk booking app from the repo root (Vite).
 
+## Validation and reviewer helpers
+- `./scripts/audit-bmad-v6.sh --all`
+- `./scripts/verify-bmad-v6.sh --all --show-failures`
+- `./workshop-reviewer.sh --all`
+- See `scripts/README.md` for command details.
+
 1. Run Codex.
 2. Load architect agent: `/bmad-agent-bmm-architect`.
 3. Create architecture: `/bmad-bmm-create-architecture`.
