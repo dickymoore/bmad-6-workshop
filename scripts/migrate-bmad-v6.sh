@@ -3,6 +3,7 @@ set -euo pipefail
 
 SCRIPT_NAME=$(basename "$0")
 ROOT_DIR=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
 WORKSHOP_BRANCHES=(
   main
@@ -96,6 +97,33 @@ append_log() {
   printf '%s %s\n' "$(date +'%Y-%m-%d %H:%M:%S')" "$message" >> "$repo/$logfile"
 }
 
+prepare_payload() {
+  local repo="$1"
+  local payload_dir="$2"
+
+  mkdir -p "$payload_dir/scripts"
+  cp "$SCRIPT_DIR/audit-bmad-v6.sh" "$payload_dir/scripts/"
+  cp "$SCRIPT_DIR/migrate-bmad-v6.sh" "$payload_dir/scripts/"
+  cp "$SCRIPT_DIR/verify-bmad-v6.sh" "$payload_dir/scripts/"
+
+  if [[ -f "$repo/workshop-reviewer.sh" ]]; then
+    cp "$repo/workshop-reviewer.sh" "$payload_dir/workshop-reviewer.sh"
+  fi
+}
+
+sync_shared_assets() {
+  local repo="$1"
+  local payload_dir="$2"
+
+  mkdir -p "$repo/scripts"
+  cp "$payload_dir/scripts/"*.sh "$repo/scripts/"
+  chmod +x "$repo/scripts/"*.sh
+
+  if [[ -f "$payload_dir/workshop-reviewer.sh" ]]; then
+    cp "$payload_dir/workshop-reviewer.sh" "$repo/workshop-reviewer.sh"
+  fi
+}
+
 replace_shared_markers() {
   local repo="$1"
   local branch="$2"
@@ -108,7 +136,9 @@ replace_shared_markers() {
   sed -i 's|/prompts:bmad-bmm-agents-pm|/bmad-agent-bmm-pm|g' "$readme"
   sed -i 's|/prompts:bmad-bmm-agents-sm|/bmad-agent-bmm-sm|g' "$readme"
   sed -i 's|/prompts:bmad-bmm-agents-dev|/bmad-agent-bmm-dev|g' "$readme"
-  sed -i 's|/prompts:bmad-bmm-agents-tea|/bmad-agent-bmm-tech-writer|g' "$readme"
+  sed -i 's|/prompts:bmad-bmm-agents-tea|/bmad-agent-bmm-qa|g' "$readme"
+  sed -i 's|\\*workflow-init|/bmad-bmm-create-product-brief|g' "$readme"
+  sed -i 's|\\*workflow-status|/bmad-bmm-sprint-status|g' "$readme"
 }
 
 install_stable_bmad() {
@@ -258,7 +288,10 @@ fi
 require_clean_tree "$REPO"
 
 START_BRANCH=$(git -C "$REPO" rev-parse --abbrev-ref HEAD)
-trap 'git -C "$REPO" checkout "$START_BRANCH" >/dev/null 2>&1 || true' EXIT
+PAYLOAD_DIR=$(mktemp -d)
+trap 'git -C "$REPO" checkout "$START_BRANCH" >/dev/null 2>&1 || true; rm -rf "$PAYLOAD_DIR"' EXIT
+
+prepare_payload "$REPO" "$PAYLOAD_DIR"
 
 for branch in "${TARGET_BRANCHES[@]}"; do
   branch_exists "$REPO" "$branch" || fail "Branch not found: $branch"
@@ -268,6 +301,7 @@ for branch in "${TARGET_BRANCHES[@]}"; do
   log "Migrating branch=$branch"
   append_log "$REPO" "$LOG_FILE" "START branch=$branch"
 
+  sync_shared_assets "$REPO" "$PAYLOAD_DIR"
   replace_shared_markers "$REPO" "$branch"
 
   if [[ "$branch" != "main" ]]; then

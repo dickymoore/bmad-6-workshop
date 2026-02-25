@@ -28,3 +28,16 @@
 - Hardened scripts to resolve local/remote refs (`branch` vs `origin/branch`) deterministically.
 - Hardened verification script for missing `_bmad` config in pre-migration branches.
 
+## Phase 2: Pilot (stage-1, stage-2)
+- Executed pilot migration with `scripts/migrate-bmad-v6.sh` on `stage-1` and `stage-2`.
+- Stable installer executed successfully and upgraded both branches to `_bmad` manifest version `6.0.3`.
+- Pilot defects found:
+  1. audit/verify originally assumed local branch refs only.
+  2. migration script did not carry shared scripts into non-main branches.
+  3. legacy marker regex over-reported due reviewer guard patterns.
+  4. workshop reviewer and README transformations needed stable-v6 refresh.
+- Fixes applied in automation:
+  - Added local/remote ref resolution.
+  - Added payload sync for scripts + reviewer per migrated branch.
+  - Tightened legacy marker detection to command markers.
+  - Upgraded migration replacements for stable agent/workflow commands.

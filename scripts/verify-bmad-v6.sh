@@ -99,7 +99,7 @@ config_value() {
 legacy_markers() {
   local repo="$1"
   local ref="$2"
-  local regex='@alpha|/prompts:bmad-|\*workflow-init|\*workflow-status|\.bmad/'
+  local regex='@alpha|/prompts:bmad-|\*workflow-init|\*workflow-status'
   git -C "$repo" grep -nE "$regex" "$ref" -- ':*.md' ':*.yaml' ':*.yml' 'workshop-reviewer.sh' 2>/dev/null || true
 }
 
