@@ -25,3 +25,9 @@ Single-page React app for browsing office floorplans, booking desks, managing a 
 ## Tests
 - Unit/component: `npm run test:unit`
 - E2E: `npm run test:e2e`
+
+## Validation and reviewer helpers
+- `./scripts/audit-bmad-v6.sh --all`
+- `./scripts/verify-bmad-v6.sh --all --show-failures`
+- `./workshop-reviewer.sh --all`
+- See `scripts/README.md` for command details.
