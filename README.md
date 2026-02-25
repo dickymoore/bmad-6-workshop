@@ -6,7 +6,7 @@
 - Stages `implementation-in-progress`, `complete`, `mvp`: run the desk booking app from the repo root (Vite).
 
 1. Run Codex.
-2. Load the business analyst: `/prompts:bmad-bmm-agents-analyst`
+2. Load the business analyst: `/bmad-agent-bmm-analyst`
 3. Select or run `*workflow-init`.
 4. Name the app as you like (other branches use "Desk Booking Application").
 5. Select **[a] Advanced Elicitation**.
