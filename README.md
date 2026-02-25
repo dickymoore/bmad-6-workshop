@@ -3,11 +3,11 @@
 # BMAD BMM Stage 4 - One story left.
 1. Inspect docs/sprint-artifacts/sprint-status.yaml. Just one more story.
 2. Run Codex.
-3. /prompts:bmad-bmm-agents-dev
-4. *workflow-status 
+3. /bmad-agent-bmm-dev
+4. */bmad-bmm-sprint-status 
 5. *develop-story 4-4
 6. *code-review 4-4
-7. /prompts:bmad-bmm-agents-sm
+7. /bmad-agent-bmm-sm
 8. *epic-retrospective epic-4
 9. Mark Epic 4 as done in docs/sprint-artifacts/sprint-status.yaml
 ... Run the application!
