@@ -53,22 +53,33 @@ set_stage_rules() {
       require_patterns=(
         '^README\.md$'
         '^office-floorplans/'
+        '^scripts/audit-bmad-v6\.sh$'
+        '^scripts/migrate-bmad-v6\.sh$'
+        '^scripts/verify-bmad-v6\.sh$'
       )
       forbid_patterns=(
         '^\.bmad/'
+        '^_bmad/'
+        '^\.agents/'
         '^docs/'
         '^data/'
         '^package\.json$'
         '^src/'
         '^tests/'
       )
-      guidance=$'Main: verify tooling + install BMAD, then checkout stage-1.\n- Suggested next: `git checkout stage-1` and follow `README.md`.'
+      guidance=$'Main: verify tooling + install BMAD stable v6, then checkout stage-1.\n- Suggested next: `git checkout stage-1` and follow `README.md`.'
       ;;
     stage-1)
       require_patterns=(
-        '^\.bmad/'
+        '^_bmad/_config/manifest\.yaml$'
+        '^_bmad/bmm/config\.yaml$'
+        '^\.agents/skills/'
+        '^scripts/audit-bmad-v6\.sh$'
+        '^scripts/migrate-bmad-v6\.sh$'
+        '^scripts/verify-bmad-v6\.sh$'
       )
       forbid_patterns=(
+        '^\.bmad/'
         '^docs/'
         '^docs/prd\.md$'
         '^docs/ux-design-specification\.md$'
@@ -77,17 +88,21 @@ set_stage_rules() {
         '^src/'
         '^tests/'
       )
-      guidance=$'Stage 1 (Analysis): run analyst workflow-init, brainstorming/research/product brief.\n- When done: stash and `git checkout stage-2`.'
+      guidance=$'Stage 1 (Analysis): use `/bmad-agent-bmm-analyst` + `/bmad-bmm-create-product-brief` and research workflows.\n- When done: stash and `git checkout stage-2`.'
       ;;
     stage-2)
       require_patterns=(
+        '^_bmad/_config/manifest\.yaml$'
+        '^_bmad/bmm/config\.yaml$'
+        '^\.agents/skills/'
         '^docs/adr/ADR-001-tech-stack\.md$'
         '^docs/brainstorming-session-results-.*\.md$'
         '^docs/bmm-product-brief-.*\.md$'
         '^docs/bmm-research-technical-.*\.md$'
-        '^docs/bmm-workflow-status\.yaml$'
+        '^scripts/audit-bmad-v6\.sh$'
       )
       forbid_patterns=(
+        '^\.bmad/'
         '^docs/prd\.md$'
         '^docs/ux-design-specification\.md$'
         '^data/'
@@ -95,14 +110,18 @@ set_stage_rules() {
         '^src/'
         '^tests/'
       )
-      guidance=$'Stage 2 (Planning): continue from workflow-status to produce PRD + UX.\n- When done: stash and `git checkout stage-3`.'
+      guidance=$'Stage 2 (Planning): use `/bmad-agent-bmm-pm` + `/bmad-bmm-create-prd` and `/bmad-bmm-create-ux-design`.\n- When done: stash and `git checkout stage-3`.'
       ;;
     stage-3)
       require_patterns=(
+        '^_bmad/_config/manifest\.yaml$'
+        '^_bmad/bmm/config\.yaml$'
+        '^\.agents/skills/'
         '^docs/prd\.md$'
         '^docs/ux-design-specification\.md$'
       )
       forbid_patterns=(
+        '^\.bmad/'
         '^docs/architecture\.md$'
         '^docs/epics\.md$'
         '^docs/implementation-readiness-report-.*\.md$'
@@ -112,66 +131,89 @@ set_stage_rules() {
         '^src/'
         '^tests/'
       )
-      guidance=$'Stage 3 (Solutioning): create architecture + epics/stories + implementation readiness.\n- When done: stash and `git checkout stage-4`.'
+      guidance=$'Stage 3 (Solutioning): use `/bmad-agent-bmm-architect` + `/bmad-bmm-create-architecture` and `/bmad-bmm-create-epics-and-stories`.\n- When done: stash and `git checkout stage-4`.'
       ;;
     stage-4)
       require_patterns=(
+        '^_bmad/_config/manifest\.yaml$'
+        '^_bmad/bmm/config\.yaml$'
+        '^\.agents/skills/'
         '^docs/architecture\.md$'
         '^docs/epics\.md$'
         '^docs/implementation-readiness-report-.*\.md$'
         '^docs/test-design-epic-1\.md$'
       )
       forbid_patterns=(
+        '^\.bmad/'
         '^docs/sprint-artifacts/'
         '^data/'
         '^package\.json$'
         '^src/'
         '^tests/'
       )
-      guidance=$'Stage 4 (Implementation setup): sprint-planning + create-story/story-context.\n- When done: `git checkout ready-for-dev`.'
+      guidance=$'Stage 4 (Implementation setup): run `/bmad-bmm-check-implementation-readiness`, then `/bmad-bmm-sprint-planning` and `/bmad-bmm-create-story`.\n- When done: `git checkout ready-for-dev`.'
       ;;
     ready-for-dev)
       require_patterns=(
+        '^_bmad/_config/manifest\.yaml$'
+        '^_bmad/bmm/config\.yaml$'
+        '^\.agents/skills/'
         '^docs/sprint-artifacts/sprint-status\.yaml$'
         '^docs/sprint-artifacts/1-1-.*\.md$'
       )
       forbid_patterns=(
+        '^\.bmad/'
         '^data/'
         '^package\.json$'
         '^src/'
         '^tests/'
       )
-      guidance=$'Ready-for-dev: use dev agent to implement stories + code-review.\n- When done: `git checkout implementation-in-progress`.'
+      guidance=$'Ready-for-dev: use `/bmad-agent-bmm-dev` + `/bmad-bmm-dev-story` and `/bmad-bmm-code-review`.\n- When done: `git checkout implementation-in-progress`.'
       ;;
     implementation-in-progress)
       require_patterns=(
+        '^_bmad/_config/manifest\.yaml$'
+        '^_bmad/bmm/config\.yaml$'
+        '^\.agents/skills/'
         '^package\.json$'
         '^src/'
         '^data/'
         '^docs/sprint-artifacts/sprint-status\.yaml$'
       )
-      forbid_patterns=()
-      guidance=$'Implementation-in-progress: finish remaining story, run app, update sprint status.\n- When done: `git checkout complete`.'
+      forbid_patterns=(
+        '^\.bmad/'
+      )
+      guidance=$'Implementation-in-progress: finish stories via `/bmad-bmm-dev-story`, run app/tests, and update sprint status.\n- When done: `git checkout complete`.'
       ;;
     complete)
       require_patterns=(
+        '^_bmad/_config/manifest\.yaml$'
+        '^_bmad/bmm/config\.yaml$'
+        '^\.agents/skills/'
         '^package\.json$'
         '^src/'
         '^data/'
       )
-      forbid_patterns=()
-      guidance=$'Complete: run app, reproduce/fix any remaining bug via correct-course.\n- When done: `git checkout mvp`.'
+      forbid_patterns=(
+        '^\.bmad/'
+      )
+      guidance=$'Complete: run app and use `/bmad-bmm-correct-course` for any meaningful pivot.\n- When done: `git checkout mvp`.'
       ;;
     mvp)
       require_patterns=(
+        '^_bmad/_config/manifest\.yaml$'
+        '^_bmad/bmm/config\.yaml$'
+        '^\.agents/skills/'
         '^package\.json$'
         '^src/'
         '^public/'
         '^scripts/'
         '^data/'
       )
-      forbid_patterns=()
-      guidance=$'MVP: final working app; run, demo, and discuss learnings.'
+      forbid_patterns=(
+        '^\.bmad/'
+      )
+      guidance=$'MVP: final working app; run dev/e2e and demonstrate stable-v6 BMAD workflow usage.'
       ;;
     *)
       echo "Unknown stage: $stage" >&2

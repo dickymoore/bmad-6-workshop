@@ -6,10 +6,10 @@
 - Stages `implementation-in-progress`, `complete`, `mvp`: run the desk booking app from the repo root (Vite).
 
 1. Run Codex.
-2. /prompts:bmad-bmm-agents-pm
-3. *workflow-status
+2. /bmad-agent-bmm-pm
+3. */bmad-bmm-sprint-status
 4. Press 1 or *sprint-planning
-5. Load /prompts:bmad-bmm-agents-sm
+5. Load /bmad-agent-bmm-sm
 6. *sprint-planning.
 7. Inspect docs/sprint-artifacts/sprint-status.yaml
 8. *create-epic-tech-context
