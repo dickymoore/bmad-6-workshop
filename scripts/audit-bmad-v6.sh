@@ -6,15 +6,28 @@ ROOT_DIR=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 
 WORKSHOP_BRANCHES=(
   main
-  stage-1
-  stage-2
-  stage-3
-  stage-4
-  ready-for-dev
-  implementation-in-progress
-  complete
-  mvp
+  workshop/10-analysis
+  workshop/20-planning
+  workshop/30-solutioning
+  workshop/40-implementation-setup
+  workshop/50-ready-for-dev
+  workshop/60-implementation
+  workshop/70-complete
+  workshop/80-mvp
 )
+
+declare -A LEGACY_TO_CANONICAL=(
+  [stage-1]=workshop/10-analysis
+  [stage-2]=workshop/20-planning
+  [stage-3]=workshop/30-solutioning
+  [stage-4]=workshop/40-implementation-setup
+  [ready-for-dev]=workshop/50-ready-for-dev
+  [implementation-in-progress]=workshop/60-implementation
+  [complete]=workshop/70-complete
+  [mvp]=workshop/80-mvp
+)
+
+declare -A SELECTED_BRANCH_SET=()
 
 usage() {
   cat <<USAGE
@@ -25,8 +38,9 @@ Usage:
 Audit workshop branches for BMAD stable-v6 alignment issues.
 
 Options:
-  --all            Audit all workshop branches.
+  --all            Audit all canonical workshop branches.
   --branch <name>  Audit a specific branch (repeatable).
+                   Accepts canonical names or legacy aliases.
   --show-hits      Print matching legacy markers per branch.
   --repo <path>    Target repository path (default: current git root).
   -h, --help       Show help.
@@ -43,6 +57,36 @@ log() {
 fail() {
   echo "ERROR: $*" >&2
   exit 2
+}
+
+canonicalize_branch() {
+  local branch="$1"
+  if [[ "$branch" == "main" ]]; then
+    echo "main"
+    return 0
+  fi
+  if [[ -n "${LEGACY_TO_CANONICAL[$branch]:-}" ]]; then
+    echo "${LEGACY_TO_CANONICAL[$branch]}"
+    return 0
+  fi
+  echo "$branch"
+}
+
+add_selected_branch() {
+  local input_branch="$1"
+  local canonical_branch
+  canonical_branch=$(canonicalize_branch "$input_branch")
+
+  if [[ "$canonical_branch" != "$input_branch" ]]; then
+    log "mapped legacy branch '$input_branch' -> '$canonical_branch'"
+  fi
+
+  if [[ -n "${SELECTED_BRANCH_SET[$canonical_branch]:-}" ]]; then
+    return 0
+  fi
+
+  SELECTED_BRANCH_SET[$canonical_branch]=1
+  SELECTED_BRANCHES+=("$canonical_branch")
 }
 
 require_git_repo() {
@@ -109,7 +153,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     --branch)
       [[ $# -ge 2 ]] || fail "Missing value for --branch"
-      SELECTED_BRANCHES+=("$2")
+      add_selected_branch "$2"
       shift 2
       ;;
     --show-hits)
@@ -136,7 +180,9 @@ require_git_repo "$REPO"
 if $AUDIT_ALL; then
   SELECTED_BRANCHES=("${WORKSHOP_BRANCHES[@]}")
 elif [[ ${#SELECTED_BRANCHES[@]} -eq 0 ]]; then
-  SELECTED_BRANCHES=("$(git -C "$REPO" rev-parse --abbrev-ref HEAD)")
+  current_branch=$(git -C "$REPO" rev-parse --abbrev-ref HEAD)
+  [[ "$current_branch" != "HEAD" ]] || fail "Detached HEAD is not supported without --branch"
+  add_selected_branch "$current_branch"
 fi
 
 violations=0

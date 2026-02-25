@@ -6,15 +6,28 @@ ROOT_DIR=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 
 WORKSHOP_BRANCHES=(
   main
-  stage-1
-  stage-2
-  stage-3
-  stage-4
-  ready-for-dev
-  implementation-in-progress
-  complete
-  mvp
+  workshop/10-analysis
+  workshop/20-planning
+  workshop/30-solutioning
+  workshop/40-implementation-setup
+  workshop/50-ready-for-dev
+  workshop/60-implementation
+  workshop/70-complete
+  workshop/80-mvp
 )
+
+declare -A LEGACY_TO_CANONICAL=(
+  [stage-1]=workshop/10-analysis
+  [stage-2]=workshop/20-planning
+  [stage-3]=workshop/30-solutioning
+  [stage-4]=workshop/40-implementation-setup
+  [ready-for-dev]=workshop/50-ready-for-dev
+  [implementation-in-progress]=workshop/60-implementation
+  [complete]=workshop/70-complete
+  [mvp]=workshop/80-mvp
+)
+
+declare -A TARGET_BRANCH_SET=()
 
 usage() {
   cat <<USAGE
@@ -25,8 +38,9 @@ Usage:
 Verify workshop branches against stable-v6 stage contracts.
 
 Options:
-  --all              Verify all workshop branches.
+  --all              Verify all canonical workshop branches.
   --branch <name>    Verify a specific branch (repeatable).
+                     Accepts canonical names or legacy aliases.
   --repo <path>      Target repository path (default: current git root).
   --show-failures    Print failing pattern checks.
   -h, --help         Show help.
@@ -43,6 +57,36 @@ log() {
 fail() {
   echo "ERROR: $*" >&2
   exit 2
+}
+
+canonicalize_branch() {
+  local branch="$1"
+  if [[ "$branch" == "main" ]]; then
+    echo "main"
+    return 0
+  fi
+  if [[ -n "${LEGACY_TO_CANONICAL[$branch]:-}" ]]; then
+    echo "${LEGACY_TO_CANONICAL[$branch]}"
+    return 0
+  fi
+  echo "$branch"
+}
+
+add_target_branch() {
+  local input_branch="$1"
+  local canonical_branch
+  canonical_branch=$(canonicalize_branch "$input_branch")
+
+  if [[ "$canonical_branch" != "$input_branch" ]]; then
+    log "mapped legacy branch '$input_branch' -> '$canonical_branch'"
+  fi
+
+  if [[ -n "${TARGET_BRANCH_SET[$canonical_branch]:-}" ]]; then
+    return 0
+  fi
+
+  TARGET_BRANCH_SET[$canonical_branch]=1
+  TARGET_BRANCHES+=("$canonical_branch")
 }
 
 require_git_repo() {
@@ -156,28 +200,28 @@ branch_rules_require() {
     main)
       printf '%s\n' '^README\.md$' '^office-floorplans/' '^scripts/audit-bmad-v6\.sh$' '^scripts/migrate-bmad-v6\.sh$' '^scripts/verify-bmad-v6\.sh$'
       ;;
-    stage-1)
+    workshop/10-analysis)
       printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^_bmad/bmm/config\.yaml$' '^\.agents/skills/' '^office-floorplans/' '^scripts/audit-bmad-v6\.sh$' '^scripts/migrate-bmad-v6\.sh$' '^scripts/verify-bmad-v6\.sh$'
       ;;
-    stage-2)
+    workshop/20-planning)
       printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^_bmad/bmm/config\.yaml$' '^\.agents/skills/' '^docs/adr/ADR-001-tech-stack\.md$' '^docs/bmm-product-brief-.*\.md$' '^docs/bmm-research-technical-.*\.md$' '^docs/brainstorming-session-results-.*\.md$' '^scripts/audit-bmad-v6\.sh$'
       ;;
-    stage-3)
+    workshop/30-solutioning)
       printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^_bmad/bmm/config\.yaml$' '^\.agents/skills/' '^docs/prd\.md$' '^docs/ux-design-specification\.md$'
       ;;
-    stage-4)
+    workshop/40-implementation-setup)
       printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^_bmad/bmm/config\.yaml$' '^\.agents/skills/' '^docs/architecture\.md$' '^docs/epics\.md$' '^docs/implementation-readiness-report-.*\.md$' '^docs/test-design-epic-1\.md$'
       ;;
-    ready-for-dev)
+    workshop/50-ready-for-dev)
       printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^_bmad/bmm/config\.yaml$' '^\.agents/skills/' '^docs/sprint-artifacts/sprint-status\.yaml$' '^docs/sprint-artifacts/1-1-.*\.md$'
       ;;
-    implementation-in-progress)
+    workshop/60-implementation)
       printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^_bmad/bmm/config\.yaml$' '^\.agents/skills/' '^package\.json$' '^src/' '^tests/' '^data/' '^docs/sprint-artifacts/sprint-status\.yaml$'
       ;;
-    complete)
+    workshop/70-complete)
       printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^_bmad/bmm/config\.yaml$' '^\.agents/skills/' '^package\.json$' '^src/' '^tests/' '^data/' '^docs/sprint-artifacts/sprint-status\.yaml$'
       ;;
-    mvp)
+    workshop/80-mvp)
       printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^_bmad/bmm/config\.yaml$' '^\.agents/skills/' '^package\.json$' '^src/' '^tests/' '^data/' '^public/' '^scripts/' '^docs/sprint-artifacts/sprint-status\.yaml$'
       ;;
     *)
@@ -191,22 +235,22 @@ branch_rules_forbid() {
     main)
       printf '%s\n' '^\.bmad/' '^_bmad/' '^\.agents/' '^docs/' '^data/' '^package\.json$' '^src/' '^tests/'
       ;;
-    stage-1)
+    workshop/10-analysis)
       printf '%s\n' '^\.bmad/' '^docs/' '^data/' '^package\.json$' '^src/' '^tests/'
       ;;
-    stage-2)
+    workshop/20-planning)
       printf '%s\n' '^\.bmad/' '^docs/prd\.md$' '^docs/ux-design-specification\.md$' '^data/' '^package\.json$' '^src/' '^tests/'
       ;;
-    stage-3)
+    workshop/30-solutioning)
       printf '%s\n' '^\.bmad/' '^docs/architecture\.md$' '^docs/epics\.md$' '^docs/implementation-readiness-report-.*\.md$' '^docs/sprint-artifacts/' '^data/' '^package\.json$' '^src/' '^tests/'
       ;;
-    stage-4)
+    workshop/40-implementation-setup)
       printf '%s\n' '^\.bmad/' '^docs/sprint-artifacts/' '^data/' '^package\.json$' '^src/' '^tests/'
       ;;
-    ready-for-dev)
+    workshop/50-ready-for-dev)
       printf '%s\n' '^\.bmad/' '^data/' '^package\.json$' '^src/' '^tests/'
       ;;
-    implementation-in-progress|complete|mvp)
+    workshop/60-implementation|workshop/70-complete|workshop/80-mvp)
       printf '%s\n' '^\.bmad/'
       ;;
     *)
@@ -228,7 +272,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     --branch)
       [[ $# -ge 2 ]] || fail "Missing value for --branch"
-      TARGET_BRANCHES+=("$2")
+      add_target_branch "$2"
       shift 2
       ;;
     --repo)
@@ -255,7 +299,9 @@ require_git_repo "$REPO"
 if $VERIFY_ALL; then
   TARGET_BRANCHES=("${WORKSHOP_BRANCHES[@]}")
 elif [[ ${#TARGET_BRANCHES[@]} -eq 0 ]]; then
-  TARGET_BRANCHES=("$(git -C "$REPO" rev-parse --abbrev-ref HEAD)")
+  current_branch=$(git -C "$REPO" rev-parse --abbrev-ref HEAD)
+  [[ "$current_branch" != "HEAD" ]] || fail "Detached HEAD is not supported without --branch"
+  add_target_branch "$current_branch"
 fi
 
 failures=0

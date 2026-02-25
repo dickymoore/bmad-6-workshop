@@ -31,8 +31,10 @@ npx bmad-method@latest install
 1) Checkout the workshop stage
 
 ```bash
-git checkout stage-1
+git checkout workshop/10-analysis
 ```
+
+- Legacy alias still supported for one cycle: `stage-1`.
 
 1) Start the workshop
 
@@ -103,12 +105,33 @@ For facilitators and operators preparing or delivering the workshop:
 ./workshop-reviewer.sh --all
 ```
 
+## Branch Names
+
+Canonical workshop branch progression:
+
+`main -> workshop/10-analysis -> workshop/20-planning ->`
+`workshop/30-solutioning -> workshop/40-implementation-setup ->`
+`workshop/50-ready-for-dev -> workshop/60-implementation ->`
+`workshop/70-complete -> workshop/80-mvp`
+
+Legacy aliases are still accepted for one compatibility cycle:
+
+- `stage-1` -> `workshop/10-analysis`
+- `stage-2` -> `workshop/20-planning`
+- `stage-3` -> `workshop/30-solutioning`
+- `stage-4` -> `workshop/40-implementation-setup`
+- `ready-for-dev` -> `workshop/50-ready-for-dev`
+- `implementation-in-progress` -> `workshop/60-implementation`
+- `complete` -> `workshop/70-complete`
+- `mvp` -> `workshop/80-mvp`
+
 ## App Locations by Stage
 
-- Stages `stage-1` through `ready-for-dev` have no runnable app at repo root.
-  The floorplan demo lives in `office-floorplans/` (Next.js).
-- Stages `implementation-in-progress`, `complete`, and `mvp` run the desk
-  booking app from repo root (Vite).
+- Stages `workshop/10-analysis` through `workshop/50-ready-for-dev` have no
+  runnable app at repo root. The floorplan demo lives in
+  `office-floorplans/` (Next.js).
+- Stages `workshop/60-implementation`, `workshop/70-complete`, and
+  `workshop/80-mvp` run the desk booking app from repo root (Vite).
 
 ## Office Floorplans Assets
 

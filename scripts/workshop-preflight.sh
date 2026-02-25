@@ -7,6 +7,17 @@ STRICT=false
 
 WORKSHOP_BRANCHES=(
   main
+  workshop/10-analysis
+  workshop/20-planning
+  workshop/30-solutioning
+  workshop/40-implementation-setup
+  workshop/50-ready-for-dev
+  workshop/60-implementation
+  workshop/70-complete
+  workshop/80-mvp
+)
+
+LEGACY_BRANCH_ALIASES=(
   stage-1
   stage-2
   stage-3
@@ -101,6 +112,7 @@ check_git_repo() {
 
 check_workshop_branches() {
   local missing=()
+  local missing_legacy=()
   local b
 
   for b in "${WORKSHOP_BRANCHES[@]}"; do
@@ -112,9 +124,23 @@ check_workshop_branches() {
   done
 
   if (( ${#missing[@]} == 0 )); then
-    pass "all workshop branches are present (local or origin)"
+    pass "all canonical workshop branches are present (local or origin)"
   else
-    fail "missing workshop branches: ${missing[*]}"
+    fail "missing canonical workshop branches: ${missing[*]}"
+  fi
+
+  for b in "${LEGACY_BRANCH_ALIASES[@]}"; do
+    if git -C "$ROOT_DIR" show-ref --verify --quiet "refs/heads/$b" || git -C "$ROOT_DIR" show-ref --verify --quiet "refs/remotes/origin/$b"; then
+      :
+    else
+      missing_legacy+=("$b")
+    fi
+  done
+
+  if (( ${#missing_legacy[@]} == 0 )); then
+    pass "legacy branch aliases present for compatibility cycle"
+  else
+    warn "missing legacy aliases (compatibility cycle): ${missing_legacy[*]}"
   fi
 }
 

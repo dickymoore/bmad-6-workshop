@@ -13,8 +13,10 @@
 
 - Headline: "How this workshop is structured."
 - Explain branch order:
-  `main -> stage-1 -> stage-2 -> stage-3 -> stage-4 -> ready-for-dev ->`
-  `implementation-in-progress -> complete -> mvp`.
+  `main -> workshop/10-analysis -> workshop/20-planning ->`
+  `workshop/30-solutioning -> workshop/40-implementation-setup ->`
+  `workshop/50-ready-for-dev -> workshop/60-implementation ->`
+  `workshop/70-complete -> workshop/80-mvp`.
 - Show `README.md` on `main`.
 - Mention app location split:
   - Early stages: no runnable app at repo root; demo lives in
@@ -26,7 +28,7 @@
 ## 02:30 - 05:00 | Stage 1 (Analysis)
 
 - Headline: "Stage 1: Analysis setup and elicitation."
-- Command: `git checkout stage-1`
+- Command: `git checkout workshop/10-analysis`
 - Open `README.md` and follow the stage instructions.
 - In Codex:
   - `/bmad-agent-bmm-analyst`
@@ -35,7 +37,7 @@
 - Highlight output artifacts to expect:
   - `_bmad/` and `.agents/skills/` exist
   - planning docs are not created yet
-- Wrap: `git stash` then `git checkout stage-2`.
+- Wrap: `git stash` then `git checkout workshop/20-planning`.
 
 ## 05:00 - 07:30 | Stage 2 (Planning)
 
@@ -44,7 +46,7 @@
   - `docs/adr/ADR-001-tech-stack.md`
   - brainstorming, research, and product brief outputs
 - Mention: PRD and UX spec are not created yet.
-- Transition: `git stash` then `git checkout stage-3`.
+- Transition: `git stash` then `git checkout workshop/30-solutioning`.
 
 ## 07:30 - 11:00 | Stage 3 (Solutioning)
 
@@ -58,7 +60,7 @@
   - `docs/prd.md`
   - `docs/ux-design-specification.md`
   - no sprint artifacts yet
-- Transition: `git stash` then `git checkout stage-4`.
+- Transition: `git stash` then `git checkout workshop/40-implementation-setup`.
 
 ## 11:00 - 13:30 | Stage 4 (Implementation Setup)
 
@@ -73,7 +75,7 @@
   - `/bmad-bmm-sprint-planning`
   - `/bmad-agent-bmm-sm`
   - `/bmad-bmm-create-story`
-- Transition: `git stash` then `git checkout ready-for-dev`.
+- Transition: `git stash` then `git checkout workshop/50-ready-for-dev`.
 
 ## 13:30 - 16:00 | Ready-for-dev (Hand-off)
 
@@ -81,7 +83,7 @@
 - Show `docs/sprint-artifacts/sprint-status.yaml`.
 - Show a story file `docs/sprint-artifacts/1-1-*.md`.
 - Emphasize: still no root app at this stage.
-- Transition: `git checkout implementation-in-progress`.
+- Transition: `git checkout workshop/60-implementation`.
 
 ## 16:00 - 21:30 | Implementation-in-progress (Run the App)
 
@@ -101,7 +103,7 @@
 ## 21:30 - 25:00 | Complete (Bug Hunt / Correct Course)
 
 - Headline: "Complete: find and fix a bug with Correct Course."
-- Command: `git checkout complete`
+- Command: `git checkout workshop/70-complete`
 - Run app again and reproduce the bug noted in `README.md`.
 - Run Codex PM:
   - `/bmad-agent-bmm-pm`
@@ -111,7 +113,7 @@
 ## 25:00 - 29:00 | MVP (Final State)
 
 - Headline: "MVP: working app plus tests."
-- Command: `git checkout mvp`
+- Command: `git checkout workshop/80-mvp`
 - Run `npm install` and `npm run dev` if needed.
 - Optional: run e2e tests
   - `BASE_URL=http://localhost:5173 E2E_RUN=1 npm run test:e2e`
@@ -131,12 +133,12 @@
 ## Optional On-screen Commands (Quick Reference)
 
 - `./workshop-reviewer.sh --all`
-- `./workshop-reviewer.sh --dev stage-1`
-- `./workshop-reviewer.sh --dev implementation-in-progress`
-- `./workshop-reviewer.sh --e2e mvp`
+- `./workshop-reviewer.sh --dev workshop/10-analysis`
+- `./workshop-reviewer.sh --dev workshop/60-implementation`
+- `./workshop-reviewer.sh --e2e workshop/80-mvp`
 
 ## Notes to Self (Not for Screen)
 
 - Keep the pace brisk; pause only when showing artifacts.
 - For Codex steps, narrate what you expect to see and why it matters.
-- If time runs short, skip deep UI walkthrough in implementation-in-progress.
+- If time runs short, skip deep UI walkthrough in `workshop/60-implementation`.

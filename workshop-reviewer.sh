@@ -4,33 +4,47 @@ set -euo pipefail
 usage() {
   cat <<'USAGE'
 Usage:
-  ./workshop-reviewer.sh                # check current branch (HEAD)
-  ./workshop-reviewer.sh <branch>       # check a specific branch
-  ./workshop-reviewer.sh --all          # check all workshop branches
-  ./workshop-reviewer.sh --dev [branch] # start the correct dev server
-  ./workshop-reviewer.sh --dev --all    # smoke-check dev server on all branches
-  ./workshop-reviewer.sh --e2e [branch] # run Playwright e2e (app stages only)
-  ./workshop-reviewer.sh --e2e --all    # run Playwright e2e on app branches
+  ./workshop-reviewer.sh                             # check current branch (HEAD)
+  ./workshop-reviewer.sh <branch>                    # check a specific branch
+  ./workshop-reviewer.sh --all                       # check all workshop branches
+  ./workshop-reviewer.sh --dev [branch]              # start the correct dev server
+  ./workshop-reviewer.sh --dev --all                 # smoke-check dev server on all branches
+  ./workshop-reviewer.sh --e2e [branch]              # run Playwright e2e (app stages only)
+  ./workshop-reviewer.sh --e2e --all                 # run Playwright e2e on app branches
   ./workshop-reviewer.sh --help
 
 This script validates that each workshop stage branch is in the expected
 "pre-artifact" state and prints a short facilitation guide for that stage.
 
-Note: checks are based on the committed tree of the branch, not your working tree.
-Note: --dev/--e2e may switch branches; keep your working tree clean.
+Notes:
+- Checks are based on the committed tree of the branch, not your working tree.
+- --all uses canonical workshop/* branch names.
+- Positional branch accepts canonical names and legacy aliases.
+- --dev/--e2e may switch branches; keep your working tree clean.
 USAGE
 }
 
 branches=(
   main
-  stage-1
-  stage-2
-  stage-3
-  stage-4
-  ready-for-dev
-  implementation-in-progress
-  complete
-  mvp
+  workshop/10-analysis
+  workshop/20-planning
+  workshop/30-solutioning
+  workshop/40-implementation-setup
+  workshop/50-ready-for-dev
+  workshop/60-implementation
+  workshop/70-complete
+  workshop/80-mvp
+)
+
+declare -A LEGACY_TO_CANONICAL=(
+  [stage-1]=workshop/10-analysis
+  [stage-2]=workshop/20-planning
+  [stage-3]=workshop/30-solutioning
+  [stage-4]=workshop/40-implementation-setup
+  [ready-for-dev]=workshop/50-ready-for-dev
+  [implementation-in-progress]=workshop/60-implementation
+  [complete]=workshop/70-complete
+  [mvp]=workshop/80-mvp
 )
 
 mode="check"
@@ -41,6 +55,40 @@ require_patterns=()
 forbid_patterns=()
 
 guidance=""
+
+canonicalize_branch() {
+  local branch="$1"
+  if [[ "$branch" == "main" ]]; then
+    echo "main"
+    return 0
+  fi
+  if [[ -n "${LEGACY_TO_CANONICAL[$branch]:-}" ]]; then
+    echo "${LEGACY_TO_CANONICAL[$branch]}"
+    return 0
+  fi
+  echo "$branch"
+}
+
+branch_exists() {
+  local branch="$1"
+  git show-ref --verify --quiet "refs/heads/$branch" || \
+    git show-ref --verify --quiet "refs/remotes/origin/$branch"
+}
+
+ensure_local_branch() {
+  local branch="$1"
+  if git show-ref --verify --quiet "refs/heads/$branch"; then
+    return 0
+  fi
+
+  if git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+    git checkout -b "$branch" "origin/$branch" >/dev/null
+    return 0
+  fi
+
+  echo "Branch not found locally or on origin: $branch" >&2
+  exit 2
+}
 
 set_stage_rules() {
   local stage="$1"
@@ -67,9 +115,9 @@ set_stage_rules() {
         '^src/'
         '^tests/'
       )
-      guidance=$'Main: verify tooling + install BMAD stable v6, then checkout stage-1.\n- Suggested next: `git checkout stage-1` and follow `README.md`.'
+      guidance=$'Main: verify tooling + install BMAD stable v6, then checkout workshop/10-analysis.\n- Suggested next: `git checkout workshop/10-analysis` and follow `README.md`.'
       ;;
-    stage-1)
+    workshop/10-analysis)
       require_patterns=(
         '^_bmad/_config/manifest\.yaml$'
         '^_bmad/bmm/config\.yaml$'
@@ -87,9 +135,9 @@ set_stage_rules() {
         '^src/'
         '^tests/'
       )
-      guidance=$'Stage 1 (Analysis): use `/bmad-agent-bmm-analyst` + `/bmad-bmm-create-product-brief` and research workflows.\n- When done: stash and `git checkout stage-2`.'
+      guidance=$'Stage 1 (Analysis): use `/bmad-agent-bmm-analyst` + `/bmad-bmm-create-product-brief` and research workflows.\n- When done: stash and `git checkout workshop/20-planning`.'
       ;;
-    stage-2)
+    workshop/20-planning)
       require_patterns=(
         '^_bmad/_config/manifest\.yaml$'
         '^_bmad/bmm/config\.yaml$'
@@ -109,9 +157,9 @@ set_stage_rules() {
         '^src/'
         '^tests/'
       )
-      guidance=$'Stage 2 (Planning): use `/bmad-agent-bmm-pm` + `/bmad-bmm-create-prd` and `/bmad-bmm-create-ux-design`.\n- When done: stash and `git checkout stage-3`.'
+      guidance=$'Stage 2 (Planning): use `/bmad-agent-bmm-pm` + `/bmad-bmm-create-prd` and `/bmad-bmm-create-ux-design`.\n- When done: stash and `git checkout workshop/30-solutioning`.'
       ;;
-    stage-3)
+    workshop/30-solutioning)
       require_patterns=(
         '^_bmad/_config/manifest\.yaml$'
         '^_bmad/bmm/config\.yaml$'
@@ -130,9 +178,9 @@ set_stage_rules() {
         '^src/'
         '^tests/'
       )
-      guidance=$'Stage 3 (Solutioning): use `/bmad-agent-bmm-architect` + `/bmad-bmm-create-architecture` and `/bmad-bmm-create-epics-and-stories`.\n- When done: stash and `git checkout stage-4`.'
+      guidance=$'Stage 3 (Solutioning): use `/bmad-agent-bmm-architect` + `/bmad-bmm-create-architecture` and `/bmad-bmm-create-epics-and-stories`.\n- When done: stash and `git checkout workshop/40-implementation-setup`.'
       ;;
-    stage-4)
+    workshop/40-implementation-setup)
       require_patterns=(
         '^_bmad/_config/manifest\.yaml$'
         '^_bmad/bmm/config\.yaml$'
@@ -150,9 +198,9 @@ set_stage_rules() {
         '^src/'
         '^tests/'
       )
-      guidance=$'Stage 4 (Implementation setup): run `/bmad-bmm-check-implementation-readiness`, then `/bmad-bmm-sprint-planning` and `/bmad-bmm-create-story`.\n- When done: `git checkout ready-for-dev`.'
+      guidance=$'Stage 4 (Implementation setup): run `/bmad-bmm-check-implementation-readiness`, then `/bmad-bmm-sprint-planning` and `/bmad-bmm-create-story`.\n- When done: `git checkout workshop/50-ready-for-dev`.'
       ;;
-    ready-for-dev)
+    workshop/50-ready-for-dev)
       require_patterns=(
         '^_bmad/_config/manifest\.yaml$'
         '^_bmad/bmm/config\.yaml$'
@@ -167,9 +215,9 @@ set_stage_rules() {
         '^src/'
         '^tests/'
       )
-      guidance=$'Ready-for-dev: use `/bmad-agent-bmm-dev` + `/bmad-bmm-dev-story` and `/bmad-bmm-code-review`.\n- When done: `git checkout implementation-in-progress`.'
+      guidance=$'Ready-for-dev: use `/bmad-agent-bmm-dev` + `/bmad-bmm-dev-story` and `/bmad-bmm-code-review`.\n- When done: `git checkout workshop/60-implementation`.'
       ;;
-    implementation-in-progress)
+    workshop/60-implementation)
       require_patterns=(
         '^_bmad/_config/manifest\.yaml$'
         '^_bmad/bmm/config\.yaml$'
@@ -183,9 +231,9 @@ set_stage_rules() {
       forbid_patterns=(
         '^\.bmad/'
       )
-      guidance=$'Implementation-in-progress: finish stories via `/bmad-bmm-dev-story`, run app/tests, and update sprint status.\n- When done: `git checkout complete`.'
+      guidance=$'Implementation stage: finish stories via `/bmad-bmm-dev-story`, run app/tests, and update sprint status.\n- When done: `git checkout workshop/70-complete`.'
       ;;
-    complete)
+    workshop/70-complete)
       require_patterns=(
         '^_bmad/_config/manifest\.yaml$'
         '^_bmad/bmm/config\.yaml$'
@@ -199,9 +247,9 @@ set_stage_rules() {
       forbid_patterns=(
         '^\.bmad/'
       )
-      guidance=$'Complete: run app and use `/bmad-bmm-correct-course` for any meaningful pivot.\n- When done: `git checkout mvp`.'
+      guidance=$'Complete stage: run app and use `/bmad-bmm-correct-course` for any meaningful pivot.\n- When done: `git checkout workshop/80-mvp`.'
       ;;
-    mvp)
+    workshop/80-mvp)
       require_patterns=(
         '^_bmad/_config/manifest\.yaml$'
         '^_bmad/bmm/config\.yaml$'
@@ -217,7 +265,7 @@ set_stage_rules() {
       forbid_patterns=(
         '^\.bmad/'
       )
-      guidance=$'MVP: final working app; run dev/e2e and demonstrate stable-v6 BMAD workflow usage.'
+      guidance=$'MVP stage: final working app; run dev/e2e and demonstrate stable-v6 BMAD workflow usage.'
       ;;
     *)
       echo "Unknown stage: $stage" >&2
@@ -233,11 +281,16 @@ list_tree() {
 
 check_branch() {
   local branch="$1"
-  set_stage_rules "$branch"
+  local stage
+  stage=$(canonicalize_branch "$branch")
+  set_stage_rules "$stage"
   local tree
   tree=$(list_tree "$branch")
 
   echo "==> $branch"
+  if [[ "$stage" != "$branch" ]]; then
+    echo "  NOTE: legacy alias mapped to canonical stage: $stage"
+  fi
 
   local missing=0
   for pattern in "${require_patterns[@]}"; do
@@ -339,7 +392,7 @@ run_dev_check() {
   local port
   port=$(pick_port)
   local url="http://localhost:$port"
-  local log="/tmp/workshop-dev-${branch}.log"
+  local log="/tmp/workshop-dev-${branch//\//-}.log"
 
   local pid
   pid=$(start_dev_server "$app_dir" "$port" "$log")
@@ -378,7 +431,7 @@ run_e2e() {
   local port
   port=$(pick_port)
   local url="http://localhost:$port"
-  local log="/tmp/workshop-e2e-${branch}.log"
+  local log="/tmp/workshop-e2e-${branch//\//-}.log"
 
   if ! has_e2e_script; then
     echo "  E2E SKIP (no test:e2e script)"
@@ -430,6 +483,18 @@ while [[ $# -gt 0 ]]; do
 done
 
 start_branch=$(git rev-parse --abbrev-ref HEAD)
+if [[ "$start_branch" == "HEAD" ]]; then
+  echo "Detached HEAD is not supported for this script." >&2
+  exit 2
+fi
+
+if [[ -n "$target_branch" ]]; then
+  mapped_target=$(canonicalize_branch "$target_branch")
+  if [[ "$mapped_target" != "$target_branch" ]]; then
+    echo "Mapped legacy branch '$target_branch' -> '$mapped_target'"
+  fi
+  target_branch="$mapped_target"
+fi
 
 if [[ "$mode" != "check" ]]; then
   if $run_all || [[ -n "$target_branch" && "$target_branch" != "$start_branch" ]]; then
@@ -440,11 +505,18 @@ fi
 if $run_all; then
   failures=0
   for b in "${branches[@]}"; do
+    branch_exists "$b" || {
+      echo "Branch not found: $b" >&2
+      exit 2
+    }
+    ensure_local_branch "$b"
     git checkout "$b" >/dev/null
+
     if [[ "$mode" == "check" ]]; then
       check_branch "$b"
       continue
     fi
+
     echo "==> $b"
 
     app_dir=""
@@ -478,7 +550,13 @@ if $run_all; then
 fi
 
 branch="${target_branch:-$start_branch}"
+branch_exists "$branch" || {
+  echo "Branch not found: $branch" >&2
+  exit 2
+}
+
 if [[ "$branch" != "$start_branch" ]]; then
+  ensure_local_branch "$branch"
   git checkout "$branch" >/dev/null
 fi
 
