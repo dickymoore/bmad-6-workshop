@@ -55,6 +55,21 @@ npm cache clean --force
 npx bmad-method@latest install --modules bmm --tools codex --yes
 ```
 
+## 4A. Facilitator Session Automation
+
+Use these scripts to create one folder per stage branch for a single workshop
+run, then open all folders in separate VS Code windows.
+
+- PowerShell (Windows):
+  - `./scripts/setup-workshop-session.ps1 -Mode all -Session Wed-AM`
+  - Optional desktop orchestration:
+    `-UseVirtualDesktops` (requires compatible PowerShell desktop commands).
+- Bash (Linux/macOS):
+  - `./scripts/setup-workshop-session.sh --mode all --session Wed-AM`
+- Teardown after each run:
+  - `./scripts/setup-workshop-session.ps1 -Mode teardown -Session Wed-AM`
+  - `./scripts/setup-workshop-session.sh --mode teardown --session Wed-AM`
+
 ## 5. Live Delivery Cadence
 
 Target runtime: 2.5 to 3 hours.
