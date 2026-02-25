@@ -437,7 +437,6 @@ if $run_all; then
   failures=0
   for b in "${branches[@]}"; do
     git checkout "$b" >/dev/null
-    echo "==> $b"
     if [[ "$mode" == "check" ]]; then
       check_branch "$b"
       continue
