@@ -39,6 +39,21 @@ git checkout stage-1
 - Open `README.md` on the current stage.
 - Follow stage instructions in order.
 
+## Workshop Operations
+
+For facilitators and operators preparing or delivering the workshop:
+
+- [workshop-setup-runbook.md](workshop-setup-runbook.md): setup,
+  troubleshooting, and reset workflow.
+- [workshop-branch-strategy.md](workshop-branch-strategy.md): branch flow,
+  merge order, and ownership.
+- [workshop-dry-run-and-delivery-checklists.md](workshop-dry-run-and-delivery-checklists.md):
+  dry-run and day-of delivery checklists.
+- [`./scripts/workshop-preflight.sh`](scripts/workshop-preflight.sh): run
+  readiness checks (`./scripts/workshop-preflight.sh --all`).
+- [workshop-video-script.md](workshop-video-script.md): facilitation script
+  for demo recording or live delivery.
+
 ## Scripts
 
 ### `./scripts/workshop-preflight.sh`
