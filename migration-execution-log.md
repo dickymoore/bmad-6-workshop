@@ -41,3 +41,5 @@
   - Added payload sync for scripts + reviewer per migrated branch.
   - Tightened legacy marker detection to command markers.
   - Upgraded migration replacements for stable agent/workflow commands.
+2026-02-25 12:57:15 START branch=main
+2026-02-25 12:57:15 DONE branch=main

@@ -14,7 +14,7 @@ Kick off the workshop quickly with the steps below. All commands are run from a 
    ```
 3) **Install BMAD 6 Alpha**
    ```
-   npx bmad-method@alpha install
+   npx bmad-method@latest install
    ```
    
    - Type `y` to proceed.
