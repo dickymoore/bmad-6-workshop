@@ -7,7 +7,7 @@
 
 1. Run Codex.
 2. /bmad-agent-bmm-analyst
-3. *workflow-status
+3. */bmad-bmm-sprint-status
 4. continue
 5. When ready, exit codex.
 6. git stash
