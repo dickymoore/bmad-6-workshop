@@ -100,6 +100,96 @@ function Get-ManifestPath {
   return Join-Path (Get-SessionPath) '.session-manifest.json'
 }
 
+function Copy-FileIfExists {
+  param(
+    [Parameter(Mandatory = $true)][string]$Source,
+    [Parameter(Mandatory = $true)][string]$Destination
+  )
+
+  if (Test-Path -LiteralPath $Source -PathType Leaf) {
+    Copy-Item -LiteralPath $Source -Destination $Destination -Force
+    return $true
+  }
+
+  return $false
+}
+
+function Sync-SystemSkills {
+  param(
+    [Parameter(Mandatory = $true)][string]$CodexSkillsPath,
+    [Parameter(Mandatory = $true)][string]$SourceRepoPath
+  )
+
+  $candidates = @(
+    (Join-Path $SourceRepoPath '.codex/skills/.system'),
+    (Join-Path $HOME '.codex/skills/.system')
+  )
+
+  foreach ($candidate in $candidates) {
+    if (Test-Path -LiteralPath $candidate -PathType Container) {
+      $dest = Join-Path $CodexSkillsPath '.system'
+      if (Test-Path -LiteralPath $dest) {
+        Remove-Item -LiteralPath $dest -Recurse -Force
+      }
+      Copy-Item -LiteralPath $candidate -Destination $dest -Recurse -Force
+      return
+    }
+  }
+}
+
+function Sync-BmadSkills {
+  param([Parameter(Mandatory = $true)][string]$BranchPath)
+
+  $skillsPath = Join-Path $BranchPath '.codex/skills'
+  $agentsSkillsPath = Join-Path $BranchPath '.agents/skills'
+  New-Item -ItemType Directory -Path $skillsPath -Force | Out-Null
+
+  # Keep .system intact; rebuild BMAD skills to match this branch.
+  Get-ChildItem -LiteralPath $skillsPath -Force -ErrorAction SilentlyContinue | ForEach-Object {
+    if ($_.Name -ne '.system') {
+      Remove-Item -LiteralPath $_.FullName -Recurse -Force
+    }
+  }
+
+  if (-not (Test-Path -LiteralPath $agentsSkillsPath -PathType Container)) {
+    Write-Log "no .agents/skills found in $BranchPath; BMAD skills unavailable for this branch"
+    return
+  }
+
+  Get-ChildItem -LiteralPath $agentsSkillsPath -Directory | ForEach-Object {
+    $dest = Join-Path $skillsPath $_.Name
+    Copy-Item -LiteralPath $_.FullName -Destination $dest -Recurse -Force
+  }
+}
+
+function Bootstrap-CodexWorkspace {
+  param([Parameter(Mandatory = $true)][string]$BranchPath)
+
+  $codexPath = Join-Path $BranchPath '.codex'
+  $skillsPath = Join-Path $codexPath 'skills'
+  New-Item -ItemType Directory -Path $skillsPath -Force | Out-Null
+
+  $copiedAuth = $false
+  $copiedAuth = Copy-FileIfExists -Source (Join-Path $SourceRepo '.codex/auth.json') -Destination (Join-Path $codexPath 'auth.json')
+  if (-not $copiedAuth) {
+    $copiedAuth = Copy-FileIfExists -Source (Join-Path $HOME '.codex/auth.json') -Destination (Join-Path $codexPath 'auth.json')
+  }
+
+  $copiedConfig = Copy-FileIfExists -Source (Join-Path $SourceRepo '.codex/config.toml') -Destination (Join-Path $codexPath 'config.toml')
+  if (-not $copiedConfig) {
+    $null = Copy-FileIfExists -Source (Join-Path $HOME '.codex/config.toml') -Destination (Join-Path $codexPath 'config.toml')
+  }
+
+  Sync-SystemSkills -CodexSkillsPath $skillsPath -SourceRepoPath $SourceRepo
+  Sync-BmadSkills -BranchPath $BranchPath
+
+  if ($copiedAuth) {
+    Write-Log "bootstrapped Codex workspace in $BranchPath/.codex"
+  } else {
+    Write-Log "bootstrapped Codex workspace in $BranchPath/.codex (no auth.json source found)"
+  }
+}
+
 function Sync-SourceRepo {
   $hasOrigin = $true
   try {
@@ -215,6 +305,7 @@ function Prepare-Session {
     Invoke-Git -Arguments @("--git-dir=$mirrorPath", 'worktree', 'add', '--force', $folderPath, $branch) -SuppressOutput
     Invoke-Git -Arguments @('-C', $folderPath, 'reset', '--hard', $branch) -SuppressOutput
     Invoke-Git -Arguments @('-C', $folderPath, 'clean', '-fd') -SuppressOutput
+    Bootstrap-CodexWorkspace -BranchPath $folderPath
 
     Write-Log "prepared $branch -> $folderPath"
   }
@@ -241,7 +332,33 @@ function Open-CodeWindow {
     Fail "VS Code CLI 'code' not found in PATH"
   }
 
-  Start-Process -FilePath $codeCmd.Source -ArgumentList @('-n', $Path) | Out-Null
+  $codexHome = Join-Path $Path '.codex'
+  $startArgs = @{
+    FilePath = $codeCmd.Source
+    ArgumentList = @('-n', $Path)
+    WorkingDirectory = $Path
+  }
+
+  # Use per-window CODEX_HOME so each workshop branch gets its own Codex context.
+  $supportsEnv = (Get-Command Start-Process).Parameters.ContainsKey('Environment')
+  if ($supportsEnv) {
+    $startArgs['Environment'] = @{ CODEX_HOME = $codexHome }
+    Start-Process @startArgs | Out-Null
+    return
+  }
+
+  $previous = $env:CODEX_HOME
+  $hadPrevious = Test-Path Env:CODEX_HOME
+  try {
+    $env:CODEX_HOME = $codexHome
+    Start-Process @startArgs | Out-Null
+  } finally {
+    if ($hadPrevious) {
+      $env:CODEX_HOME = $previous
+    } else {
+      Remove-Item Env:CODEX_HOME -ErrorAction SilentlyContinue
+    }
+  }
 }
 
 function Test-VirtualDesktopSupport {

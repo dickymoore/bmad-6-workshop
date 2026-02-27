@@ -73,6 +73,85 @@ safe_rm_rf() {
   rm -rf "$path"
 }
 
+copy_file_if_exists() {
+  local src="$1"
+  local dst="$2"
+  if [[ -f "$src" ]]; then
+    cp "$src" "$dst"
+    return 0
+  fi
+  return 1
+}
+
+sync_system_skills() {
+  local codex_skills_dir="$1"
+  local source_codex="$SOURCE_REPO/.codex"
+  local home_codex="$HOME/.codex"
+  local system_src=""
+
+  if [[ -d "$source_codex/skills/.system" ]]; then
+    system_src="$source_codex/skills/.system"
+  elif [[ -d "$home_codex/skills/.system" ]]; then
+    system_src="$home_codex/skills/.system"
+  fi
+
+  [[ -n "$system_src" ]] || return 0
+
+  mkdir -p "$codex_skills_dir/.system"
+  cp -R "$system_src/." "$codex_skills_dir/.system/"
+}
+
+sync_bmad_skills() {
+  local branch_path="$1"
+  local codex_skills_dir="$branch_path/.codex/skills"
+  local agents_skills_dir="$branch_path/.agents/skills"
+
+  mkdir -p "$codex_skills_dir"
+
+  # Keep .system intact; rebuild BMAD skills to match current branch exactly.
+  find "$codex_skills_dir" -mindepth 1 -maxdepth 1 ! -name '.system' -exec rm -rf {} + 2>/dev/null || true
+
+  if [[ ! -d "$agents_skills_dir" ]]; then
+    log "no .agents/skills found in $branch_path; BMAD skills unavailable for this branch"
+    return 0
+  fi
+
+  while IFS= read -r -d '' skill_dir; do
+    local skill_name
+    skill_name=$(basename "$skill_dir")
+    cp -R "$skill_dir" "$codex_skills_dir/$skill_name"
+  done < <(find "$agents_skills_dir" -mindepth 1 -maxdepth 1 -type d -print0)
+}
+
+bootstrap_codex_workspace() {
+  local branch_path="$1"
+  local codex_dir="$branch_path/.codex"
+  local source_codex="$SOURCE_REPO/.codex"
+  local home_codex="$HOME/.codex"
+  local copied_auth=0
+
+  mkdir -p "$codex_dir/skills"
+
+  if copy_file_if_exists "$source_codex/auth.json" "$codex_dir/auth.json"; then
+    copied_auth=1
+  elif copy_file_if_exists "$home_codex/auth.json" "$codex_dir/auth.json"; then
+    copied_auth=1
+  fi
+
+  if ! copy_file_if_exists "$source_codex/config.toml" "$codex_dir/config.toml"; then
+    copy_file_if_exists "$home_codex/config.toml" "$codex_dir/config.toml" || true
+  fi
+
+  sync_system_skills "$codex_dir/skills"
+  sync_bmad_skills "$branch_path"
+
+  if [[ "$copied_auth" -eq 1 ]]; then
+    log "bootstrapped Codex workspace in $branch_path/.codex"
+  else
+    log "bootstrapped Codex workspace in $branch_path/.codex (no auth.json source found)"
+  fi
+}
+
 folder_name_for_branch() {
   local branch="$1"
   case "$branch" in
@@ -191,6 +270,7 @@ prepare_session() {
     git --git-dir="$mirror" worktree add --force "$branch_path" "$branch" >/dev/null
     git -C "$branch_path" reset --hard "$branch" >/dev/null
     git -C "$branch_path" clean -fd >/dev/null
+    bootstrap_codex_workspace "$branch_path"
 
     log "prepared $branch -> $branch_path"
   done < <(selected_branches)
@@ -221,7 +301,7 @@ launch_session() {
   tail -n +2 "$manifest" | while IFS=$'\t' read -r branch folder path; do
     [[ -d "$path" ]] || fail "Missing branch folder for launch: $path"
     log "opening VS Code for $branch ($path)"
-    code -n "$path" >/dev/null 2>&1 &
+    CODEX_HOME="$path/.codex" code -n "$path" >/dev/null 2>&1 &
     sleep 0.2
   done
 }

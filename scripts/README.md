@@ -59,6 +59,11 @@ and facilitator session setup.
   - Includes `main` by default plus all canonical `workshop/*` branches.
   - `-UseVirtualDesktops` is optional and requires compatible PowerShell
     desktop commands (for example `New-Desktop`/`Switch-Desktop`).
+  - `prepare` now bootstraps per-worktree `.codex` folders (auth/config +
+    skills mirrored from `.agents/skills`) and `launch` opens each VS Code
+    window with `CODEX_HOME` set to that worktree’s `.codex`.
+  - Branches without `.agents/skills` (for example `main` if BMAD is not
+    installed there) will not expose BMAD slash skills in that window.
 
 ## `scripts/setup-workshop-session.sh`
 
@@ -69,3 +74,8 @@ and facilitator session setup.
   - `./scripts/setup-workshop-session.sh --mode teardown --session Wed-AM`
 - Notes:
   - Virtual desktop orchestration is PowerShell-only.
+  - `prepare` now bootstraps per-worktree `.codex` folders (auth/config +
+    skills mirrored from `.agents/skills`) and `launch` opens each VS Code
+    window with `CODEX_HOME` set to that worktree’s `.codex`.
+  - Branches without `.agents/skills` (for example `main` if BMAD is not
+    installed there) will not expose BMAD slash skills in that window.
