@@ -2,7 +2,7 @@
 [CmdletBinding()]
 param(
   [Parameter(Mandatory = $true)]
-  [ValidateSet('prepare', 'launch', 'all', 'teardown')]
+  [ValidateSet('prepare', 'launch', 'desktops', 'all', 'teardown')]
   [string]$Mode,
 
   [Parameter(Mandatory = $true)]
@@ -14,7 +14,10 @@ param(
   [switch]$ExcludeMain,
   [switch]$NoCode,
   [switch]$Reset,
-  [switch]$UseVirtualDesktops
+  [switch]$UseVirtualDesktops,
+
+  [ValidateRange(0, 999)]
+  [int]$MaxBranches = 0
 )
 
 Set-StrictMode -Version Latest
@@ -82,10 +85,14 @@ function Get-BranchEntries {
   )
 
   if ($ExcludeMain) {
-    return $entries | Where-Object { $_.Branch -ne 'main' }
+    $entries = @($entries | Where-Object { $_.Branch -ne 'main' })
   }
 
-  return $entries
+  if ($MaxBranches -gt 0) {
+    $entries = @($entries | Select-Object -First $MaxBranches)
+  }
+
+  return @($entries)
 }
 
 function Get-SessionPath {
@@ -98,6 +105,247 @@ function Get-MirrorPath {
 
 function Get-ManifestPath {
   return Join-Path (Get-SessionPath) '.session-manifest.json'
+}
+
+function Copy-FileIfExists {
+  param(
+    [Parameter(Mandatory = $true)][string]$Source,
+    [Parameter(Mandatory = $true)][string]$Destination
+  )
+
+  if (Test-Path -LiteralPath $Source -PathType Leaf) {
+    Copy-Item -LiteralPath $Source -Destination $Destination -Force
+    return $true
+  }
+
+  return $false
+}
+
+function Ensure-VSCodeCodexEnv {
+  param([Parameter(Mandatory = $true)][string]$BranchPath)
+
+  $vscodePath = Join-Path $BranchPath '.vscode'
+  $settingsPath = Join-Path $vscodePath 'settings.json'
+  New-Item -ItemType Directory -Path $vscodePath -Force | Out-Null
+
+  $settings = @{}
+  if (Test-Path -LiteralPath $settingsPath -PathType Leaf) {
+    try {
+      $raw = Get-Content -LiteralPath $settingsPath -Raw
+      if (-not [string]::IsNullOrWhiteSpace($raw)) {
+        $parsed = ConvertFrom-Json -InputObject $raw -AsHashtable
+        if ($parsed -is [hashtable]) {
+          $settings = $parsed
+        }
+      }
+    } catch {
+      Write-Warning "Unable to parse $settingsPath; skipping CODEX_HOME terminal env injection."
+      return
+    }
+  }
+
+  if (-not $settings.ContainsKey('terminal.integrated.env.linux') -or -not ($settings['terminal.integrated.env.linux'] -is [hashtable])) {
+    $settings['terminal.integrated.env.linux'] = @{}
+  }
+  if (-not $settings.ContainsKey('terminal.integrated.env.windows') -or -not ($settings['terminal.integrated.env.windows'] -is [hashtable])) {
+    $settings['terminal.integrated.env.windows'] = @{}
+  }
+
+  $settings['terminal.integrated.env.linux']['CODEX_HOME'] = '${workspaceFolder}/.codex'
+  $settings['terminal.integrated.env.windows']['CODEX_HOME'] = '${workspaceFolder}\.codex'
+
+  $settings | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $settingsPath
+}
+
+function Ensure-WorktreeExcludes {
+  param([Parameter(Mandatory = $true)][string]$BranchPath)
+
+  $excludePath = ''
+  try {
+    $excludePath = (& git -C $BranchPath rev-parse --git-path info/exclude).Trim()
+  } catch {
+    Write-Warning "Unable to determine git exclude path for $BranchPath"
+    return
+  }
+
+  if ([string]::IsNullOrWhiteSpace($excludePath)) {
+    return
+  }
+
+  $excludeDir = Split-Path -Parent $excludePath
+  if (-not (Test-Path -LiteralPath $excludeDir)) {
+    New-Item -ItemType Directory -Path $excludeDir -Force | Out-Null
+  }
+
+  if (-not (Test-Path -LiteralPath $excludePath -PathType Leaf)) {
+    New-Item -ItemType File -Path $excludePath -Force | Out-Null
+  }
+
+  $entries = @('.codex/', '.vscode/settings.json')
+  $existing = @()
+  if (Test-Path -LiteralPath $excludePath -PathType Leaf) {
+    $existing = @(Get-Content -LiteralPath $excludePath -ErrorAction SilentlyContinue)
+  }
+
+  foreach ($entry in $entries) {
+    if ($existing -notcontains $entry) {
+      Add-Content -LiteralPath $excludePath -Value $entry
+    }
+  }
+}
+
+function Protect-CodexSecrets {
+  param([Parameter(Mandatory = $true)][string]$CodexPath)
+
+  $targets = @(
+    (Join-Path $CodexPath 'auth.json'),
+    (Join-Path $CodexPath 'config.toml')
+  )
+
+  foreach ($target in $targets) {
+    if (-not (Test-Path -LiteralPath $target -PathType Leaf)) {
+      continue
+    }
+
+    try {
+      if ($IsWindows) {
+        $identity = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+        & icacls $target /inheritance:r /grant:r "${identity}:(R,W)" /c *> $null
+      } else {
+        & chmod 600 $target
+      }
+    } catch {
+      Write-Warning "Unable to tighten permissions on $target"
+    }
+  }
+}
+
+function Sync-SystemSkills {
+  param(
+    [Parameter(Mandatory = $true)][string]$CodexSkillsPath,
+    [Parameter(Mandatory = $true)][string]$SourceRepoPath
+  )
+
+  $candidates = @(
+    (Join-Path $SourceRepoPath '.codex/skills/.system'),
+    (Join-Path $HOME '.codex/skills/.system')
+  )
+
+  foreach ($candidate in $candidates) {
+    if (Test-Path -LiteralPath $candidate -PathType Container) {
+      $dest = Join-Path $CodexSkillsPath '.system'
+      if (Test-Path -LiteralPath $dest) {
+        Remove-Item -LiteralPath $dest -Recurse -Force
+      }
+      Copy-Item -LiteralPath $candidate -Destination $dest -Recurse -Force
+      return
+    }
+  }
+}
+
+function Sync-BmadSkills {
+  param([Parameter(Mandatory = $true)][string]$BranchPath)
+
+  $skillsPath = Join-Path $BranchPath '.codex/skills'
+  $agentsSkillsPath = Join-Path $BranchPath '.agents/skills'
+  New-Item -ItemType Directory -Path $skillsPath -Force | Out-Null
+
+  # Keep .system intact; rebuild BMAD skills to match this branch.
+  Get-ChildItem -LiteralPath $skillsPath -Force -ErrorAction SilentlyContinue | ForEach-Object {
+    if ($_.Name -ne '.system') {
+      Remove-Item -LiteralPath $_.FullName -Recurse -Force
+    }
+  }
+
+  if (-not (Test-Path -LiteralPath $agentsSkillsPath -PathType Container)) {
+    Write-Log "no .agents/skills found in $BranchPath; BMAD skills unavailable for this branch"
+    return
+  }
+
+  Get-ChildItem -LiteralPath $agentsSkillsPath -Directory | ForEach-Object {
+    $dest = Join-Path $skillsPath $_.Name
+    Copy-Item -LiteralPath $_.FullName -Destination $dest -Recurse -Force
+  }
+}
+
+function Apply-BmadCodexCompatibility {
+  param([Parameter(Mandatory = $true)][string]$BranchPath)
+
+  $helpTask = Join-Path $BranchPath '_bmad/core/tasks/help.md'
+  $helpSkill = Join-Path $BranchPath '.codex/skills/bmad-help/SKILL.md'
+
+  if (Test-Path -LiteralPath $helpTask -PathType Leaf) {
+    $taskContent = Get-Content -LiteralPath $helpTask -Raw
+    if ($taskContent -notmatch '## CODEX COMPATIBILITY OVERRIDE') {
+      $override = @'
+## CODEX COMPATIBILITY OVERRIDE
+- This section overrides conflicting display rules below.
+- BMAD workflows in Codex are invoked as skills, not legacy `/bmad-*` slash commands.
+- When showing a workflow command from the catalog, output `$<command>` (example: `$bmad-bmm-create-prd`).
+- For help itself, always show `$bmad-help` (never `/bmad-help`).
+- For agent workflows, direct users to `/skills` and pick the relevant agent skill.
+- If legacy slash syntax appears in source docs, label it as legacy and include the `$...` equivalent.
+'@
+      if ($taskContent -match '(?m)^# Task: BMAD Help$') {
+        $taskContent = [regex]::Replace(
+          $taskContent,
+          '(?m)^# Task: BMAD Help$',
+          "# Task: BMAD Help`n`n$override",
+          1
+        )
+      } else {
+        $taskContent = "$override`n`n$taskContent"
+      }
+      Set-Content -LiteralPath $helpTask -Value $taskContent
+    }
+  }
+
+  if (Test-Path -LiteralPath $helpSkill -PathType Leaf) {
+    $skillContent = Get-Content -LiteralPath $helpSkill -Raw
+    if ($skillContent -notmatch '## CODEX COMPATIBILITY OVERRIDE') {
+      $append = @'
+
+## CODEX COMPATIBILITY OVERRIDE
+
+- BMAD entries that look like `/bmad-*` are legacy slash syntax.
+- In Codex, invoke BMAD workflows as skills with `$bmad-*`.
+- Apply this mapping when presenting next-step recommendations.
+'@
+      Set-Content -LiteralPath $helpSkill -Value ($skillContent.TrimEnd("`r", "`n") + $append + "`n")
+    }
+  }
+}
+
+function Bootstrap-CodexWorkspace {
+  param([Parameter(Mandatory = $true)][string]$BranchPath)
+
+  $codexPath = Join-Path $BranchPath '.codex'
+  $skillsPath = Join-Path $codexPath 'skills'
+  New-Item -ItemType Directory -Path $skillsPath -Force | Out-Null
+
+  $copiedAuth = $false
+  $copiedAuth = Copy-FileIfExists -Source (Join-Path $SourceRepo '.codex/auth.json') -Destination (Join-Path $codexPath 'auth.json')
+  if (-not $copiedAuth) {
+    $copiedAuth = Copy-FileIfExists -Source (Join-Path $HOME '.codex/auth.json') -Destination (Join-Path $codexPath 'auth.json')
+  }
+
+  $copiedConfig = Copy-FileIfExists -Source (Join-Path $SourceRepo '.codex/config.toml') -Destination (Join-Path $codexPath 'config.toml')
+  if (-not $copiedConfig) {
+    $null = Copy-FileIfExists -Source (Join-Path $HOME '.codex/config.toml') -Destination (Join-Path $codexPath 'config.toml')
+  }
+
+  Sync-SystemSkills -CodexSkillsPath $skillsPath -SourceRepoPath $SourceRepo
+  Sync-BmadSkills -BranchPath $BranchPath
+  Apply-BmadCodexCompatibility -BranchPath $BranchPath
+  Ensure-VSCodeCodexEnv -BranchPath $BranchPath
+  Ensure-WorktreeExcludes -BranchPath $BranchPath
+  Protect-CodexSecrets -CodexPath $codexPath
+
+  if ($copiedAuth) {
+    Write-Log "bootstrapped Codex workspace in $BranchPath/.codex"
+  } else {
+    Write-Log "bootstrapped Codex workspace in $BranchPath/.codex (no auth.json source found)"
+  }
 }
 
 function Sync-SourceRepo {
@@ -195,6 +443,11 @@ function Prepare-Session {
   }
 
   Invoke-Git -Arguments @("--git-dir=$mirrorPath", 'remote', 'set-url', 'origin', $SourceRepo)
+  # Avoid mirror-style fetch into refs/heads/*, which fails when a branch is
+  # checked out in an attached worktree (for example 00-main).
+  Invoke-Git -Arguments @("--git-dir=$mirrorPath", 'config', '--unset-all', 'remote.origin.fetch') -AllowFailure -SuppressOutput | Out-Null
+  Invoke-Git -Arguments @("--git-dir=$mirrorPath", 'config', '--add', 'remote.origin.fetch', '+refs/heads/*:refs/remotes/origin/*')
+  Invoke-Git -Arguments @("--git-dir=$mirrorPath", 'config', '--add', 'remote.origin.fetch', '+refs/tags/*:refs/tags/*')
   Invoke-Git -Arguments @("--git-dir=$mirrorPath", 'fetch', 'origin', '--prune') -SuppressOutput
   Invoke-Git -Arguments @("--git-dir=$mirrorPath", 'worktree', 'prune') -SuppressOutput
 
@@ -215,6 +468,7 @@ function Prepare-Session {
     Invoke-Git -Arguments @("--git-dir=$mirrorPath", 'worktree', 'add', '--force', $folderPath, $branch) -SuppressOutput
     Invoke-Git -Arguments @('-C', $folderPath, 'reset', '--hard', $branch) -SuppressOutput
     Invoke-Git -Arguments @('-C', $folderPath, 'clean', '-fd') -SuppressOutput
+    Bootstrap-CodexWorkspace -BranchPath $folderPath
 
     Write-Log "prepared $branch -> $folderPath"
   }
@@ -224,13 +478,40 @@ function Prepare-Session {
 }
 
 function Get-SessionItems {
-  $manifestPath = Get-ManifestPath
-  if (-not (Test-Path -LiteralPath $manifestPath)) {
-    Fail "Session manifest missing: $manifestPath (run prepare first)"
+  $jsonManifestPath = Get-ManifestPath
+  $items = @()
+
+  if (Test-Path -LiteralPath $jsonManifestPath) {
+    $manifest = Get-Content -LiteralPath $jsonManifestPath -Raw | ConvertFrom-Json
+    $items = @($manifest.items)
+  } else {
+    $tsvManifestPath = Join-Path (Get-SessionPath) '.session-manifest.tsv'
+    if (-not (Test-Path -LiteralPath $tsvManifestPath)) {
+      Fail "Session manifest missing: $jsonManifestPath or $tsvManifestPath (run prepare first)"
+    }
+
+    $lines = Get-Content -LiteralPath $tsvManifestPath
+    foreach ($line in $lines | Select-Object -Skip 1) {
+      if ([string]::IsNullOrWhiteSpace($line)) {
+        continue
+      }
+      $parts = $line -split "`t", 3
+      if ($parts.Count -lt 3) {
+        continue
+      }
+      $items += [PSCustomObject]@{
+        branch = $parts[0]
+        folder = $parts[1]
+        path = $parts[2]
+      }
+    }
   }
 
-  $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-  return @($manifest.items)
+  if ($MaxBranches -gt 0) {
+    $items = @($items | Select-Object -First $MaxBranches)
+  }
+
+  return @($items)
 }
 
 function Open-CodeWindow {
@@ -241,7 +522,33 @@ function Open-CodeWindow {
     Fail "VS Code CLI 'code' not found in PATH"
   }
 
-  Start-Process -FilePath $codeCmd.Source -ArgumentList @('-n', $Path) | Out-Null
+  $codexHome = Join-Path $Path '.codex'
+  $startArgs = @{
+    FilePath = $codeCmd.Source
+    ArgumentList = @('-n', $Path)
+    WorkingDirectory = $Path
+  }
+
+  # Use per-window CODEX_HOME so each workshop branch gets its own Codex context.
+  $supportsEnv = (Get-Command Start-Process).Parameters.ContainsKey('Environment')
+  if ($supportsEnv) {
+    $startArgs['Environment'] = @{ CODEX_HOME = $codexHome }
+    Start-Process @startArgs | Out-Null
+    return
+  }
+
+  $previous = $env:CODEX_HOME
+  $hadPrevious = Test-Path Env:CODEX_HOME
+  try {
+    $env:CODEX_HOME = $codexHome
+    Start-Process @startArgs | Out-Null
+  } finally {
+    if ($hadPrevious) {
+      $env:CODEX_HOME = $previous
+    } else {
+      Remove-Item Env:CODEX_HOME -ErrorAction SilentlyContinue
+    }
+  }
 }
 
 function Test-VirtualDesktopSupport {
@@ -308,6 +615,122 @@ function Launch-Session {
   }
 }
 
+function CommandLine-MatchesToken {
+  param(
+    [string]$CommandLine,
+    [string[]]$Tokens
+  )
+
+  if ([string]::IsNullOrWhiteSpace($CommandLine)) {
+    return $false
+  }
+
+  foreach ($token in $Tokens) {
+    if ([string]::IsNullOrWhiteSpace($token)) {
+      continue
+    }
+    if ($CommandLine.IndexOf($token, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+      return $true
+    }
+  }
+
+  return $false
+}
+
+function Get-CodeProcessesForSessionItem {
+  param([Parameter(Mandatory = $true)][object]$Item)
+
+  $sessionFolder = Split-Path -Leaf (Split-Path -Parent $Item.path)
+  $pathForward = ($Item.path -replace '\\', '/')
+  $pathBack = ($Item.path -replace '/', '\')
+
+  $tokens = @(
+    $Item.path,
+    $pathForward,
+    $pathBack,
+    "$sessionFolder/$($Item.folder)",
+    "$sessionFolder\$($Item.folder)"
+  )
+
+  $all = Get-CimInstance Win32_Process -Filter "Name='Code.exe'" -ErrorAction SilentlyContinue
+  return @($all | Where-Object { CommandLine-MatchesToken -CommandLine $_.CommandLine -Tokens $tokens })
+}
+
+function Move-CodeProcessToDesktop {
+  param(
+    [Parameter(Mandatory = $true)][int]$ProcessId,
+    [Parameter(Mandatory = $true)][object]$Desktop
+  )
+
+  $moveWindowCmd = Get-Command Move-Window -ErrorAction SilentlyContinue
+  if (-not $moveWindowCmd) {
+    return $false
+  }
+
+  try {
+    if ($moveWindowCmd.Parameters.ContainsKey('ProcessId') -and $moveWindowCmd.Parameters.ContainsKey('Desktop')) {
+      Move-Window -ProcessId $ProcessId -Desktop $Desktop | Out-Null
+      return $true
+    }
+
+    $proc = Get-Process -Id $ProcessId -ErrorAction SilentlyContinue
+    if ($null -eq $proc -or $proc.MainWindowHandle -eq 0) {
+      return $false
+    }
+
+    foreach ($handleParam in @('Hwnd', 'Handle', 'WindowHandle', 'MainWindowHandle')) {
+      if ($moveWindowCmd.Parameters.ContainsKey($handleParam) -and $moveWindowCmd.Parameters.ContainsKey('Desktop')) {
+        $args = @{ Desktop = $Desktop }
+        $args[$handleParam] = $proc.MainWindowHandle
+        Move-Window @args | Out-Null
+        return $true
+      }
+    }
+
+    # Some VirtualDesktop modules use positional args: Move-Window <hwnd> <desktop>
+    Move-Window $proc.MainWindowHandle $Desktop | Out-Null
+    return $true
+  } catch {
+    Write-Warning "Unable to move Code process $ProcessId to desktop: $($_.Exception.Message)"
+    return $false
+  }
+}
+
+function Arrange-SessionDesktops {
+  if (-not $IsWindows) {
+    Fail "Mode 'desktops' must be run from Windows PowerShell (outside WSL)."
+  }
+
+  if (-not (Test-VirtualDesktopSupport)) {
+    Fail "Virtual desktop commands not found. Install/import a compatible module (for example VirtualDesktop)."
+  }
+
+  if (-not (Get-Command Move-Window -ErrorAction SilentlyContinue)) {
+    Fail "Move-Window command not found. Install/import a module that supports moving windows between desktops."
+  }
+
+  $items = Get-SessionItems
+  $desktopIndex = 0
+  foreach ($item in $items) {
+    $desktop = New-Desktop
+    $moved = 0
+    $processes = Get-CodeProcessesForSessionItem -Item $item
+    foreach ($proc in $processes) {
+      if (Move-CodeProcessToDesktop -ProcessId $proc.ProcessId -Desktop $desktop) {
+        $moved++
+      }
+    }
+
+    if ($moved -eq 0) {
+      Write-Warning "No VS Code windows matched session item: $($item.branch) ($($item.path))"
+    } else {
+      Write-Log "moved $moved VS Code window(s) for $($item.branch) to desktop index $desktopIndex"
+    }
+
+    $desktopIndex++
+  }
+}
+
 function Close-CodeWindowsForSession {
   $sessionPath = Get-SessionPath
 
@@ -357,6 +780,7 @@ if (-not (Test-Path -LiteralPath $SessionsRoot)) {
 switch ($Mode) {
   'prepare' { Prepare-Session }
   'launch' { Launch-Session }
+  'desktops' { Arrange-SessionDesktops }
   'all' {
     Prepare-Session
     Launch-Session
