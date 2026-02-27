@@ -157,6 +157,69 @@ function Ensure-VSCodeCodexEnv {
   $settings | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $settingsPath
 }
 
+function Ensure-WorktreeExcludes {
+  param([Parameter(Mandatory = $true)][string]$BranchPath)
+
+  $excludePath = ''
+  try {
+    $excludePath = (& git -C $BranchPath rev-parse --git-path info/exclude).Trim()
+  } catch {
+    Write-Warning "Unable to determine git exclude path for $BranchPath"
+    return
+  }
+
+  if ([string]::IsNullOrWhiteSpace($excludePath)) {
+    return
+  }
+
+  $excludeDir = Split-Path -Parent $excludePath
+  if (-not (Test-Path -LiteralPath $excludeDir)) {
+    New-Item -ItemType Directory -Path $excludeDir -Force | Out-Null
+  }
+
+  if (-not (Test-Path -LiteralPath $excludePath -PathType Leaf)) {
+    New-Item -ItemType File -Path $excludePath -Force | Out-Null
+  }
+
+  $entries = @('.codex/', '.vscode/settings.json')
+  $existing = @()
+  if (Test-Path -LiteralPath $excludePath -PathType Leaf) {
+    $existing = @(Get-Content -LiteralPath $excludePath -ErrorAction SilentlyContinue)
+  }
+
+  foreach ($entry in $entries) {
+    if ($existing -notcontains $entry) {
+      Add-Content -LiteralPath $excludePath -Value $entry
+    }
+  }
+}
+
+function Protect-CodexSecrets {
+  param([Parameter(Mandatory = $true)][string]$CodexPath)
+
+  $targets = @(
+    (Join-Path $CodexPath 'auth.json'),
+    (Join-Path $CodexPath 'config.toml')
+  )
+
+  foreach ($target in $targets) {
+    if (-not (Test-Path -LiteralPath $target -PathType Leaf)) {
+      continue
+    }
+
+    try {
+      if ($IsWindows) {
+        $identity = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+        & icacls $target /inheritance:r /grant:r "${identity}:(R,W)" /c *> $null
+      } else {
+        & chmod 600 $target
+      }
+    } catch {
+      Write-Warning "Unable to tighten permissions on $target"
+    }
+  }
+}
+
 function Sync-SystemSkills {
   param(
     [Parameter(Mandatory = $true)][string]$CodexSkillsPath,
@@ -275,6 +338,8 @@ function Bootstrap-CodexWorkspace {
   Sync-BmadSkills -BranchPath $BranchPath
   Apply-BmadCodexCompatibility -BranchPath $BranchPath
   Ensure-VSCodeCodexEnv -BranchPath $BranchPath
+  Ensure-WorktreeExcludes -BranchPath $BranchPath
+  Protect-CodexSecrets -CodexPath $codexPath
 
   if ($copiedAuth) {
     Write-Log "bootstrapped Codex workspace in $BranchPath/.codex"

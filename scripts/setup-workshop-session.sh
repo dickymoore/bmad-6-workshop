@@ -112,6 +112,32 @@ ensure_vscode_codex_env() {
 JSON
 }
 
+ensure_worktree_excludes() {
+  local branch_path="$1"
+  local exclude_file
+  exclude_file=$(git -C "$branch_path" rev-parse --git-path info/exclude 2>/dev/null || true)
+  [[ -n "$exclude_file" ]] || return 0
+
+  mkdir -p "$(dirname "$exclude_file")"
+  touch "$exclude_file"
+
+  if ! grep -Fxq '.codex/' "$exclude_file"; then
+    echo '.codex/' >> "$exclude_file"
+  fi
+  if ! grep -Fxq '.vscode/settings.json' "$exclude_file"; then
+    echo '.vscode/settings.json' >> "$exclude_file"
+  fi
+}
+
+set_codex_secret_permissions() {
+  local codex_dir="$1"
+  local file
+  for file in "$codex_dir/auth.json" "$codex_dir/config.toml"; do
+    [[ -f "$file" ]] || continue
+    chmod 600 "$file" 2>/dev/null || true
+  done
+}
+
 sync_system_skills() {
   local codex_skills_dir="$1"
   local source_codex="$SOURCE_REPO/.codex"
@@ -126,6 +152,7 @@ sync_system_skills() {
 
   [[ -n "$system_src" ]] || return 0
 
+  rm -rf "$codex_skills_dir/.system"
   mkdir -p "$codex_skills_dir/.system"
   cp -R "$system_src/." "$codex_skills_dir/.system/"
 }
@@ -212,6 +239,8 @@ bootstrap_codex_workspace() {
   sync_bmad_skills "$branch_path"
   apply_bmad_codex_compat "$branch_path"
   ensure_vscode_codex_env "$branch_path"
+  ensure_worktree_excludes "$branch_path"
+  set_codex_secret_permissions "$codex_dir"
 
   if [[ "$copied_auth" -eq 1 ]]; then
     log "bootstrapped Codex workspace in $branch_path/.codex"
