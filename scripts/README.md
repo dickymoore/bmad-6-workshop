@@ -56,7 +56,8 @@ and facilitator session setup.
 - Typical use:
   - `./scripts/setup-workshop-session.ps1 -Mode all -Session Wed-AM`
   - `./scripts/setup-workshop-session.ps1 -Mode launch -Session Wed-AM`
-  - `./scripts/setup-workshop-session.ps1 -Mode desktops -Session Wed-AM -MaxBranches 1`
+  - `./scripts/setup-workshop-session.ps1 -Mode desktops -Session Wed-AM`
+    `-MaxBranches 1`
   - `./scripts/setup-workshop-session.ps1 -Mode teardown -Session Wed-AM`
 - Notes:
   - Includes `main` by default plus all canonical `workshop/*` branches.
@@ -78,7 +79,8 @@ and facilitator session setup.
 - Modes: `prepare`, `launch`, `all`, `teardown`.
 - Typical use:
   - `./scripts/setup-workshop-session.sh --mode all --session Wed-AM`
-  - `./scripts/setup-workshop-session.sh --mode all --session Wed-AM --max-branches 1 --exclude-main`
+  - `./scripts/setup-workshop-session.sh --mode all --session Wed-AM`
+    `--max-branches 1 --exclude-main`
   - `./scripts/setup-workshop-session.sh --mode teardown --session Wed-AM`
 - Notes:
   - Virtual desktop orchestration is PowerShell-only.
