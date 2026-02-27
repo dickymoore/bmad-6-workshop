@@ -25,8 +25,9 @@ npx bmad-method@latest install
 ```
 
 - Choose `Codex` when prompted.
-- After install, run `/bmad-help` in Codex to see available agents and
-  workflows.
+- In Codex, invoke the skill by name (for example: `Run bmad-help`) to see
+  available agents and workflows. (`/bmad-help` may be unrecognized depending
+  on Codex version/runtime.)
 
 1) Checkout the workshop stage
 
