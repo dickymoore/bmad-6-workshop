@@ -2,7 +2,7 @@
 [CmdletBinding()]
 param(
   [Parameter(Mandatory = $true)]
-  [ValidateSet('prepare', 'launch', 'all', 'teardown')]
+  [ValidateSet('prepare', 'launch', 'desktops', 'all', 'teardown')]
   [string]$Mode,
 
   [Parameter(Mandatory = $true)]
@@ -14,7 +14,10 @@ param(
   [switch]$ExcludeMain,
   [switch]$NoCode,
   [switch]$Reset,
-  [switch]$UseVirtualDesktops
+  [switch]$UseVirtualDesktops,
+
+  [ValidateRange(0, 999)]
+  [int]$MaxBranches = 0
 )
 
 Set-StrictMode -Version Latest
@@ -82,10 +85,14 @@ function Get-BranchEntries {
   )
 
   if ($ExcludeMain) {
-    return $entries | Where-Object { $_.Branch -ne 'main' }
+    $entries = @($entries | Where-Object { $_.Branch -ne 'main' })
   }
 
-  return $entries
+  if ($MaxBranches -gt 0) {
+    $entries = @($entries | Select-Object -First $MaxBranches)
+  }
+
+  return @($entries)
 }
 
 function Get-SessionPath {
@@ -112,6 +119,42 @@ function Copy-FileIfExists {
   }
 
   return $false
+}
+
+function Ensure-VSCodeCodexEnv {
+  param([Parameter(Mandatory = $true)][string]$BranchPath)
+
+  $vscodePath = Join-Path $BranchPath '.vscode'
+  $settingsPath = Join-Path $vscodePath 'settings.json'
+  New-Item -ItemType Directory -Path $vscodePath -Force | Out-Null
+
+  $settings = @{}
+  if (Test-Path -LiteralPath $settingsPath -PathType Leaf) {
+    try {
+      $raw = Get-Content -LiteralPath $settingsPath -Raw
+      if (-not [string]::IsNullOrWhiteSpace($raw)) {
+        $parsed = ConvertFrom-Json -InputObject $raw -AsHashtable
+        if ($parsed -is [hashtable]) {
+          $settings = $parsed
+        }
+      }
+    } catch {
+      Write-Warning "Unable to parse $settingsPath; skipping CODEX_HOME terminal env injection."
+      return
+    }
+  }
+
+  if (-not $settings.ContainsKey('terminal.integrated.env.linux') -or -not ($settings['terminal.integrated.env.linux'] -is [hashtable])) {
+    $settings['terminal.integrated.env.linux'] = @{}
+  }
+  if (-not $settings.ContainsKey('terminal.integrated.env.windows') -or -not ($settings['terminal.integrated.env.windows'] -is [hashtable])) {
+    $settings['terminal.integrated.env.windows'] = @{}
+  }
+
+  $settings['terminal.integrated.env.linux']['CODEX_HOME'] = '${workspaceFolder}/.codex'
+  $settings['terminal.integrated.env.windows']['CODEX_HOME'] = '${workspaceFolder}\.codex'
+
+  $settings | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $settingsPath
 }
 
 function Sync-SystemSkills {
@@ -182,6 +225,7 @@ function Bootstrap-CodexWorkspace {
 
   Sync-SystemSkills -CodexSkillsPath $skillsPath -SourceRepoPath $SourceRepo
   Sync-BmadSkills -BranchPath $BranchPath
+  Ensure-VSCodeCodexEnv -BranchPath $BranchPath
 
   if ($copiedAuth) {
     Write-Log "bootstrapped Codex workspace in $BranchPath/.codex"
@@ -315,13 +359,40 @@ function Prepare-Session {
 }
 
 function Get-SessionItems {
-  $manifestPath = Get-ManifestPath
-  if (-not (Test-Path -LiteralPath $manifestPath)) {
-    Fail "Session manifest missing: $manifestPath (run prepare first)"
+  $jsonManifestPath = Get-ManifestPath
+  $items = @()
+
+  if (Test-Path -LiteralPath $jsonManifestPath) {
+    $manifest = Get-Content -LiteralPath $jsonManifestPath -Raw | ConvertFrom-Json
+    $items = @($manifest.items)
+  } else {
+    $tsvManifestPath = Join-Path (Get-SessionPath) '.session-manifest.tsv'
+    if (-not (Test-Path -LiteralPath $tsvManifestPath)) {
+      Fail "Session manifest missing: $jsonManifestPath or $tsvManifestPath (run prepare first)"
+    }
+
+    $lines = Get-Content -LiteralPath $tsvManifestPath
+    foreach ($line in $lines | Select-Object -Skip 1) {
+      if ([string]::IsNullOrWhiteSpace($line)) {
+        continue
+      }
+      $parts = $line -split "`t", 3
+      if ($parts.Count -lt 3) {
+        continue
+      }
+      $items += [PSCustomObject]@{
+        branch = $parts[0]
+        folder = $parts[1]
+        path = $parts[2]
+      }
+    }
   }
 
-  $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
-  return @($manifest.items)
+  if ($MaxBranches -gt 0) {
+    $items = @($items | Select-Object -First $MaxBranches)
+  }
+
+  return @($items)
 }
 
 function Open-CodeWindow {
@@ -425,6 +496,122 @@ function Launch-Session {
   }
 }
 
+function CommandLine-MatchesToken {
+  param(
+    [string]$CommandLine,
+    [string[]]$Tokens
+  )
+
+  if ([string]::IsNullOrWhiteSpace($CommandLine)) {
+    return $false
+  }
+
+  foreach ($token in $Tokens) {
+    if ([string]::IsNullOrWhiteSpace($token)) {
+      continue
+    }
+    if ($CommandLine.IndexOf($token, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) {
+      return $true
+    }
+  }
+
+  return $false
+}
+
+function Get-CodeProcessesForSessionItem {
+  param([Parameter(Mandatory = $true)][object]$Item)
+
+  $sessionFolder = Split-Path -Leaf (Split-Path -Parent $Item.path)
+  $pathForward = ($Item.path -replace '\\', '/')
+  $pathBack = ($Item.path -replace '/', '\')
+
+  $tokens = @(
+    $Item.path,
+    $pathForward,
+    $pathBack,
+    "$sessionFolder/$($Item.folder)",
+    "$sessionFolder\$($Item.folder)"
+  )
+
+  $all = Get-CimInstance Win32_Process -Filter "Name='Code.exe'" -ErrorAction SilentlyContinue
+  return @($all | Where-Object { CommandLine-MatchesToken -CommandLine $_.CommandLine -Tokens $tokens })
+}
+
+function Move-CodeProcessToDesktop {
+  param(
+    [Parameter(Mandatory = $true)][int]$ProcessId,
+    [Parameter(Mandatory = $true)][object]$Desktop
+  )
+
+  $moveWindowCmd = Get-Command Move-Window -ErrorAction SilentlyContinue
+  if (-not $moveWindowCmd) {
+    return $false
+  }
+
+  try {
+    if ($moveWindowCmd.Parameters.ContainsKey('ProcessId') -and $moveWindowCmd.Parameters.ContainsKey('Desktop')) {
+      Move-Window -ProcessId $ProcessId -Desktop $Desktop | Out-Null
+      return $true
+    }
+
+    $proc = Get-Process -Id $ProcessId -ErrorAction SilentlyContinue
+    if ($null -eq $proc -or $proc.MainWindowHandle -eq 0) {
+      return $false
+    }
+
+    foreach ($handleParam in @('Hwnd', 'Handle', 'WindowHandle', 'MainWindowHandle')) {
+      if ($moveWindowCmd.Parameters.ContainsKey($handleParam) -and $moveWindowCmd.Parameters.ContainsKey('Desktop')) {
+        $args = @{ Desktop = $Desktop }
+        $args[$handleParam] = $proc.MainWindowHandle
+        Move-Window @args | Out-Null
+        return $true
+      }
+    }
+
+    # Some VirtualDesktop modules use positional args: Move-Window <hwnd> <desktop>
+    Move-Window $proc.MainWindowHandle $Desktop | Out-Null
+    return $true
+  } catch {
+    Write-Warning "Unable to move Code process $ProcessId to desktop: $($_.Exception.Message)"
+    return $false
+  }
+}
+
+function Arrange-SessionDesktops {
+  if (-not $IsWindows) {
+    Fail "Mode 'desktops' must be run from Windows PowerShell (outside WSL)."
+  }
+
+  if (-not (Test-VirtualDesktopSupport)) {
+    Fail "Virtual desktop commands not found. Install/import a compatible module (for example VirtualDesktop)."
+  }
+
+  if (-not (Get-Command Move-Window -ErrorAction SilentlyContinue)) {
+    Fail "Move-Window command not found. Install/import a module that supports moving windows between desktops."
+  }
+
+  $items = Get-SessionItems
+  $desktopIndex = 0
+  foreach ($item in $items) {
+    $desktop = New-Desktop
+    $moved = 0
+    $processes = Get-CodeProcessesForSessionItem -Item $item
+    foreach ($proc in $processes) {
+      if (Move-CodeProcessToDesktop -ProcessId $proc.ProcessId -Desktop $desktop) {
+        $moved++
+      }
+    }
+
+    if ($moved -eq 0) {
+      Write-Warning "No VS Code windows matched session item: $($item.branch) ($($item.path))"
+    } else {
+      Write-Log "moved $moved VS Code window(s) for $($item.branch) to desktop index $desktopIndex"
+    }
+
+    $desktopIndex++
+  }
+}
+
 function Close-CodeWindowsForSession {
   $sessionPath = Get-SessionPath
 
@@ -474,6 +661,7 @@ if (-not (Test-Path -LiteralPath $SessionsRoot)) {
 switch ($Mode) {
   'prepare' { Prepare-Session }
   'launch' { Launch-Session }
+  'desktops' { Arrange-SessionDesktops }
   'all' {
     Prepare-Session
     Launch-Session

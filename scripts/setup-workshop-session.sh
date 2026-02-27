@@ -14,6 +14,7 @@ INCLUDE_MAIN=1
 OPEN_CODE=1
 RESET=0
 USE_VIRTUAL_DESKTOPS=0
+MAX_BRANCHES=0
 
 ALL_BRANCHES=(
   main
@@ -53,6 +54,7 @@ Options:
                             Default: ${DEFAULT_SESSIONS_ROOT}
   --source-repo <path>      Source repo used to discover origin URL.
                             Default: current repo root.
+  --max-branches <n>        Limit session to first n mapped branches.
   --exclude-main            Skip main branch worktree.
   --no-code                 Do not open VS Code windows in launch/all.
   --reset                   Remove existing session folder before prepare/all.
@@ -81,6 +83,33 @@ copy_file_if_exists() {
     return 0
   fi
   return 1
+}
+
+ensure_vscode_codex_env() {
+  local branch_path="$1"
+  local vscode_dir="$branch_path/.vscode"
+  local settings_path="$vscode_dir/settings.json"
+
+  mkdir -p "$vscode_dir"
+
+  if [[ -f "$settings_path" ]]; then
+    if grep -q '"CODEX_HOME"' "$settings_path"; then
+      return 0
+    fi
+    log "existing $settings_path detected without CODEX_HOME; skipping auto-merge"
+    return 0
+  fi
+
+  cat > "$settings_path" <<'JSON'
+{
+  "terminal.integrated.env.linux": {
+    "CODEX_HOME": "${workspaceFolder}/.codex"
+  },
+  "terminal.integrated.env.windows": {
+    "CODEX_HOME": "${workspaceFolder}\\.codex"
+  }
+}
+JSON
 }
 
 sync_system_skills() {
@@ -144,6 +173,7 @@ bootstrap_codex_workspace() {
 
   sync_system_skills "$codex_dir/skills"
   sync_bmad_skills "$branch_path"
+  ensure_vscode_codex_env "$branch_path"
 
   if [[ "$copied_auth" -eq 1 ]]; then
     log "bootstrapped Codex workspace in $branch_path/.codex"
@@ -170,11 +200,16 @@ folder_name_for_branch() {
 
 selected_branches() {
   local branch
+  local count=0
   for branch in "${ALL_BRANCHES[@]}"; do
     if [[ "$branch" == "main" && "$INCLUDE_MAIN" -eq 0 ]]; then
       continue
     fi
+    if [[ "$MAX_BRANCHES" -gt 0 && "$count" -ge "$MAX_BRANCHES" ]]; then
+      break
+    fi
     printf '%s\n' "$branch"
+    count=$((count + 1))
   done
 }
 
@@ -345,6 +380,11 @@ while [[ $# -gt 0 ]]; do
       INCLUDE_MAIN=0
       shift
       ;;
+    --max-branches)
+      [[ $# -ge 2 ]] || fail "Missing value for --max-branches"
+      MAX_BRANCHES="$2"
+      shift 2
+      ;;
     --no-code)
       OPEN_CODE=0
       shift
@@ -379,6 +419,10 @@ if [[ -z "$SOURCE_REPO" ]]; then
 fi
 if [[ -z "$SESSIONS_ROOT" ]]; then
   SESSIONS_ROOT="$DEFAULT_SESSIONS_ROOT"
+fi
+
+if ! [[ "$MAX_BRANCHES" =~ ^[0-9]+$ ]]; then
+  fail "--max-branches must be a non-negative integer"
 fi
 
 [[ -d "$SOURCE_REPO" ]] || fail "Source repo path does not exist: $SOURCE_REPO"
