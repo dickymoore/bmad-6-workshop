@@ -1,17 +1,26 @@
 # BMAD BMM Workshop Video Script (Rough Timing)
 
-## 00:00 - 00:45 | Hook + What Viewers Will Learn
+## 00:00 - 00:45 | Cold Open (Mark Ruddock + Agentic Swarm)
 
-- Headline: "From zero to MVP with BMAD BMM: a staged workshop."
-- Show the repo tree and branches list:
-  `git branch -a | sed -n '1,12p'`.
-- One-liner outcome:
-  "We'll walk stage-by-stage from analysis to MVP and show the expected
-  artifacts at each stage."
+- Opening line:
+  "Imagine a developer flying 20,000 over the atlantic, with a product demo
+  in 5 hours, and nothing yet to show for it...
+  Mark Ruddock pushed a simple but powerful idea: stop treating the assistant 
+  as one monolith, and start orchestrating specialized agents as a swarm."
+- Story beat:
+  "That agentic swarm concept is the foundation for this workshop. Analyst,
+  PM, architect, scrum master, and dev are coordinated as a system, not used as
+  isolated prompts."
+- Bridge to action:
+  "In this session, we apply that model end-to-end and show exactly how it
+  turns ambiguity into stage-by-stage delivery from analysis to MVP."
+- Introduce myself
+- Introduce BMAD & What problems it fixes
 
 ## 00:45 - 02:30 | Repo Orientation + Workshop Flow
 
 - Headline: "How this workshop is structured."
+- Show agenda
 - Explain branch order:
   `main -> workshop/10-analysis -> workshop/20-planning ->`
   `workshop/30-solutioning -> workshop/40-implementation-setup ->`
