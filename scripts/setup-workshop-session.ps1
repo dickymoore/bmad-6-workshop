@@ -329,6 +329,11 @@ function Prepare-Session {
   }
 
   Invoke-Git -Arguments @("--git-dir=$mirrorPath", 'remote', 'set-url', 'origin', $SourceRepo)
+  # Avoid mirror-style fetch into refs/heads/*, which fails when a branch is
+  # checked out in an attached worktree (for example 00-main).
+  Invoke-Git -Arguments @("--git-dir=$mirrorPath", 'config', '--unset-all', 'remote.origin.fetch') -AllowFailure -SuppressOutput | Out-Null
+  Invoke-Git -Arguments @("--git-dir=$mirrorPath", 'config', '--add', 'remote.origin.fetch', '+refs/heads/*:refs/remotes/origin/*')
+  Invoke-Git -Arguments @("--git-dir=$mirrorPath", 'config', '--add', 'remote.origin.fetch', '+refs/tags/*:refs/tags/*')
   Invoke-Git -Arguments @("--git-dir=$mirrorPath", 'fetch', 'origin', '--prune') -SuppressOutput
   Invoke-Git -Arguments @("--git-dir=$mirrorPath", 'worktree', 'prune') -SuppressOutput
 

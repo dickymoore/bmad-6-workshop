@@ -286,6 +286,11 @@ prepare_session() {
   fi
 
   git --git-dir="$mirror" remote set-url origin "$SOURCE_REPO"
+  # Avoid mirror-style fetch into refs/heads/*, which fails when a branch is
+  # checked out in an attached worktree (e.g. 00-main).
+  git --git-dir="$mirror" config --unset-all remote.origin.fetch >/dev/null 2>&1 || true
+  git --git-dir="$mirror" config --add remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+  git --git-dir="$mirror" config --add remote.origin.fetch '+refs/tags/*:refs/tags/*'
   git --git-dir="$mirror" fetch origin --prune >/dev/null
   git --git-dir="$mirror" worktree prune >/dev/null
 
