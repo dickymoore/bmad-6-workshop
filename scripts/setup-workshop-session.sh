@@ -152,6 +152,43 @@ sync_bmad_skills() {
   done < <(find "$agents_skills_dir" -mindepth 1 -maxdepth 1 -type d -print0)
 }
 
+apply_bmad_codex_compat() {
+  local branch_path="$1"
+  local help_task="$branch_path/_bmad/core/tasks/help.md"
+  local help_skill="$branch_path/.codex/skills/bmad-help/SKILL.md"
+
+  if [[ -f "$help_task" ]] && ! grep -q '## CODEX COMPATIBILITY OVERRIDE' "$help_task"; then
+    local tmp_file
+    tmp_file=$(mktemp)
+    awk '
+      { print }
+      !inserted && /^# Task: BMAD Help$/ {
+        print ""
+        print "## CODEX COMPATIBILITY OVERRIDE"
+        print "- This section overrides conflicting display rules below."
+        print "- BMAD workflows in Codex are invoked as skills, not legacy `/bmad-*` slash commands."
+        print "- When showing a workflow command from the catalog, output `$<command>` (example: `$bmad-bmm-create-prd`)."
+        print "- For help itself, always show `$bmad-help` (never `/bmad-help`)."
+        print "- For agent workflows, direct users to `/skills` and pick the relevant agent skill."
+        print "- If legacy slash syntax appears in source docs, label it as legacy and include the `$...` equivalent."
+        inserted = 1
+      }
+    ' "$help_task" > "$tmp_file"
+    mv "$tmp_file" "$help_task"
+  fi
+
+  if [[ -f "$help_skill" ]] && ! grep -q '## CODEX COMPATIBILITY OVERRIDE' "$help_skill"; then
+    cat >> "$help_skill" <<'EOF'
+
+## CODEX COMPATIBILITY OVERRIDE
+
+- BMAD entries that look like `/bmad-*` are legacy slash syntax.
+- In Codex, invoke BMAD workflows as skills with `$bmad-*`.
+- Apply this mapping when presenting next-step recommendations.
+EOF
+  fi
+}
+
 bootstrap_codex_workspace() {
   local branch_path="$1"
   local codex_dir="$branch_path/.codex"
@@ -173,6 +210,7 @@ bootstrap_codex_workspace() {
 
   sync_system_skills "$codex_dir/skills"
   sync_bmad_skills "$branch_path"
+  apply_bmad_codex_compat "$branch_path"
   ensure_vscode_codex_env "$branch_path"
 
   if [[ "$copied_auth" -eq 1 ]]; then

@@ -205,6 +205,54 @@ function Sync-BmadSkills {
   }
 }
 
+function Apply-BmadCodexCompatibility {
+  param([Parameter(Mandatory = $true)][string]$BranchPath)
+
+  $helpTask = Join-Path $BranchPath '_bmad/core/tasks/help.md'
+  $helpSkill = Join-Path $BranchPath '.codex/skills/bmad-help/SKILL.md'
+
+  if (Test-Path -LiteralPath $helpTask -PathType Leaf) {
+    $taskContent = Get-Content -LiteralPath $helpTask -Raw
+    if ($taskContent -notmatch '## CODEX COMPATIBILITY OVERRIDE') {
+      $override = @'
+## CODEX COMPATIBILITY OVERRIDE
+- This section overrides conflicting display rules below.
+- BMAD workflows in Codex are invoked as skills, not legacy `/bmad-*` slash commands.
+- When showing a workflow command from the catalog, output `$<command>` (example: `$bmad-bmm-create-prd`).
+- For help itself, always show `$bmad-help` (never `/bmad-help`).
+- For agent workflows, direct users to `/skills` and pick the relevant agent skill.
+- If legacy slash syntax appears in source docs, label it as legacy and include the `$...` equivalent.
+'@
+      if ($taskContent -match '(?m)^# Task: BMAD Help$') {
+        $taskContent = [regex]::Replace(
+          $taskContent,
+          '(?m)^# Task: BMAD Help$',
+          "# Task: BMAD Help`n`n$override",
+          1
+        )
+      } else {
+        $taskContent = "$override`n`n$taskContent"
+      }
+      Set-Content -LiteralPath $helpTask -Value $taskContent
+    }
+  }
+
+  if (Test-Path -LiteralPath $helpSkill -PathType Leaf) {
+    $skillContent = Get-Content -LiteralPath $helpSkill -Raw
+    if ($skillContent -notmatch '## CODEX COMPATIBILITY OVERRIDE') {
+      $append = @'
+
+## CODEX COMPATIBILITY OVERRIDE
+
+- BMAD entries that look like `/bmad-*` are legacy slash syntax.
+- In Codex, invoke BMAD workflows as skills with `$bmad-*`.
+- Apply this mapping when presenting next-step recommendations.
+'@
+      Set-Content -LiteralPath $helpSkill -Value ($skillContent.TrimEnd("`r", "`n") + $append + "`n")
+    }
+  }
+}
+
 function Bootstrap-CodexWorkspace {
   param([Parameter(Mandatory = $true)][string]$BranchPath)
 
@@ -225,6 +273,7 @@ function Bootstrap-CodexWorkspace {
 
   Sync-SystemSkills -CodexSkillsPath $skillsPath -SourceRepoPath $SourceRepo
   Sync-BmadSkills -BranchPath $BranchPath
+  Apply-BmadCodexCompatibility -BranchPath $BranchPath
   Ensure-VSCodeCodexEnv -BranchPath $BranchPath
 
   if ($copiedAuth) {

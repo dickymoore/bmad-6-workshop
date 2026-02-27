@@ -31,8 +31,10 @@
 - Command: `git checkout workshop/10-analysis`
 - Open `README.md` and follow the stage instructions.
 - In Codex:
-  - `/bmad-agent-bmm-analyst`
-  - `/bmad-bmm-create-product-brief`
+  - `/skills` (confirm BMAD skills are visible)
+  - `$bmad-help` (start with guided next-step routing)
+  - `$bmad-agent-bmm-analyst`
+  - `$bmad-bmm-create-product-brief`
   - choose advanced elicitation options as needed
 - Highlight output artifacts to expect:
   - `_bmad/` and `.agents/skills/` exist
@@ -53,9 +55,9 @@
 - Headline: "Stage 3: Architecture and epics."
 - Show `README.md` instructions.
 - Run in Codex:
-  - `/bmad-agent-bmm-architect`
-  - `/bmad-bmm-create-architecture`
-  - `/bmad-bmm-create-epics-and-stories`
+  - `$bmad-agent-bmm-architect`
+  - `$bmad-bmm-create-architecture`
+  - `$bmad-bmm-create-epics-and-stories`
 - Expected artifacts:
   - `docs/prd.md`
   - `docs/ux-design-specification.md`
@@ -71,10 +73,10 @@
   - `docs/implementation-readiness-report-*.md`
   - `docs/test-design-epic-1.md`
 - Run with PM and SM commands:
-  - `/bmad-agent-bmm-pm`
-  - `/bmad-bmm-sprint-planning`
-  - `/bmad-agent-bmm-sm`
-  - `/bmad-bmm-create-story`
+  - `$bmad-agent-bmm-pm`
+  - `$bmad-bmm-sprint-planning`
+  - `$bmad-agent-bmm-sm`
+  - `$bmad-bmm-create-story`
 - Transition: `git stash` then `git checkout workshop/50-ready-for-dev`.
 
 ## 13:30 - 16:00 | Ready-for-dev (Hand-off)
@@ -106,8 +108,8 @@
 - Command: `git checkout workshop/70-complete`
 - Run app again and reproduce the bug noted in `README.md`.
 - Run Codex PM:
-  - `/bmad-agent-bmm-pm`
-  - `/bmad-bmm-correct-course`
+  - `$bmad-agent-bmm-pm`
+  - `$bmad-bmm-correct-course`
 - Fix and re-check app.
 
 ## 25:00 - 29:00 | MVP (Final State)

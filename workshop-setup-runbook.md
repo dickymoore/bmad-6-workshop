@@ -81,6 +81,8 @@ Target runtime: 2.5 to 3 hours.
 
 1. Analysis (`workshop/10-analysis`)
 
+- First Codex interaction: run `/skills` (verify BMAD skills), then run
+  `bmad-help` (for example `$bmad-help`) before activating analyst flows.
 - Activate analyst role and generate discovery outputs.
 - Emphasize quality of assumptions and constraints.
 
