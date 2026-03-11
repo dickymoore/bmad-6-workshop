@@ -14,7 +14,7 @@
 6. Load PM agent: `/bmad-agent-bmm-pm`.
 7. Run change-management workflow: `/bmad-bmm-correct-course`.
 8. Re-test and iterate until satisfied.
-9. `git checkout mvp`
+9. `git checkout workshop/desk-booking/80-mvp`
 
 # Desk Booking App
 Single-page React app for browsing office floorplans, booking desks, managing a per-day roster, and exporting/importing backups. Runs locally; all data lives in browser storage plus optional JSON snapshots on disk.

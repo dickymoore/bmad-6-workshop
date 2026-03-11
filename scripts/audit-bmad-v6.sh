@@ -2,31 +2,27 @@
 set -euo pipefail
 
 SCRIPT_NAME=$(basename "$0")
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ROOT_DIR=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 
-WORKSHOP_BRANCHES=(
-  main
-  stage-1
-  stage-2
-  stage-3
-  stage-4
-  ready-for-dev
-  implementation-in-progress
-  complete
-  mvp
-)
+# shellcheck source=scripts/lib/workshop_tracks.sh
+source "$SCRIPT_DIR/lib/workshop_tracks.sh"
+
+declare -A SELECTED_BRANCH_SET=()
 
 usage() {
   cat <<USAGE
 Usage:
-  ${SCRIPT_NAME} [--all] [--branch <name>] [--show-hits] [--repo <path>]
+  ${SCRIPT_NAME} [--all] [--branch <name>] [--track <id>] [--show-hits] [--repo <path>]
   ${SCRIPT_NAME} --help
 
 Audit workshop branches for BMAD stable-v6 alignment issues.
 
 Options:
-  --all            Audit all workshop branches.
+  --all            Audit all canonical branches for the selected track.
   --branch <name>  Audit a specific branch (repeatable).
+                   Accepts namespaced canonical names plus compatibility aliases.
+  --track <id>     Workshop track id (default: value from workshops/index.json).
   --show-hits      Print matching legacy markers per branch.
   --repo <path>    Target repository path (default: current git root).
   -h, --help       Show help.
@@ -43,6 +39,28 @@ log() {
 fail() {
   echo "ERROR: $*" >&2
   exit 2
+}
+
+canonicalize_branch() {
+  local branch="$1"
+  workshop_resolve_branch "$TRACK" "$branch"
+}
+
+add_selected_branch() {
+  local input_branch="$1"
+  local canonical_branch
+  canonical_branch=$(canonicalize_branch "$input_branch")
+
+  if [[ "$canonical_branch" != "$input_branch" ]]; then
+    log "mapped branch '$input_branch' -> '$canonical_branch'"
+  fi
+
+  if [[ -n "${SELECTED_BRANCH_SET[$canonical_branch]:-}" ]]; then
+    return 0
+  fi
+
+  SELECTED_BRANCH_SET[$canonical_branch]=1
+  SELECTED_BRANCHES+=("$canonical_branch")
 }
 
 require_git_repo() {
@@ -96,10 +114,12 @@ legacy_hits() {
   git -C "$repo" grep -nE "$regex" "$ref" -- ':*.md' ':*.yaml' ':*.yml' 'workshop-reviewer.sh' 2>/dev/null || true
 }
 
+TRACK=$(workshop_default_track)
 REPO="$ROOT_DIR"
 SHOW_HITS=false
 SELECTED_BRANCHES=()
 AUDIT_ALL=false
+PENDING_BRANCHES=()
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -109,7 +129,12 @@ while [[ $# -gt 0 ]]; do
       ;;
     --branch)
       [[ $# -ge 2 ]] || fail "Missing value for --branch"
-      SELECTED_BRANCHES+=("$2")
+      PENDING_BRANCHES+=("$2")
+      shift 2
+      ;;
+    --track)
+      [[ $# -ge 2 ]] || fail "Missing value for --track"
+      TRACK="$2"
       shift 2
       ;;
     --show-hits)
@@ -134,9 +159,16 @@ done
 require_git_repo "$REPO"
 
 if $AUDIT_ALL; then
-  SELECTED_BRANCHES=("${WORKSHOP_BRANCHES[@]}")
-elif [[ ${#SELECTED_BRANCHES[@]} -eq 0 ]]; then
-  SELECTED_BRANCHES=("$(git -C "$REPO" rev-parse --abbrev-ref HEAD)")
+  mapfile -t SELECTED_BRANCHES < <(workshop_list_branches "$TRACK" 1)
+else
+  for branch in "${PENDING_BRANCHES[@]}"; do
+    add_selected_branch "$branch"
+  done
+  if [[ ${#SELECTED_BRANCHES[@]} -eq 0 ]]; then
+    current_branch=$(git -C "$REPO" rev-parse --abbrev-ref HEAD)
+    [[ "$current_branch" != "HEAD" ]] || fail "Detached HEAD is not supported without --branch"
+    add_selected_branch "$current_branch"
+  fi
 fi
 
 violations=0
@@ -169,8 +201,10 @@ for branch in "${SELECTED_BRANCHES[@]}"; do
   if [[ "$has_legacy_dir" == "yes" ]]; then
     branch_fail=1
   fi
-  if [[ "$branch" != "main" && "$version" != 6.* ]]; then
-    branch_fail=1
+  if [[ "$branch" != "main" ]]; then
+    if [[ ! "$version" =~ ^6\. ]] || [[ "$version" =~ [Aa]lpha ]] || [[ "$version" =~ [Bb]eta ]]; then
+      branch_fail=1
+    fi
   fi
   if [[ "$hit_count" -gt 0 ]]; then
     branch_fail=1
@@ -182,12 +216,11 @@ for branch in "${SELECTED_BRANCHES[@]}"; do
     violations=$((violations + 1))
   fi
 
-  log "branch=$branch status=$status stable_dir=$has_stable_dir legacy_dir=$has_legacy_dir manifest_version=$version legacy_hits=$hit_count"
+  log "track=$TRACK branch=$branch status=$status stable_dir=$has_stable_dir legacy_dir=$has_legacy_dir manifest_version=$version legacy_hits=$hit_count"
 
   if $SHOW_HITS && [[ "$hit_count" -gt 0 ]]; then
     printf '%s\n' "$hits" | sed 's/^/  hit: /'
   fi
-
 done
 
 if [[ "$violations" -gt 0 ]]; then

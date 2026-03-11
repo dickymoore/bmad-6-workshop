@@ -5,17 +5,10 @@ SCRIPT_NAME=$(basename "$0")
 ROOT_DIR=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
-WORKSHOP_BRANCHES=(
-  main
-  stage-1
-  stage-2
-  stage-3
-  stage-4
-  ready-for-dev
-  implementation-in-progress
-  complete
-  mvp
-)
+# shellcheck source=scripts/lib/workshop_tracks.sh
+source "$SCRIPT_DIR/lib/workshop_tracks.sh"
+
+declare -A TARGET_BRANCH_SET=()
 
 usage() {
   cat <<USAGE
@@ -29,10 +22,12 @@ Required:
   --apply                Execute changes. Without this flag, script runs as dry-run.
 
 Scope:
-  --all                  Migrate all workshop branches.
+  --all                  Migrate all canonical branches for the selected track.
   --branch <name>        Migrate specific branch (repeatable).
+                         Accepts namespaced canonical names plus compatibility aliases.
 
 Options:
+  --track <id>           Workshop track id (default: value from workshops/index.json).
   --repo <path>          Target repo (default: current git root).
   --npm-tag <tag>        bmad-method npm tag (default: latest).
   --user-name <name>     BMAD installer user name (default: git user.name or Workshop).
@@ -54,6 +49,28 @@ log() {
 fail() {
   echo "ERROR: $*" >&2
   exit 2
+}
+
+canonicalize_branch() {
+  local branch="$1"
+  workshop_resolve_branch "$TRACK" "$branch"
+}
+
+add_target_branch() {
+  local input_branch="$1"
+  local canonical_branch
+  canonical_branch=$(canonicalize_branch "$input_branch")
+
+  if [[ "$canonical_branch" != "$input_branch" ]]; then
+    log "mapped branch '$input_branch' -> '$canonical_branch'"
+  fi
+
+  if [[ -n "${TARGET_BRANCH_SET[$canonical_branch]:-}" ]]; then
+    return 0
+  fi
+
+  TARGET_BRANCH_SET[$canonical_branch]=1
+  TARGET_BRANCHES+=("$canonical_branch")
 }
 
 require_git_repo() {
@@ -105,6 +122,7 @@ prepare_payload() {
   cp "$SCRIPT_DIR/audit-bmad-v6.sh" "$payload_dir/scripts/"
   cp "$SCRIPT_DIR/migrate-bmad-v6.sh" "$payload_dir/scripts/"
   cp "$SCRIPT_DIR/verify-bmad-v6.sh" "$payload_dir/scripts/"
+  cp -R "$SCRIPT_DIR/lib" "$payload_dir/scripts/lib"
 
   if [[ -f "$repo/workshop-reviewer.sh" ]]; then
     cp "$repo/workshop-reviewer.sh" "$payload_dir/workshop-reviewer.sh"
@@ -117,6 +135,8 @@ sync_shared_assets() {
 
   mkdir -p "$repo/scripts"
   cp "$payload_dir/scripts/"*.sh "$repo/scripts/"
+  rm -rf "$repo/scripts/lib"
+  cp -R "$payload_dir/scripts/lib" "$repo/scripts/lib"
   chmod +x "$repo/scripts/"*.sh
 
   if [[ -f "$payload_dir/workshop-reviewer.sh" ]]; then
@@ -124,27 +144,39 @@ sync_shared_assets() {
   fi
 }
 
+replace_in_file() {
+  local expr="$1"
+  local file="$2"
+  local tmp
+  tmp=$(mktemp)
+  sed -e "$expr" "$file" > "$tmp"
+  mv "$tmp" "$file"
+}
+
 replace_shared_markers() {
   local repo="$1"
-  local branch="$2"
   local readme="$repo/README.md"
   [[ -f "$readme" ]] || return 0
 
-  sed -i 's|npx bmad-method@alpha install|npx bmad-method@latest install|g' "$readme"
-  sed -i 's|/prompts:bmad-bmm-agents-analyst|/bmad-agent-bmm-analyst|g' "$readme"
-  sed -i 's|/prompts:bmad-bmm-agents-architect|/bmad-agent-bmm-architect|g' "$readme"
-  sed -i 's|/prompts:bmad-bmm-agents-pm|/bmad-agent-bmm-pm|g' "$readme"
-  sed -i 's|/prompts:bmad-bmm-agents-sm|/bmad-agent-bmm-sm|g' "$readme"
-  sed -i 's|/prompts:bmad-bmm-agents-dev|/bmad-agent-bmm-dev|g' "$readme"
-  sed -i 's|/prompts:bmad-bmm-agents-tea|/bmad-agent-bmm-qa|g' "$readme"
-  sed -i 's|\\*workflow-init|/bmad-bmm-create-product-brief|g' "$readme"
-  sed -i 's|\\*workflow-status|/bmad-bmm-sprint-status|g' "$readme"
+  replace_in_file 's|npx bmad-method@alpha install|npx bmad-method@latest install|g' "$readme"
+  replace_in_file 's|/prompts:bmad-bmm-agents-analyst|/bmad-agent-bmm-analyst|g' "$readme"
+  replace_in_file 's|/prompts:bmad-bmm-agents-architect|/bmad-agent-bmm-architect|g' "$readme"
+  replace_in_file 's|/prompts:bmad-bmm-agents-pm|/bmad-agent-bmm-pm|g' "$readme"
+  replace_in_file 's|/prompts:bmad-bmm-agents-sm|/bmad-agent-bmm-sm|g' "$readme"
+  replace_in_file 's|/prompts:bmad-bmm-agents-dev|/bmad-agent-bmm-dev|g' "$readme"
+  replace_in_file 's|/prompts:bmad-bmm-agents-tea|/bmad-agent-bmm-qa|g' "$readme"
+  replace_in_file 's|\\*workflow-init|/bmad-bmm-create-product-brief|g' "$readme"
+  replace_in_file 's|\\*workflow-status|/bmad-bmm-sprint-status|g' "$readme"
 }
 
 install_stable_bmad() {
   local repo="$1"
   local npm_tag="$2"
   local user_name="$3"
+
+  [[ -n "$repo" ]] || fail "install_stable_bmad: repo path is empty"
+  [[ "$repo" != "/" ]] || fail "install_stable_bmad: refusing to operate on filesystem root"
+  [[ -d "$repo/.git" ]] || fail "install_stable_bmad: not a git repository: $repo"
 
   rm -rf "$repo/.bmad" "$repo/_bmad" "$repo/.agents"
 
@@ -166,9 +198,9 @@ configure_bmm_paths_for_workshop() {
   local config="$repo/_bmad/bmm/config.yaml"
   [[ -f "$config" ]] || return 0
 
-  sed -i 's|^planning_artifacts:.*|planning_artifacts: "{project-root}/docs"|' "$config"
-  sed -i 's|^implementation_artifacts:.*|implementation_artifacts: "{project-root}/docs/sprint-artifacts"|' "$config"
-  sed -i 's|^project_knowledge:.*|project_knowledge: "{project-root}/docs"|' "$config"
+  replace_in_file 's|^planning_artifacts:.*|planning_artifacts: "{project-root}/docs"|' "$config"
+  replace_in_file 's|^implementation_artifacts:.*|implementation_artifacts: "{project-root}/docs/sprint-artifacts"|' "$config"
+  replace_in_file 's|^project_knowledge:.*|project_knowledge: "{project-root}/docs"|' "$config"
 }
 
 prepare_stage_directories() {
@@ -205,6 +237,7 @@ commit_if_requested() {
   log "branch=$branch committed"
 }
 
+TRACK=$(workshop_default_track)
 REPO="$ROOT_DIR"
 NPM_TAG="latest"
 USER_NAME="$(git config user.name 2>/dev/null || echo Workshop)"
@@ -214,6 +247,7 @@ COMMIT_MESSAGE="Migrate BMAD workshop branch to stable v6"
 APPLY=false
 MIGRATE_ALL=false
 TARGET_BRANCHES=()
+PENDING_BRANCHES=()
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -227,7 +261,12 @@ while [[ $# -gt 0 ]]; do
       ;;
     --branch)
       [[ $# -ge 2 ]] || fail "Missing value for --branch"
-      TARGET_BRANCHES+=("$2")
+      PENDING_BRANCHES+=("$2")
+      shift 2
+      ;;
+    --track)
+      [[ $# -ge 2 ]] || fail "Missing value for --track"
+      TRACK="$2"
       shift 2
       ;;
     --repo)
@@ -272,9 +311,16 @@ done
 require_git_repo "$REPO"
 
 if $MIGRATE_ALL; then
-  TARGET_BRANCHES=("${WORKSHOP_BRANCHES[@]}")
-elif [[ ${#TARGET_BRANCHES[@]} -eq 0 ]]; then
-  TARGET_BRANCHES=("$(git -C "$REPO" rev-parse --abbrev-ref HEAD)")
+  mapfile -t TARGET_BRANCHES < <(workshop_list_branches "$TRACK" 1)
+else
+  for branch in "${PENDING_BRANCHES[@]}"; do
+    add_target_branch "$branch"
+  done
+  if [[ ${#TARGET_BRANCHES[@]} -eq 0 ]]; then
+    current_branch=$(git -C "$REPO" rev-parse --abbrev-ref HEAD)
+    [[ "$current_branch" != "HEAD" ]] || fail "Detached HEAD is not supported without --branch"
+    add_target_branch "$current_branch"
+  fi
 fi
 
 if [[ "$APPLY" != "true" ]]; then
@@ -289,7 +335,16 @@ require_clean_tree "$REPO"
 
 START_BRANCH=$(git -C "$REPO" rev-parse --abbrev-ref HEAD)
 PAYLOAD_DIR=$(mktemp -d)
-trap 'git -C "$REPO" checkout "$START_BRANCH" >/dev/null 2>&1 || true; rm -rf "$PAYLOAD_DIR"' EXIT
+
+cleanup() {
+  rm -rf "$PAYLOAD_DIR"
+  if [[ -n "$(git -C "$REPO" status --porcelain 2>/dev/null || true)" ]]; then
+    log "cleanup: leaving working tree on $(git -C "$REPO" rev-parse --abbrev-ref HEAD) because uncommitted changes are present"
+    return
+  fi
+  git -C "$REPO" checkout "$START_BRANCH" >/dev/null 2>&1 || true
+}
+trap cleanup EXIT
 
 prepare_payload "$REPO" "$PAYLOAD_DIR"
 
@@ -302,7 +357,7 @@ for branch in "${TARGET_BRANCHES[@]}"; do
   append_log "$REPO" "$LOG_FILE" "START branch=$branch"
 
   sync_shared_assets "$REPO" "$PAYLOAD_DIR"
-  replace_shared_markers "$REPO" "$branch"
+  replace_shared_markers "$REPO"
 
   if [[ "$branch" != "main" ]]; then
     install_stable_bmad "$REPO" "$NPM_TAG" "$USER_NAME"
