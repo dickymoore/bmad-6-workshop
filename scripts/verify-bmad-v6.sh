@@ -2,31 +2,27 @@
 set -euo pipefail
 
 SCRIPT_NAME=$(basename "$0")
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ROOT_DIR=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 
-WORKSHOP_BRANCHES=(
-  main
-  stage-1
-  stage-2
-  stage-3
-  stage-4
-  ready-for-dev
-  implementation-in-progress
-  complete
-  mvp
-)
+# shellcheck source=scripts/lib/workshop_tracks.sh
+source "$SCRIPT_DIR/lib/workshop_tracks.sh"
+
+declare -A TARGET_BRANCH_SET=()
 
 usage() {
   cat <<USAGE
 Usage:
-  ${SCRIPT_NAME} [--all] [--branch <name>] [--repo <path>] [--show-failures]
+  ${SCRIPT_NAME} [--all] [--branch <name>] [--track <id>] [--repo <path>] [--show-failures]
   ${SCRIPT_NAME} --help
 
 Verify workshop branches against stable-v6 stage contracts.
 
 Options:
-  --all              Verify all workshop branches.
+  --all              Verify all canonical branches for the selected track.
   --branch <name>    Verify a specific branch (repeatable).
+                     Accepts namespaced canonical names plus compatibility aliases.
+  --track <id>       Workshop track id (default: value from workshops/index.json).
   --repo <path>      Target repository path (default: current git root).
   --show-failures    Print failing pattern checks.
   -h, --help         Show help.
@@ -43,6 +39,28 @@ log() {
 fail() {
   echo "ERROR: $*" >&2
   exit 2
+}
+
+canonicalize_branch() {
+  local branch="$1"
+  workshop_resolve_branch "$TRACK" "$branch"
+}
+
+add_target_branch() {
+  local input_branch="$1"
+  local canonical_branch
+  canonical_branch=$(canonicalize_branch "$input_branch")
+
+  if [[ "$canonical_branch" != "$input_branch" ]]; then
+    log "mapped branch '$input_branch' -> '$canonical_branch'"
+  fi
+
+  if [[ -n "${TARGET_BRANCH_SET[$canonical_branch]:-}" ]]; then
+    return 0
+  fi
+
+  TARGET_BRANCH_SET[$canonical_branch]=1
+  TARGET_BRANCHES+=("$canonical_branch")
 }
 
 require_git_repo() {
@@ -93,7 +111,27 @@ config_value() {
     echo ""
     return 0
   fi
-  git -C "$repo" show "$ref:_bmad/bmm/config.yaml" | awk -F': *' -v k="$key" '$1==k {print $2; exit}'
+  git -C "$repo" show "$ref:_bmad/bmm/config.yaml" | awk -v k="$key" '
+    $0 ~ "^[[:space:]]*" k ":[[:space:]]*" {
+      sub(/^[[:space:]]*[^:]+:[[:space:]]*/, "", $0)
+      gsub(/[[:space:]]+$/, "", $0)
+      print $0
+      exit
+    }'
+}
+
+normalize_yaml_scalar() {
+  local value="$1"
+  value="${value#"${value%%[![:space:]]*}"}"
+  value="${value%"${value##*[![:space:]]}"}"
+  if [[ ${#value} -ge 2 ]]; then
+    if [[ "${value:0:1}" == '"' && "${value: -1}" == '"' ]]; then
+      value="${value:1:${#value}-2}"
+    elif [[ "${value:0:1}" == "'" && "${value: -1}" == "'" ]]; then
+      value="${value:1:${#value}-2}"
+    fi
+  fi
+  echo "$value"
 }
 
 legacy_markers() {
@@ -132,73 +170,19 @@ check_forbidden() {
 }
 
 branch_rules_require() {
-  case "$1" in
-    main)
-      printf '%s\n' '^README\.md$' '^office-floorplans/' '^scripts/audit-bmad-v6\.sh$' '^scripts/migrate-bmad-v6\.sh$' '^scripts/verify-bmad-v6\.sh$'
-      ;;
-    stage-1)
-      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^_bmad/bmm/config\.yaml$' '^\.agents/skills/' '^office-floorplans/' '^scripts/audit-bmad-v6\.sh$'
-      ;;
-    stage-2)
-      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^\.agents/skills/' '^docs/adr/ADR-001-tech-stack\.md$' '^docs/bmm-product-brief-.*\.md$' '^docs/bmm-research-technical-.*\.md$' '^docs/brainstorming-session-results-.*\.md$'
-      ;;
-    stage-3)
-      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^\.agents/skills/' '^docs/prd\.md$' '^docs/ux-design-specification\.md$'
-      ;;
-    stage-4)
-      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^\.agents/skills/' '^docs/architecture\.md$' '^docs/epics\.md$' '^docs/implementation-readiness-report-.*\.md$'
-      ;;
-    ready-for-dev)
-      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^\.agents/skills/' '^docs/sprint-artifacts/sprint-status\.yaml$' '^docs/sprint-artifacts/1-1-.*\.md$'
-      ;;
-    implementation-in-progress)
-      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^\.agents/skills/' '^package\.json$' '^src/' '^tests/' '^data/' '^docs/sprint-artifacts/sprint-status\.yaml$'
-      ;;
-    complete)
-      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^\.agents/skills/' '^package\.json$' '^src/' '^tests/' '^data/' '^docs/sprint-artifacts/sprint-status\.yaml$'
-      ;;
-    mvp)
-      printf '%s\n' '^_bmad/_config/manifest\.yaml$' '^\.agents/skills/' '^package\.json$' '^src/' '^tests/' '^data/' '^docs/sprint-artifacts/sprint-status\.yaml$'
-      ;;
-    *)
-      fail "Unknown branch rules: $1"
-      ;;
-  esac
+  workshop_branch_field "$TRACK" "$1" required_patterns
 }
 
 branch_rules_forbid() {
-  case "$1" in
-    main)
-      printf '%s\n' '^\.bmad/' '^_bmad/' '^\.agents/' '^src/' '^tests/' '^data/'
-      ;;
-    stage-1)
-      printf '%s\n' '^\.bmad/' '^docs/prd\.md$' '^docs/ux-design-specification\.md$' '^src/' '^tests/' '^data/'
-      ;;
-    stage-2)
-      printf '%s\n' '^\.bmad/' '^docs/prd\.md$' '^docs/ux-design-specification\.md$' '^src/' '^tests/' '^data/'
-      ;;
-    stage-3)
-      printf '%s\n' '^\.bmad/' '^docs/architecture\.md$' '^docs/epics\.md$' '^docs/implementation-readiness-report-.*\.md$' '^docs/sprint-artifacts/' '^src/' '^tests/' '^data/'
-      ;;
-    stage-4)
-      printf '%s\n' '^\.bmad/' '^docs/sprint-artifacts/' '^src/' '^tests/' '^data/'
-      ;;
-    ready-for-dev)
-      printf '%s\n' '^\.bmad/' '^src/' '^tests/' '^data/'
-      ;;
-    implementation-in-progress|complete|mvp)
-      printf '%s\n' '^\.bmad/'
-      ;;
-    *)
-      fail "Unknown branch rules: $1"
-      ;;
-  esac
+  workshop_branch_field "$TRACK" "$1" forbidden_patterns
 }
 
+TRACK=$(workshop_default_track)
 REPO="$ROOT_DIR"
 SHOW_FAILURES=false
 VERIFY_ALL=false
 TARGET_BRANCHES=()
+PENDING_BRANCHES=()
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -208,7 +192,12 @@ while [[ $# -gt 0 ]]; do
       ;;
     --branch)
       [[ $# -ge 2 ]] || fail "Missing value for --branch"
-      TARGET_BRANCHES+=("$2")
+      PENDING_BRANCHES+=("$2")
+      shift 2
+      ;;
+    --track)
+      [[ $# -ge 2 ]] || fail "Missing value for --track"
+      TRACK="$2"
       shift 2
       ;;
     --repo)
@@ -233,9 +222,16 @@ done
 require_git_repo "$REPO"
 
 if $VERIFY_ALL; then
-  TARGET_BRANCHES=("${WORKSHOP_BRANCHES[@]}")
-elif [[ ${#TARGET_BRANCHES[@]} -eq 0 ]]; then
-  TARGET_BRANCHES=("$(git -C "$REPO" rev-parse --abbrev-ref HEAD)")
+  mapfile -t TARGET_BRANCHES < <(workshop_list_branches "$TRACK" 1)
+else
+  for branch in "${PENDING_BRANCHES[@]}"; do
+    add_target_branch "$branch"
+  done
+  if [[ ${#TARGET_BRANCHES[@]} -eq 0 ]]; then
+    current_branch=$(git -C "$REPO" rev-parse --abbrev-ref HEAD)
+    [[ "$current_branch" != "HEAD" ]] || fail "Detached HEAD is not supported without --branch"
+    add_target_branch "$current_branch"
+  fi
 fi
 
 failures=0
@@ -272,18 +268,18 @@ for branch in "${TARGET_BRANCHES[@]}"; do
   version="n/a"
   if [[ "$branch" != "main" ]]; then
     version=$(manifest_version "$REPO" "$ref")
-    if [[ "$version" != 6.* ]] || [[ "$version" == *alpha* ]] || [[ "$version" == *Beta* ]] || [[ "$version" == *beta* ]]; then
+    if [[ ! "$version" =~ ^6\. ]] || [[ "$version" =~ [Aa]lpha ]] || [[ "$version" =~ [Bb]eta ]]; then
       branch_failed=1
       $SHOW_FAILURES && echo "[$branch] BAD_VERSION:$version"
     fi
 
-    plan_path=$(config_value "$REPO" "$ref" planning_artifacts)
-    impl_path=$(config_value "$REPO" "$ref" implementation_artifacts)
-    if [[ "$plan_path" != '"{project-root}/docs"' ]]; then
+    plan_path=$(normalize_yaml_scalar "$(config_value "$REPO" "$ref" planning_artifacts)")
+    impl_path=$(normalize_yaml_scalar "$(config_value "$REPO" "$ref" implementation_artifacts)")
+    if [[ "$plan_path" != '{project-root}/docs' ]]; then
       branch_failed=1
       $SHOW_FAILURES && echo "[$branch] BAD_CONFIG: planning_artifacts=$plan_path"
     fi
-    if [[ "$impl_path" != '"{project-root}/docs/sprint-artifacts"' ]]; then
+    if [[ "$impl_path" != '{project-root}/docs/sprint-artifacts' ]]; then
       branch_failed=1
       $SHOW_FAILURES && echo "[$branch] BAD_CONFIG: implementation_artifacts=$impl_path"
     fi
@@ -295,7 +291,7 @@ for branch in "${TARGET_BRANCHES[@]}"; do
     failures=$((failures + 1))
   fi
 
-  log "branch=$branch status=$status version=$version legacy_hits=$marker_count"
+  log "track=$TRACK branch=$branch status=$status version=$version legacy_hits=$marker_count"
 done
 
 if [[ "$failures" -gt 0 ]]; then
