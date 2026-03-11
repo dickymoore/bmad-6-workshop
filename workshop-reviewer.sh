@@ -1,229 +1,80 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+
+# shellcheck source=scripts/lib/workshop_tracks.sh
+source "$SCRIPT_DIR/scripts/lib/workshop_tracks.sh"
+
 usage() {
   cat <<'USAGE'
 Usage:
-  ./workshop-reviewer.sh                # check current branch (HEAD)
-  ./workshop-reviewer.sh <branch>       # check a specific branch
-  ./workshop-reviewer.sh --all          # check all workshop branches
-  ./workshop-reviewer.sh --dev [branch] # start the correct dev server
-  ./workshop-reviewer.sh --dev --all    # smoke-check dev server on all branches
-  ./workshop-reviewer.sh --e2e [branch] # run Playwright e2e (app stages only)
-  ./workshop-reviewer.sh --e2e --all    # run Playwright e2e on app branches
+  ./workshop-reviewer.sh                             # check current branch (HEAD)
+  ./workshop-reviewer.sh <branch>                    # check a specific branch
+  ./workshop-reviewer.sh --all                       # check all workshop branches for the selected track
+  ./workshop-reviewer.sh --dev [branch]              # start the correct dev server
+  ./workshop-reviewer.sh --dev --all                 # smoke-check dev server on all branches
+  ./workshop-reviewer.sh --e2e [branch]              # run Playwright e2e (app stages only)
+  ./workshop-reviewer.sh --e2e --all                 # run Playwright e2e on app branches
+  ./workshop-reviewer.sh --track <id> [options]
   ./workshop-reviewer.sh --help
 
 This script validates that each workshop stage branch is in the expected
 "pre-artifact" state and prints a short facilitation guide for that stage.
 
-Note: checks are based on the committed tree of the branch, not your working tree.
-Note: --dev/--e2e may switch branches; keep your working tree clean.
+Notes:
+- Checks are based on the committed tree of the branch, not your working tree.
+- --all uses the namespaced canonical branches for the selected track.
+- Positional branch accepts canonical names and compatibility aliases.
+- --dev/--e2e may switch branches; keep your working tree clean.
 USAGE
 }
 
-branches=(
-  main
-  stage-1
-  stage-2
-  stage-3
-  stage-4
-  ready-for-dev
-  implementation-in-progress
-  complete
-  mvp
-)
-
+TRACK=$(workshop_default_track)
+branches=()
 mode="check"
 run_all=false
 target_branch=""
 
 require_patterns=()
 forbid_patterns=()
-
 guidance=""
+
+canonicalize_branch() {
+  local branch="$1"
+  workshop_resolve_branch "$TRACK" "$branch"
+}
+
+branch_exists() {
+  local branch="$1"
+  git show-ref --verify --quiet "refs/heads/$branch" || \
+    git show-ref --verify --quiet "refs/remotes/origin/$branch"
+}
+
+ensure_local_branch() {
+  local branch="$1"
+  if git show-ref --verify --quiet "refs/heads/$branch"; then
+    return 0
+  fi
+
+  if git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+    git checkout -b "$branch" "origin/$branch" >/dev/null
+    return 0
+  fi
+
+  echo "Branch not found locally or on origin: $branch" >&2
+  exit 2
+}
+
+load_track_branches() {
+  mapfile -t branches < <(workshop_list_branches "$TRACK" 1)
+}
 
 set_stage_rules() {
   local stage="$1"
-  require_patterns=()
-  forbid_patterns=()
-  guidance=""
-
-  case "$stage" in
-    main)
-      require_patterns=(
-        '^README\.md$'
-        '^office-floorplans/'
-        '^scripts/audit-bmad-v6\.sh$'
-        '^scripts/migrate-bmad-v6\.sh$'
-        '^scripts/verify-bmad-v6\.sh$'
-      )
-      forbid_patterns=(
-        '^\.bmad/'
-        '^_bmad/'
-        '^\.agents/'
-        '^docs/'
-        '^data/'
-        '^package\.json$'
-        '^src/'
-        '^tests/'
-      )
-      guidance=$'Main: verify tooling + install BMAD stable v6, then checkout stage-1.\n- Suggested next: `git checkout stage-1` and follow `README.md`.'
-      ;;
-    stage-1)
-      require_patterns=(
-        '^_bmad/_config/manifest\.yaml$'
-        '^_bmad/bmm/config\.yaml$'
-        '^\.agents/skills/'
-        '^office-floorplans/'
-        '^scripts/audit-bmad-v6\.sh$'
-        '^scripts/migrate-bmad-v6\.sh$'
-        '^scripts/verify-bmad-v6\.sh$'
-      )
-      forbid_patterns=(
-        '^\.bmad/'
-        '^docs/'
-        '^data/'
-        '^package\.json$'
-        '^src/'
-        '^tests/'
-      )
-      guidance=$'Stage 1 (Analysis): use `/bmad-agent-bmm-analyst` + `/bmad-bmm-create-product-brief` and research workflows.\n- When done: stash and `git checkout stage-2`.'
-      ;;
-    stage-2)
-      require_patterns=(
-        '^_bmad/_config/manifest\.yaml$'
-        '^_bmad/bmm/config\.yaml$'
-        '^\.agents/skills/'
-        '^docs/adr/ADR-001-tech-stack\.md$'
-        '^docs/brainstorming-session-results-.*\.md$'
-        '^docs/bmm-product-brief-.*\.md$'
-        '^docs/bmm-research-technical-.*\.md$'
-        '^scripts/audit-bmad-v6\.sh$'
-      )
-      forbid_patterns=(
-        '^\.bmad/'
-        '^docs/prd\.md$'
-        '^docs/ux-design-specification\.md$'
-        '^data/'
-        '^package\.json$'
-        '^src/'
-        '^tests/'
-      )
-      guidance=$'Stage 2 (Planning): use `/bmad-agent-bmm-pm` + `/bmad-bmm-create-prd` and `/bmad-bmm-create-ux-design`.\n- When done: stash and `git checkout stage-3`.'
-      ;;
-    stage-3)
-      require_patterns=(
-        '^_bmad/_config/manifest\.yaml$'
-        '^_bmad/bmm/config\.yaml$'
-        '^\.agents/skills/'
-        '^docs/prd\.md$'
-        '^docs/ux-design-specification\.md$'
-      )
-      forbid_patterns=(
-        '^\.bmad/'
-        '^docs/architecture\.md$'
-        '^docs/epics\.md$'
-        '^docs/implementation-readiness-report-.*\.md$'
-        '^docs/sprint-artifacts/'
-        '^data/'
-        '^package\.json$'
-        '^src/'
-        '^tests/'
-      )
-      guidance=$'Stage 3 (Solutioning): use `/bmad-agent-bmm-architect` + `/bmad-bmm-create-architecture` and `/bmad-bmm-create-epics-and-stories`.\n- When done: stash and `git checkout stage-4`.'
-      ;;
-    stage-4)
-      require_patterns=(
-        '^_bmad/_config/manifest\.yaml$'
-        '^_bmad/bmm/config\.yaml$'
-        '^\.agents/skills/'
-        '^docs/architecture\.md$'
-        '^docs/epics\.md$'
-        '^docs/implementation-readiness-report-.*\.md$'
-        '^docs/test-design-epic-1\.md$'
-      )
-      forbid_patterns=(
-        '^\.bmad/'
-        '^docs/sprint-artifacts/'
-        '^data/'
-        '^package\.json$'
-        '^src/'
-        '^tests/'
-      )
-      guidance=$'Stage 4 (Implementation setup): run `/bmad-bmm-check-implementation-readiness`, then `/bmad-bmm-sprint-planning` and `/bmad-bmm-create-story`.\n- When done: `git checkout ready-for-dev`.'
-      ;;
-    ready-for-dev)
-      require_patterns=(
-        '^_bmad/_config/manifest\.yaml$'
-        '^_bmad/bmm/config\.yaml$'
-        '^\.agents/skills/'
-        '^docs/sprint-artifacts/sprint-status\.yaml$'
-        '^docs/sprint-artifacts/1-1-.*\.md$'
-      )
-      forbid_patterns=(
-        '^\.bmad/'
-        '^data/'
-        '^package\.json$'
-        '^src/'
-        '^tests/'
-      )
-      guidance=$'Ready-for-dev: use `/bmad-agent-bmm-dev` + `/bmad-bmm-dev-story` and `/bmad-bmm-code-review`.\n- When done: `git checkout implementation-in-progress`.'
-      ;;
-    implementation-in-progress)
-      require_patterns=(
-        '^_bmad/_config/manifest\.yaml$'
-        '^_bmad/bmm/config\.yaml$'
-        '^\.agents/skills/'
-        '^package\.json$'
-        '^src/'
-        '^data/'
-        '^docs/sprint-artifacts/sprint-status\.yaml$'
-        '^tests/'
-      )
-      forbid_patterns=(
-        '^\.bmad/'
-      )
-      guidance=$'Implementation-in-progress: finish stories via `/bmad-bmm-dev-story`, run app/tests, and update sprint status.\n- When done: `git checkout complete`.'
-      ;;
-    complete)
-      require_patterns=(
-        '^_bmad/_config/manifest\.yaml$'
-        '^_bmad/bmm/config\.yaml$'
-        '^\.agents/skills/'
-        '^package\.json$'
-        '^src/'
-        '^data/'
-        '^docs/sprint-artifacts/sprint-status\.yaml$'
-        '^tests/'
-      )
-      forbid_patterns=(
-        '^\.bmad/'
-      )
-      guidance=$'Complete: run app and use `/bmad-bmm-correct-course` for any meaningful pivot.\n- When done: `git checkout mvp`.'
-      ;;
-    mvp)
-      require_patterns=(
-        '^_bmad/_config/manifest\.yaml$'
-        '^_bmad/bmm/config\.yaml$'
-        '^\.agents/skills/'
-        '^package\.json$'
-        '^src/'
-        '^public/'
-        '^scripts/'
-        '^data/'
-        '^docs/sprint-artifacts/sprint-status\.yaml$'
-        '^tests/'
-      )
-      forbid_patterns=(
-        '^\.bmad/'
-      )
-      guidance=$'MVP: final working app; run dev/e2e and demonstrate stable-v6 BMAD workflow usage.'
-      ;;
-    *)
-      echo "Unknown stage: $stage" >&2
-      exit 2
-      ;;
-  esac
+  mapfile -t require_patterns < <(workshop_branch_field "$TRACK" "$stage" required_patterns)
+  mapfile -t forbid_patterns < <(workshop_branch_field "$TRACK" "$stage" forbidden_patterns)
+  guidance=$(workshop_branch_field "$TRACK" "$stage" guidance)
 }
 
 list_tree() {
@@ -233,11 +84,16 @@ list_tree() {
 
 check_branch() {
   local branch="$1"
-  set_stage_rules "$branch"
+  local stage
+  stage=$(canonicalize_branch "$branch")
+  set_stage_rules "$stage"
   local tree
   tree=$(list_tree "$branch")
 
   echo "==> $branch"
+  if [[ "$stage" != "$branch" ]]; then
+    echo "  NOTE: alias mapped to canonical stage: $stage"
+  fi
 
   local missing=0
   for pattern in "${require_patterns[@]}"; do
@@ -339,7 +195,7 @@ run_dev_check() {
   local port
   port=$(pick_port)
   local url="http://localhost:$port"
-  local log="/tmp/workshop-dev-${branch}.log"
+  local log="/tmp/workshop-dev-${branch//\//-}.log"
 
   local pid
   pid=$(start_dev_server "$app_dir" "$port" "$log")
@@ -378,7 +234,7 @@ run_e2e() {
   local port
   port=$(pick_port)
   local url="http://localhost:$port"
-  local log="/tmp/workshop-e2e-${branch}.log"
+  local log="/tmp/workshop-e2e-${branch//\//-}.log"
 
   if ! has_e2e_script; then
     echo "  E2E SKIP (no test:e2e script)"
@@ -422,6 +278,11 @@ while [[ $# -gt 0 ]]; do
       mode="e2e"
       shift
       ;;
+    --track)
+      [[ $# -ge 2 ]] || { echo "Missing value for --track" >&2; exit 2; }
+      TRACK="$2"
+      shift 2
+      ;;
     *)
       target_branch="$1"
       shift
@@ -429,7 +290,21 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+load_track_branches
+
 start_branch=$(git rev-parse --abbrev-ref HEAD)
+if [[ "$start_branch" == "HEAD" ]]; then
+  echo "Detached HEAD is not supported for this script." >&2
+  exit 2
+fi
+
+if [[ -n "$target_branch" ]]; then
+  mapped_target=$(canonicalize_branch "$target_branch")
+  if [[ "$mapped_target" != "$target_branch" ]]; then
+    echo "Mapped branch '$target_branch' -> '$mapped_target'"
+  fi
+  target_branch="$mapped_target"
+fi
 
 if [[ "$mode" != "check" ]]; then
   if $run_all || [[ -n "$target_branch" && "$target_branch" != "$start_branch" ]]; then
@@ -440,11 +315,19 @@ fi
 if $run_all; then
   failures=0
   for b in "${branches[@]}"; do
+    branch_exists "$b" || {
+      echo "Branch not found: $b" >&2
+      exit 2
+    }
+    ensure_local_branch "$b"
     git checkout "$b" >/dev/null
+
     if [[ "$mode" == "check" ]]; then
       check_branch "$b"
       continue
     fi
+
+    echo "==> $b"
 
     app_dir=""
     if has_root_app; then
@@ -477,7 +360,13 @@ if $run_all; then
 fi
 
 branch="${target_branch:-$start_branch}"
+branch_exists "$branch" || {
+  echo "Branch not found: $branch" >&2
+  exit 2
+}
+
 if [[ "$branch" != "$start_branch" ]]; then
+  ensure_local_branch "$branch"
   git checkout "$branch" >/dev/null
 fi
 

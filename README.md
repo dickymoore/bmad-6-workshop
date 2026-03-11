@@ -2,8 +2,8 @@
 
 # BMAD BMM Stage 3 (Solutioning)
 ## App locations (workshop note)
-- Stages `stage-1` through `ready-for-dev`: no runnable app in the repo root; the floorplan demo lives in `office-floorplans/` (Next.js).
-- Stages `implementation-in-progress`, `complete`, `mvp`: run the desk booking app from the repo root (Vite).
+- Stages `workshop/desk-booking/10-analysis` through `workshop/desk-booking/50-ready-for-dev`: no runnable app in the repo root; the floorplan demo lives in `office-floorplans/` (Next.js).
+- Stages `workshop/desk-booking/60-implementation`, `workshop/desk-booking/70-complete`, `workshop/desk-booking/80-mvp`: run the desk booking app from the repo root (Vite).
 
 ## Validation and reviewer helpers
 - `./scripts/audit-bmad-v6.sh --all`
@@ -19,4 +19,4 @@
 6. Optional QA planning support: `/bmad-agent-bmm-qa`.
 7. Exit Codex.
 8. `git stash`
-9. `git checkout stage-4`
+9. `git checkout workshop/desk-booking/40-implementation-setup`
