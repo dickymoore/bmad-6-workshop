@@ -73,6 +73,8 @@ and facilitator session setup.
     `$bmad-help` and related skills stay available.
   - `prepare` also injects `CODEX_HOME` into workspace terminal settings so
     WSL VS Code terminals inherit the per-worktree `.codex` automatically.
+  - Session worktrees also get a folder-open VS Code task that starts
+    `codex --yolo` in a dedicated visible terminal panel.
 
 ## `scripts/setup-workshop-session.sh`
 
@@ -94,3 +96,5 @@ and facilitator session setup.
     `$bmad-help` and related skills stay available.
   - `prepare` also writes workspace terminal settings so `CODEX_HOME` points
     at `${workspaceFolder}/.codex` inside VS Code terminals.
+  - Session worktrees also get a folder-open VS Code task that starts
+    `codex --yolo` in a dedicated visible terminal panel.

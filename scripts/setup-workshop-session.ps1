@@ -162,6 +162,7 @@ function Ensure-VSCodeCodexEnv {
 
   $vscodePath = Join-Path $BranchPath '.vscode'
   $settingsPath = Join-Path $vscodePath 'settings.json'
+  $tasksPath = Join-Path $vscodePath 'tasks.json'
   New-Item -ItemType Directory -Path $vscodePath -Force | Out-Null
 
   $settings = @{}
@@ -189,8 +190,45 @@ function Ensure-VSCodeCodexEnv {
 
   $settings['terminal.integrated.env.linux']['CODEX_HOME'] = '${workspaceFolder}/.codex'
   $settings['terminal.integrated.env.windows']['CODEX_HOME'] = '${workspaceFolder}\.codex'
+  $settings['task.allowAutomaticTasks'] = 'on'
+  $settings['terminal.integrated.hideOnStartup'] = 'never'
+  $settings['workbench.panel.defaultLocation'] = 'right'
 
   $settings | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $settingsPath
+
+  $tasks = @{
+    version = '2.0.0'
+    tasks = @(
+      @{
+        label = 'Workshop: Start Codex'
+        type = 'shell'
+        command = 'codex --yolo'
+        windows = @{
+          command = 'wsl.exe bash -lc ''cd "$(wslpath -a "${workspaceFolder}")" && CODEX_HOME="$PWD/.codex" codex --yolo'''
+        }
+        options = @{
+          cwd = '${workspaceFolder}'
+          env = @{
+            CODEX_HOME = '${workspaceFolder}/.codex'
+          }
+        }
+        problemMatcher = @()
+        presentation = @{
+          reveal = 'always'
+          focus = $true
+          panel = 'dedicated'
+          clear = $false
+          showReuseMessage = $false
+        }
+        runOptions = @{
+          runOn = 'folderOpen'
+          instanceLimit = 1
+        }
+      }
+    )
+  }
+
+  $tasks | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $tasksPath
 }
 
 function Ensure-WorktreeExcludes {
@@ -217,7 +255,7 @@ function Ensure-WorktreeExcludes {
     New-Item -ItemType File -Path $excludePath -Force | Out-Null
   }
 
-  $entries = @('.codex/', '.vscode/settings.json', '.agents/', '_bmad/', '_bmad-output/')
+  $entries = @('.codex/', '.vscode/settings.json', '.vscode/tasks.json', '.agents/', '_bmad/', '_bmad-output/')
   $existing = @()
   if (Test-Path -LiteralPath $excludePath -PathType Leaf) {
     $existing = @(Get-Content -LiteralPath $excludePath -ErrorAction SilentlyContinue)

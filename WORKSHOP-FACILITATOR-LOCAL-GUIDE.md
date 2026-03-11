@@ -56,6 +56,8 @@ Notes:
 - If a stage branch does not track `_bmad` and `.agents/skills`, the script
   provisions a stable BMAD Codex bundle into that session worktree so
   `$bmad-help` remains available.
+- Session worktrees also get a folder-open VS Code task that starts
+  `codex --yolo` in a visible terminal panel.
 
 ### Bash (Linux/macOS or WSL)
 
@@ -70,6 +72,8 @@ Notes:
 - If a stage branch does not track `_bmad` and `.agents/skills`, the script
   provisions a stable BMAD Codex bundle into that session worktree so
   `$bmad-help` remains available.
+- Session worktrees also get a folder-open VS Code task that starts
+  `codex --yolo` in a visible terminal panel.
 
 ## 5. Mode-by-Mode Commands
 

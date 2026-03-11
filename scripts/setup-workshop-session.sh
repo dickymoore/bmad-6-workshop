@@ -112,16 +112,9 @@ ensure_vscode_codex_env() {
   local branch_path="$1"
   local vscode_dir="$branch_path/.vscode"
   local settings_path="$vscode_dir/settings.json"
+  local tasks_path="$vscode_dir/tasks.json"
 
   mkdir -p "$vscode_dir"
-
-  if [[ -f "$settings_path" ]]; then
-    if grep -q '"CODEX_HOME"' "$settings_path"; then
-      return 0
-    fi
-    log "existing $settings_path detected without CODEX_HOME; skipping auto-merge"
-    return 0
-  fi
 
   cat > "$settings_path" <<'JSON'
 {
@@ -130,7 +123,44 @@ ensure_vscode_codex_env() {
   },
   "terminal.integrated.env.windows": {
     "CODEX_HOME": "${workspaceFolder}\\.codex"
-  }
+  },
+  "task.allowAutomaticTasks": "on",
+  "terminal.integrated.hideOnStartup": "never",
+  "workbench.panel.defaultLocation": "right"
+}
+JSON
+
+  cat > "$tasks_path" <<'JSON'
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Workshop: Start Codex",
+      "type": "shell",
+      "command": "codex --yolo",
+      "windows": {
+        "command": "wsl.exe bash -lc 'cd \"$(wslpath -a \"${workspaceFolder}\")\" && CODEX_HOME=\"$PWD/.codex\" codex --yolo'"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "CODEX_HOME": "${workspaceFolder}/.codex"
+        }
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated",
+        "clear": false,
+        "showReuseMessage": false
+      },
+      "runOptions": {
+        "runOn": "folderOpen",
+        "instanceLimit": 1
+      }
+    }
+  ]
 }
 JSON
 }
@@ -149,6 +179,9 @@ ensure_worktree_excludes() {
   fi
   if ! grep -Fxq '.vscode/settings.json' "$exclude_file"; then
     echo '.vscode/settings.json' >> "$exclude_file"
+  fi
+  if ! grep -Fxq '.vscode/tasks.json' "$exclude_file"; then
+    echo '.vscode/tasks.json' >> "$exclude_file"
   fi
   if ! grep -Fxq '.agents/' "$exclude_file"; then
     echo '.agents/' >> "$exclude_file"
