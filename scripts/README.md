@@ -68,10 +68,11 @@ and facilitator session setup.
   - `prepare` now bootstraps per-worktree `.codex` folders (auth/config +
     skills mirrored from `.agents/skills`) and `launch` opens each VS Code
     window with `CODEX_HOME` set to that worktree’s `.codex`.
+  - If a workshop branch does not track `_bmad` and `.agents/skills`, the
+    script provisions a stable BMAD Codex bundle into that session worktree so
+    `$bmad-help` and related skills stay available.
   - `prepare` also injects `CODEX_HOME` into workspace terminal settings so
     WSL VS Code terminals inherit the per-worktree `.codex` automatically.
-  - Branches without `.agents/skills` (for example `main` if BMAD is not
-    installed there) will not expose BMAD slash skills in that window.
 
 ## `scripts/setup-workshop-session.sh`
 
@@ -88,7 +89,8 @@ and facilitator session setup.
   - `prepare` now bootstraps per-worktree `.codex` folders (auth/config +
     skills mirrored from `.agents/skills`) and `launch` opens each VS Code
     window with `CODEX_HOME` set to that worktree’s `.codex`.
+  - If a workshop branch does not track `_bmad` and `.agents/skills`, the
+    script provisions a stable BMAD Codex bundle into that session worktree so
+    `$bmad-help` and related skills stay available.
   - `prepare` also writes workspace terminal settings so `CODEX_HOME` points
     at `${workspaceFolder}/.codex` inside VS Code terminals.
-  - Branches without `.agents/skills` (for example `main` if BMAD is not
-    installed there) will not expose BMAD slash skills in that window.

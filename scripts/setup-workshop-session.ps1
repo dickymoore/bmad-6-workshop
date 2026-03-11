@@ -14,7 +14,7 @@ param(
   [switch]$ExcludeMain,
   [switch]$NoCode,
   [switch]$Reset,
-  [switch]$UseVirtualDesktops,
+[switch]$UseVirtualDesktops,
 
   [ValidateRange(0, 999)]
   [int]$MaxBranches = 0
@@ -142,6 +142,21 @@ function Copy-FileIfExists {
   return $false
 }
 
+function Copy-DirectoryIfExists {
+  param(
+    [Parameter(Mandatory = $true)][string]$Source,
+    [Parameter(Mandatory = $true)][string]$Destination
+  )
+
+  if (Test-Path -LiteralPath $Source -PathType Container) {
+    New-Item -ItemType Directory -Path $Destination -Force | Out-Null
+    Copy-Item -LiteralPath (Join-Path $Source '*') -Destination $Destination -Recurse -Force
+    return $true
+  }
+
+  return $false
+}
+
 function Ensure-VSCodeCodexEnv {
   param([Parameter(Mandatory = $true)][string]$BranchPath)
 
@@ -202,7 +217,7 @@ function Ensure-WorktreeExcludes {
     New-Item -ItemType File -Path $excludePath -Force | Out-Null
   }
 
-  $entries = @('.codex/', '.vscode/settings.json')
+  $entries = @('.codex/', '.vscode/settings.json', '.agents/', '_bmad/', '_bmad-output/')
   $existing = @()
   if (Test-Path -LiteralPath $excludePath -PathType Leaf) {
     $existing = @(Get-Content -LiteralPath $excludePath -ErrorAction SilentlyContinue)
@@ -261,6 +276,95 @@ function Sync-SystemSkills {
       Copy-Item -LiteralPath $candidate -Destination $dest -Recurse -Force
       return
     }
+  }
+}
+
+function Get-BmadBundlePath {
+  return Join-Path (Get-SessionPath) '.bmad-codex-bundle'
+}
+
+function Resolve-BmadUserName {
+  if (-not [string]::IsNullOrWhiteSpace($env:USERNAME)) {
+    return ($env:USERNAME -replace '\s+', '-')
+  }
+
+  if (-not [string]::IsNullOrWhiteSpace($env:USER)) {
+    return ($env:USER -replace '\s+', '-')
+  }
+
+  return 'codexuser'
+}
+
+function Ensure-BmadBundle {
+  $bundlePath = Get-BmadBundlePath
+  $bundleConfig = Join-Path $bundlePath '_bmad'
+  $bundleSkills = Join-Path $bundlePath '.agents/skills'
+
+  if ((Test-Path -LiteralPath $bundleConfig -PathType Container) -and (Test-Path -LiteralPath $bundleSkills -PathType Container)) {
+    return
+  }
+
+  if (Test-Path -LiteralPath $bundlePath) {
+    Remove-Item -LiteralPath $bundlePath -Recurse -Force
+  }
+  New-Item -ItemType Directory -Path $bundlePath -Force | Out-Null
+
+  $sourceBmad = Join-Path $SourceRepo '_bmad'
+  $sourceAgents = Join-Path $SourceRepo '.agents'
+  $sourceOutput = Join-Path $SourceRepo '_bmad-output'
+
+  if ((Test-Path -LiteralPath $sourceBmad -PathType Container) -and (Test-Path -LiteralPath (Join-Path $sourceAgents 'skills') -PathType Container)) {
+    Write-Log 'copying BMAD Codex payload from source repo into session bundle cache'
+    $null = Copy-DirectoryIfExists -Source $sourceBmad -Destination (Join-Path $bundlePath '_bmad')
+    $null = Copy-DirectoryIfExists -Source $sourceAgents -Destination (Join-Path $bundlePath '.agents')
+    $null = Copy-DirectoryIfExists -Source $sourceOutput -Destination (Join-Path $bundlePath '_bmad-output')
+  } else {
+    if (-not (Get-Command npx -ErrorAction SilentlyContinue)) {
+      Fail 'npx is required to provision BMAD Codex skills'
+    }
+
+    $userName = Resolve-BmadUserName
+    Write-Log 'installing BMAD stable v6 bundle into session cache via npx bmad-method@latest'
+    & npx 'bmad-method@latest' install `
+      --directory $bundlePath `
+      --action install `
+      --yes `
+      --modules bmm `
+      --tools codex `
+      --user-name $userName `
+      --output-folder _bmad-output *> $null
+
+    if ($LASTEXITCODE -ne 0) {
+      Fail 'Unable to install BMAD stable bundle for session bootstrap'
+    }
+  }
+
+  if (-not ((Test-Path -LiteralPath $bundleConfig -PathType Container) -and (Test-Path -LiteralPath $bundleSkills -PathType Container))) {
+    Fail "BMAD session bundle is incomplete: expected _bmad and .agents/skills in $bundlePath"
+  }
+}
+
+function Provision-BmadPayload {
+  param([Parameter(Mandatory = $true)][string]$BranchPath)
+
+  $branchBmad = Join-Path $BranchPath '_bmad'
+  $branchSkills = Join-Path $BranchPath '.agents/skills'
+
+  if ((Test-Path -LiteralPath $branchBmad -PathType Container) -and (Test-Path -LiteralPath $branchSkills -PathType Container)) {
+    return
+  }
+
+  Ensure-BmadBundle
+  $bundlePath = Get-BmadBundlePath
+
+  if (-not (Test-Path -LiteralPath $branchBmad -PathType Container)) {
+    $null = Copy-DirectoryIfExists -Source (Join-Path $bundlePath '_bmad') -Destination $branchBmad
+  }
+  if (-not (Test-Path -LiteralPath $branchSkills -PathType Container)) {
+    $null = Copy-DirectoryIfExists -Source (Join-Path $bundlePath '.agents') -Destination (Join-Path $BranchPath '.agents')
+  }
+  if (-not (Test-Path -LiteralPath (Join-Path $BranchPath '_bmad-output') -PathType Container)) {
+    $null = Copy-DirectoryIfExists -Source (Join-Path $bundlePath '_bmad-output') -Destination (Join-Path $BranchPath '_bmad-output')
   }
 }
 
@@ -356,6 +460,7 @@ function Bootstrap-CodexWorkspace {
   }
 
   Sync-SystemSkills -CodexSkillsPath $skillsPath -SourceRepoPath $SourceRepo
+  Provision-BmadPayload -BranchPath $BranchPath
   Sync-BmadSkills -BranchPath $BranchPath
   Apply-BmadCodexCompatibility -BranchPath $BranchPath
   Ensure-VSCodeCodexEnv -BranchPath $BranchPath

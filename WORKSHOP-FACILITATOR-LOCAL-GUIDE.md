@@ -53,6 +53,9 @@ Notes:
 - Includes `main` by default.
 - Use `-ExcludeMain` if needed.
 - Use `-NoCode` for prepare-only.
+- If a stage branch does not track `_bmad` and `.agents/skills`, the script
+  provisions a stable BMAD Codex bundle into that session worktree so
+  `$bmad-help` remains available.
 
 ### Bash (Linux/macOS or WSL)
 
@@ -64,6 +67,9 @@ Notes:
 - `--use-virtual-desktops` is a no-op in bash.
 - Use `--exclude-main` if needed.
 - Use `--no-code` for prepare-only.
+- If a stage branch does not track `_bmad` and `.agents/skills`, the script
+  provisions a stable BMAD Codex bundle into that session worktree so
+  `$bmad-help` remains available.
 
 ## 5. Mode-by-Mode Commands
 

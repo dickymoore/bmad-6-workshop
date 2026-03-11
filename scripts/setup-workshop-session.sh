@@ -15,6 +15,7 @@ OPEN_CODE=1
 RESET=0
 USE_VIRTUAL_DESKTOPS=0
 MAX_BRANCHES=0
+BMAD_NPM_TAG="${BMAD_NPM_TAG:-latest}"
 
 ALL_BRANCHES=(
   main
@@ -96,6 +97,17 @@ copy_file_if_exists() {
   return 1
 }
 
+copy_dir_if_exists() {
+  local src="$1"
+  local dst="$2"
+  if [[ -d "$src" ]]; then
+    mkdir -p "$dst"
+    cp -R "$src/." "$dst/"
+    return 0
+  fi
+  return 1
+}
+
 ensure_vscode_codex_env() {
   local branch_path="$1"
   local vscode_dir="$branch_path/.vscode"
@@ -138,6 +150,15 @@ ensure_worktree_excludes() {
   if ! grep -Fxq '.vscode/settings.json' "$exclude_file"; then
     echo '.vscode/settings.json' >> "$exclude_file"
   fi
+  if ! grep -Fxq '.agents/' "$exclude_file"; then
+    echo '.agents/' >> "$exclude_file"
+  fi
+  if ! grep -Fxq '_bmad/' "$exclude_file"; then
+    echo '_bmad/' >> "$exclude_file"
+  fi
+  if ! grep -Fxq '_bmad-output/' "$exclude_file"; then
+    echo '_bmad-output/' >> "$exclude_file"
+  fi
 }
 
 set_codex_secret_permissions() {
@@ -166,6 +187,88 @@ sync_system_skills() {
   rm -rf "$codex_skills_dir/.system"
   mkdir -p "$codex_skills_dir/.system"
   cp -R "$system_src/." "$codex_skills_dir/.system/"
+}
+
+bmad_bundle_dir() {
+  printf '%s\n' "$(session_dir)/.bmad-codex-bundle"
+}
+
+resolve_bmad_user_name() {
+  local user_name
+  user_name=${USER:-}
+  if [[ -n "$user_name" ]]; then
+    printf '%s\n' "$user_name" | tr -s '[:space:]' '-'
+    return 0
+  fi
+  user_name=$(whoami 2>/dev/null || true)
+  if [[ -n "$user_name" ]]; then
+    printf '%s\n' "$user_name" | tr -s '[:space:]' '-'
+    return 0
+  fi
+  echo "codexuser"
+}
+
+ensure_bmad_bundle() {
+  local bundle_dir
+  bundle_dir=$(bmad_bundle_dir)
+
+  if [[ -d "$bundle_dir/_bmad" && -d "$bundle_dir/.agents/skills" ]]; then
+    return 0
+  fi
+
+  rm -rf "$bundle_dir"
+  mkdir -p "$bundle_dir"
+
+  if [[ -d "$SOURCE_REPO/_bmad" && -d "$SOURCE_REPO/.agents/skills" ]]; then
+    log "copying BMAD Codex payload from source repo into session bundle cache"
+    copy_dir_if_exists "$SOURCE_REPO/_bmad" "$bundle_dir/_bmad"
+    copy_dir_if_exists "$SOURCE_REPO/.agents" "$bundle_dir/.agents"
+    copy_dir_if_exists "$SOURCE_REPO/_bmad-output" "$bundle_dir/_bmad-output" || true
+  else
+    command -v npx >/dev/null 2>&1 || fail "npx is required to provision BMAD Codex skills"
+    local user_name
+    user_name=$(resolve_bmad_user_name)
+    log "installing BMAD stable v6 bundle into session cache via npx bmad-method@${BMAD_NPM_TAG}"
+    (
+      cd "$bundle_dir"
+      npx "bmad-method@${BMAD_NPM_TAG}" install \
+        --directory "$bundle_dir" \
+        --action install \
+        --yes \
+        --modules bmm \
+        --tools codex \
+        --user-name "$user_name" \
+        --output-folder _bmad-output >/dev/null </dev/null
+    )
+  fi
+
+  [[ -d "$bundle_dir/_bmad" && -d "$bundle_dir/.agents/skills" ]] || \
+    fail "BMAD session bundle is incomplete: expected _bmad and .agents/skills in $bundle_dir"
+}
+
+provision_bmad_payload() {
+  local branch_path="$1"
+  if [[ -d "$branch_path/_bmad" && -d "$branch_path/.agents/skills" ]]; then
+    return 0
+  fi
+
+  ensure_bmad_bundle
+
+  local bundle_dir
+  bundle_dir=$(bmad_bundle_dir)
+
+  if [[ ! -d "$branch_path/_bmad" ]]; then
+    copy_dir_if_exists "$bundle_dir/_bmad" "$branch_path/_bmad" || \
+      fail "Unable to copy _bmad payload into $branch_path"
+  fi
+  if [[ ! -d "$branch_path/.agents/skills" ]]; then
+    mkdir -p "$branch_path/.agents"
+    copy_dir_if_exists "$bundle_dir/.agents" "$branch_path/.agents" || \
+      fail "Unable to copy .agents payload into $branch_path"
+  fi
+  if [[ ! -d "$branch_path/_bmad-output" && -d "$bundle_dir/_bmad-output" ]]; then
+    copy_dir_if_exists "$bundle_dir/_bmad-output" "$branch_path/_bmad-output" || true
+  fi
 }
 
 sync_bmad_skills() {
@@ -247,6 +350,7 @@ bootstrap_codex_workspace() {
   fi
 
   sync_system_skills "$codex_dir/skills"
+  provision_bmad_payload "$branch_path"
   sync_bmad_skills "$branch_path"
   apply_bmad_codex_compat "$branch_path"
   ensure_vscode_codex_env "$branch_path"
