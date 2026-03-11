@@ -28,6 +28,17 @@ ALL_BRANCHES=(
   workshop/80-mvp
 )
 
+declare -A SOURCE_BRANCH_ALIAS=(
+  [workshop/10-analysis]=stage-1
+  [workshop/20-planning]=stage-2
+  [workshop/30-solutioning]=stage-3
+  [workshop/40-implementation-setup]=stage-4
+  [workshop/50-ready-for-dev]=ready-for-dev
+  [workshop/60-implementation]=implementation-in-progress
+  [workshop/70-complete]=complete
+  [workshop/80-mvp]=mvp
+)
+
 log() {
   printf '[%s] %s\n' "$(date +'%Y-%m-%d %H:%M:%S')" "$*"
 }
@@ -318,6 +329,7 @@ sync_source_repo() {
 resolve_mirror_ref() {
   local mirror="$1"
   local branch="$2"
+  local alias_branch="${SOURCE_BRANCH_ALIAS[$branch]:-}"
 
   if git --git-dir="$mirror" show-ref --verify --quiet "refs/remotes/origin/$branch"; then
     printf '%s\n' "refs/remotes/origin/$branch"
@@ -326,6 +338,17 @@ resolve_mirror_ref() {
   if git --git-dir="$mirror" show-ref --verify --quiet "refs/heads/$branch"; then
     printf '%s\n' "refs/heads/$branch"
     return 0
+  fi
+
+  if [[ -n "$alias_branch" ]]; then
+    if git --git-dir="$mirror" show-ref --verify --quiet "refs/remotes/origin/$alias_branch"; then
+      printf '%s\n' "refs/remotes/origin/$alias_branch"
+      return 0
+    fi
+    if git --git-dir="$mirror" show-ref --verify --quiet "refs/heads/$alias_branch"; then
+      printf '%s\n' "refs/heads/$alias_branch"
+      return 0
+    fi
   fi
 
   return 1

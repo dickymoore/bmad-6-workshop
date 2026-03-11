@@ -95,6 +95,27 @@ function Get-BranchEntries {
   return @($entries)
 }
 
+function Get-SourceBranchAlias {
+  param([Parameter(Mandatory = $true)][string]$Branch)
+
+  $aliases = @{
+    'workshop/10-analysis' = 'stage-1'
+    'workshop/20-planning' = 'stage-2'
+    'workshop/30-solutioning' = 'stage-3'
+    'workshop/40-implementation-setup' = 'stage-4'
+    'workshop/50-ready-for-dev' = 'ready-for-dev'
+    'workshop/60-implementation' = 'implementation-in-progress'
+    'workshop/70-complete' = 'complete'
+    'workshop/80-mvp' = 'mvp'
+  }
+
+  if ($aliases.ContainsKey($Branch)) {
+    return $aliases[$Branch]
+  }
+
+  return $null
+}
+
 function Get-SessionPath {
   return Join-Path $SessionsRoot $Session
 }
@@ -374,6 +395,7 @@ function Resolve-MirrorRef {
 
   $remoteRef = "refs/remotes/origin/$Branch"
   $localRef = "refs/heads/$Branch"
+  $aliasBranch = Get-SourceBranchAlias -Branch $Branch
 
   $remoteExists = Invoke-Git -Arguments @("--git-dir=$MirrorPath", 'show-ref', '--verify', '--quiet', $remoteRef) -AllowFailure -SuppressOutput
   if ($remoteExists -eq 0) {
@@ -383,6 +405,21 @@ function Resolve-MirrorRef {
   $localExists = Invoke-Git -Arguments @("--git-dir=$MirrorPath", 'show-ref', '--verify', '--quiet', $localRef) -AllowFailure -SuppressOutput
   if ($localExists -eq 0) {
     return $localRef
+  }
+
+  if (-not [string]::IsNullOrWhiteSpace($aliasBranch)) {
+    $aliasRemoteRef = "refs/remotes/origin/$aliasBranch"
+    $aliasLocalRef = "refs/heads/$aliasBranch"
+
+    $aliasRemoteExists = Invoke-Git -Arguments @("--git-dir=$MirrorPath", 'show-ref', '--verify', '--quiet', $aliasRemoteRef) -AllowFailure -SuppressOutput
+    if ($aliasRemoteExists -eq 0) {
+      return $aliasRemoteRef
+    }
+
+    $aliasLocalExists = Invoke-Git -Arguments @("--git-dir=$MirrorPath", 'show-ref', '--verify', '--quiet', $aliasLocalRef) -AllowFailure -SuppressOutput
+    if ($aliasLocalExists -eq 0) {
+      return $aliasLocalRef
+    }
   }
 
   Fail "Branch not found in source refs: $Branch"
