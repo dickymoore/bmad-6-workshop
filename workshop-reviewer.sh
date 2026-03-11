@@ -173,6 +173,10 @@ cleanup_e2e_artifacts() {
   rm -rf test-results/artifacts playwright-report blob-report 2>/dev/null || true
 }
 
+cleanup_runtime_artifacts() {
+  rm -rf .vite 2>/dev/null || true
+}
+
 wait_for_server() {
   local url="$1"
   local pid="$2"
@@ -214,18 +218,21 @@ run_dev_check() {
   local url="http://localhost:$port"
   local log="/tmp/workshop-dev-${branch//\//-}.log"
 
+  cleanup_runtime_artifacts
   local pid
   pid=$(start_dev_server "$app_dir" "$port" "$log")
 
   if wait_for_server "$url" "$pid"; then
     kill "$pid" 2>/dev/null || true
     wait "$pid" 2>/dev/null || true
+    cleanup_runtime_artifacts
     echo "  DEV OK ($url)"
     return 0
   fi
 
   kill "$pid" 2>/dev/null || true
   wait "$pid" 2>/dev/null || true
+  cleanup_runtime_artifacts
   echo "  DEV FAIL (see $log)"
   return 1
 }
@@ -260,6 +267,7 @@ run_e2e() {
   fi
 
   cleanup_e2e_artifacts
+  cleanup_runtime_artifacts
   npm run dev -- --port "$port" --strictPort >"$log" 2>&1 &
   local pid=$!
 
@@ -267,6 +275,7 @@ run_e2e() {
     kill "$pid" 2>/dev/null || true
     wait "$pid" 2>/dev/null || true
     cleanup_e2e_artifacts
+    cleanup_runtime_artifacts
     echo "  E2E FAIL (dev server did not start, see $log)"
     return 1
   fi
@@ -280,6 +289,7 @@ run_e2e() {
   kill "$pid" 2>/dev/null || true
   wait "$pid" 2>/dev/null || true
   cleanup_e2e_artifacts
+  cleanup_runtime_artifacts
   return "$status"
 }
 
