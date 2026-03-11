@@ -1,0 +1,10 @@
+{
+  "bootstrap_branch": "main",
+  "default_track": "desk-booking",
+  "tracks": {
+    "desk-booking": {
+      "display_name": "Desk Booking",
+      "path": "workshops/desk-booking/track.json"
+    }
+  }
+}
