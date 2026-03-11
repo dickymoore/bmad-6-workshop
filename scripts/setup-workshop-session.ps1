@@ -10,6 +10,7 @@ param(
 
   [string]$SessionsRoot,
   [string]$SourceRepo,
+  [string]$Track,
 
   [switch]$ExcludeMain,
   [switch]$NoCode,
@@ -71,21 +72,86 @@ function Get-DefaultSourceRepo {
   }
 }
 
+function Get-TrackIndex {
+  if ($script:TrackIndex) {
+    return $script:TrackIndex
+  }
+
+  $indexPath = Join-Path $SourceRepo 'workshops/index.json'
+  if (-not (Test-Path -LiteralPath $indexPath -PathType Leaf)) {
+    Fail "Workshop track index not found: $indexPath"
+  }
+
+  $script:TrackIndex = Get-Content -LiteralPath $indexPath -Raw | ConvertFrom-Json
+  return $script:TrackIndex
+}
+
+function Resolve-TrackId {
+  if (-not [string]::IsNullOrWhiteSpace($Track)) {
+    return $Track
+  }
+
+  return (Get-TrackIndex).default_track
+}
+
+function Get-TrackDefinition {
+  if ($script:TrackDefinition) {
+    return $script:TrackDefinition
+  }
+
+  $index = Get-TrackIndex
+  $trackId = Resolve-TrackId
+  $trackMetaProperty = $index.tracks.PSObject.Properties[$trackId]
+  if (-not $trackMetaProperty) {
+    Fail "Unknown workshop track: $trackId"
+  }
+
+  $relativeTrackPath = $trackMetaProperty.Value.path -replace '/', [IO.Path]::DirectorySeparatorChar
+  $trackPath = Join-Path $SourceRepo $relativeTrackPath
+  if (-not (Test-Path -LiteralPath $trackPath -PathType Leaf)) {
+    Fail "Workshop track definition not found: $trackPath"
+  }
+
+  $script:TrackDefinition = Get-Content -LiteralPath $trackPath -Raw | ConvertFrom-Json
+  return $script:TrackDefinition
+}
+
 function Get-BranchEntries {
-  $entries = @(
-    [PSCustomObject]@{ Branch = 'main'; Folder = '00-main' }
-    [PSCustomObject]@{ Branch = 'workshop/10-analysis'; Folder = '10-analysis' }
-    [PSCustomObject]@{ Branch = 'workshop/20-planning'; Folder = '20-planning' }
-    [PSCustomObject]@{ Branch = 'workshop/30-solutioning'; Folder = '30-solutioning' }
-    [PSCustomObject]@{ Branch = 'workshop/40-implementation-setup'; Folder = '40-implementation-setup' }
-    [PSCustomObject]@{ Branch = 'workshop/50-ready-for-dev'; Folder = '50-ready-for-dev' }
-    [PSCustomObject]@{ Branch = 'workshop/60-implementation'; Folder = '60-implementation' }
-    [PSCustomObject]@{ Branch = 'workshop/70-complete'; Folder = '70-complete' }
-    [PSCustomObject]@{ Branch = 'workshop/80-mvp'; Folder = '80-mvp' }
-  )
+  $trackDefinition = Get-TrackDefinition
+  $entries = @()
+
+  $entries += [PSCustomObject]@{
+    Branch = $trackDefinition.bootstrap.branch
+    Folder = $trackDefinition.bootstrap.folder
+    SourceCandidates = @($trackDefinition.bootstrap.branch)
+  }
+
+  foreach ($stage in $trackDefinition.stages) {
+    $candidates = @($stage.branch)
+    if ($stage.PSObject.Properties.Name -contains 'source_branch' -and -not [string]::IsNullOrWhiteSpace($stage.source_branch)) {
+      $candidates += $stage.source_branch
+    }
+    if ($stage.PSObject.Properties.Name -contains 'old_canonical' -and -not [string]::IsNullOrWhiteSpace($stage.old_canonical)) {
+      $candidates += $stage.old_canonical
+    }
+    if ($stage.PSObject.Properties.Name -contains 'legacy_aliases') {
+      foreach ($alias in @($stage.legacy_aliases)) {
+        if (-not [string]::IsNullOrWhiteSpace($alias)) {
+          $candidates += $alias
+        }
+      }
+    }
+
+    $entries += [PSCustomObject]@{
+      Branch = $stage.branch
+      Folder = $stage.folder
+      SourceCandidates = @($candidates | Select-Object -Unique)
+    }
+  }
 
   if ($ExcludeMain) {
-    $entries = @($entries | Where-Object { $_.Branch -ne 'main' })
+    $bootstrapBranch = $trackDefinition.bootstrap.branch
+    $entries = @($entries | Where-Object { $_.Branch -ne $bootstrapBranch })
   }
 
   if ($MaxBranches -gt 0) {
@@ -93,27 +159,6 @@ function Get-BranchEntries {
   }
 
   return @($entries)
-}
-
-function Get-SourceBranchAlias {
-  param([Parameter(Mandatory = $true)][string]$Branch)
-
-  $aliases = @{
-    'workshop/10-analysis' = 'stage-1'
-    'workshop/20-planning' = 'stage-2'
-    'workshop/30-solutioning' = 'stage-3'
-    'workshop/40-implementation-setup' = 'stage-4'
-    'workshop/50-ready-for-dev' = 'ready-for-dev'
-    'workshop/60-implementation' = 'implementation-in-progress'
-    'workshop/70-complete' = 'complete'
-    'workshop/80-mvp' = 'mvp'
-  }
-
-  if ($aliases.ContainsKey($Branch)) {
-    return $aliases[$Branch]
-  }
-
-  return $null
 }
 
 function Get-SessionPath {
@@ -570,39 +615,29 @@ function Resolve-MirrorRef {
     [Parameter(Mandatory = $true)]
     [string]$MirrorPath,
     [Parameter(Mandatory = $true)]
-    [string]$Branch
+    [object]$Entry
   )
 
-  $remoteRef = "refs/remotes/origin/$Branch"
-  $localRef = "refs/heads/$Branch"
-  $aliasBranch = Get-SourceBranchAlias -Branch $Branch
-
-  $remoteExists = Invoke-Git -Arguments @("--git-dir=$MirrorPath", 'show-ref', '--verify', '--quiet', $remoteRef) -AllowFailure -SuppressOutput
-  if ($remoteExists -eq 0) {
-    return $remoteRef
-  }
-
-  $localExists = Invoke-Git -Arguments @("--git-dir=$MirrorPath", 'show-ref', '--verify', '--quiet', $localRef) -AllowFailure -SuppressOutput
-  if ($localExists -eq 0) {
-    return $localRef
-  }
-
-  if (-not [string]::IsNullOrWhiteSpace($aliasBranch)) {
-    $aliasRemoteRef = "refs/remotes/origin/$aliasBranch"
-    $aliasLocalRef = "refs/heads/$aliasBranch"
-
-    $aliasRemoteExists = Invoke-Git -Arguments @("--git-dir=$MirrorPath", 'show-ref', '--verify', '--quiet', $aliasRemoteRef) -AllowFailure -SuppressOutput
-    if ($aliasRemoteExists -eq 0) {
-      return $aliasRemoteRef
+  foreach ($candidate in @($Entry.SourceCandidates)) {
+    if ([string]::IsNullOrWhiteSpace($candidate)) {
+      continue
     }
 
-    $aliasLocalExists = Invoke-Git -Arguments @("--git-dir=$MirrorPath", 'show-ref', '--verify', '--quiet', $aliasLocalRef) -AllowFailure -SuppressOutput
-    if ($aliasLocalExists -eq 0) {
-      return $aliasLocalRef
+    $remoteRef = "refs/remotes/origin/$candidate"
+    $localRef = "refs/heads/$candidate"
+
+    $remoteExists = Invoke-Git -Arguments @("--git-dir=$MirrorPath", 'show-ref', '--verify', '--quiet', $remoteRef) -AllowFailure -SuppressOutput
+    if ($remoteExists -eq 0) {
+      return $remoteRef
+    }
+
+    $localExists = Invoke-Git -Arguments @("--git-dir=$MirrorPath", 'show-ref', '--verify', '--quiet', $localRef) -AllowFailure -SuppressOutput
+    if ($localExists -eq 0) {
+      return $localRef
     }
   }
 
-  Fail "Branch not found in source refs: $Branch"
+  Fail "Branch not found in source refs: $($Entry.Branch)"
 }
 
 function Assert-SourceRepo {
@@ -629,6 +664,7 @@ function Write-Manifest {
 
   $manifest = [PSCustomObject]@{
     session = $Session
+    track = (Resolve-TrackId)
     createdAtUtc = (Get-Date).ToUniversalTime().ToString('o')
     sourceRepo = (Resolve-Path $SourceRepo).Path
     includeMain = (-not $ExcludeMain)
@@ -672,7 +708,7 @@ function Prepare-Session {
     $branch = $entry.Branch
     $folderPath = Join-Path $sessionPath $entry.Folder
     $headRef = "refs/heads/$branch"
-    $sourceRef = Resolve-MirrorRef -MirrorPath $mirrorPath -Branch $branch
+    $sourceRef = Resolve-MirrorRef -MirrorPath $mirrorPath -Entry $entry
 
     if (Test-Path -LiteralPath $folderPath) {
       Invoke-Git -Arguments @("--git-dir=$mirrorPath", 'worktree', 'remove', '--force', $folderPath) -AllowFailure -SuppressOutput | Out-Null

@@ -2,45 +2,28 @@
 set -euo pipefail
 
 SCRIPT_NAME=$(basename "$0")
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ROOT_DIR=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+
+# shellcheck source=scripts/lib/workshop_tracks.sh
+source "$SCRIPT_DIR/lib/workshop_tracks.sh"
+
 STRICT=false
-
-WORKSHOP_BRANCHES=(
-  main
-  workshop/10-analysis
-  workshop/20-planning
-  workshop/30-solutioning
-  workshop/40-implementation-setup
-  workshop/50-ready-for-dev
-  workshop/60-implementation
-  workshop/70-complete
-  workshop/80-mvp
-)
-
-LEGACY_BRANCH_ALIASES=(
-  stage-1
-  stage-2
-  stage-3
-  stage-4
-  ready-for-dev
-  implementation-in-progress
-  complete
-  mvp
-)
-
+TRACK=$(workshop_default_track)
 errors=0
 warnings=0
 
 usage() {
   cat <<USAGE
 Usage:
-  ./${SCRIPT_NAME} [--strict] [--help]
+  ./${SCRIPT_NAME} [--strict] [--track <id>] [--help]
 
 Checks facilitator machine and repo readiness before workshop delivery.
 
 Options:
-  --strict   Exit non-zero if warnings are found.
-  --help     Show help.
+  --strict      Exit non-zero if warnings are found.
+  --track <id>  Workshop track id (default: value from workshops/index.json).
+  --help        Show help.
 USAGE
 }
 
@@ -111,36 +94,52 @@ check_git_repo() {
 }
 
 check_workshop_branches() {
+  local canonical_branches=()
+  local compatibility_branches=()
   local missing=()
-  local missing_legacy=()
-  local b
+  local missing_compat=()
+  local branch
 
-  for b in "${WORKSHOP_BRANCHES[@]}"; do
-    if git -C "$ROOT_DIR" show-ref --verify --quiet "refs/heads/$b" || git -C "$ROOT_DIR" show-ref --verify --quiet "refs/remotes/origin/$b"; then
+  mapfile -t canonical_branches < <(workshop_list_branches "$TRACK" 1)
+
+  for branch in "${canonical_branches[@]}"; do
+    if git -C "$ROOT_DIR" show-ref --verify --quiet "refs/heads/$branch" || git -C "$ROOT_DIR" show-ref --verify --quiet "refs/remotes/origin/$branch"; then
       :
     else
-      missing+=("$b")
+      missing+=("$branch")
     fi
   done
 
   if (( ${#missing[@]} == 0 )); then
-    pass "all canonical workshop branches are present (local or origin)"
+    pass "all canonical workshop branches are present for track '$TRACK' (local or origin)"
   else
-    fail "missing canonical workshop branches: ${missing[*]}"
+    fail "missing canonical workshop branches for track '$TRACK': ${missing[*]}"
   fi
 
-  for b in "${LEGACY_BRANCH_ALIASES[@]}"; do
-    if git -C "$ROOT_DIR" show-ref --verify --quiet "refs/heads/$b" || git -C "$ROOT_DIR" show-ref --verify --quiet "refs/remotes/origin/$b"; then
+  for branch in "${canonical_branches[@]}"; do
+    [[ "$branch" == "main" ]] && continue
+    while IFS= read -r candidate; do
+      [[ "$candidate" == "$branch" ]] && continue
+      compatibility_branches+=("$candidate")
+    done < <(workshop_branch_candidates "$TRACK" "$branch")
+  done
+
+  if (( ${#compatibility_branches[@]} > 0 )); then
+    mapfile -t compatibility_branches < <(printf '%s\n' "${compatibility_branches[@]}" | awk '!seen[$0]++')
+  fi
+
+  for branch in "${compatibility_branches[@]}"; do
+    if git -C "$ROOT_DIR" show-ref --verify --quiet "refs/heads/$branch" || git -C "$ROOT_DIR" show-ref --verify --quiet "refs/remotes/origin/$branch"; then
       :
     else
-      missing_legacy+=("$b")
+      missing_compat+=("$branch")
     fi
   done
 
-  if (( ${#missing_legacy[@]} == 0 )); then
-    pass "legacy branch aliases present for compatibility cycle"
+  if (( ${#missing_compat[@]} == 0 )); then
+    pass "compatibility branch names are present for track '$TRACK'"
   else
-    warn "missing legacy aliases (compatibility cycle): ${missing_legacy[*]}"
+    warn "missing compatibility branch names for track '$TRACK': ${missing_compat[*]}"
   fi
 }
 
@@ -215,56 +214,48 @@ while [[ $# -gt 0 ]]; do
       STRICT=true
       shift
       ;;
+    --track)
+      [[ $# -ge 2 ]] || { echo "Missing value for --track" >&2; exit 2; }
+      TRACK="$2"
+      shift 2
+      ;;
     --help|-h)
       usage
       exit 0
       ;;
     *)
       echo "Unknown argument: $1" >&2
-      usage
       exit 2
       ;;
   esac
 done
 
-cd "$ROOT_DIR"
-
-echo "Workshop preflight in: $ROOT_DIR"
-
-echo "--- required tooling ---"
 require_command git
 require_command node
 require_command npm
-require_command npx
-require_command rg
-require_command codex
+optional_command npx
+optional_command codex
+optional_command code
+optional_command rg
 
-echo "--- optional tooling ---"
-optional_command gh
-optional_command jq
-
-echo "--- environment checks ---"
 check_node_version
 check_git_repo
-check_remote
 check_workshop_branches
-check_network_access
-
-echo "--- workshop payload checks ---"
+check_remote
 check_bmad_payload
 check_readme_install_hint
+check_network_access
 check_stage_app_layout
 
-echo "--- summary ---"
-printf 'Errors: %d\n' "$errors"
-printf 'Warnings: %d\n' "$warnings"
-
+printf '\n'
 if (( errors > 0 )); then
+  echo "Preflight failed with errors=$errors warnings=$warnings"
   exit 1
 fi
 
-if [[ "$STRICT" == "true" ]] && (( warnings > 0 )); then
-  exit 2
+if $STRICT && (( warnings > 0 )); then
+  echo "Preflight warnings encountered under --strict (warnings=$warnings)"
+  exit 1
 fi
 
-exit 0
+echo "Preflight passed with warnings=$warnings"

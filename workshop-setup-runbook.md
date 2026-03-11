@@ -1,157 +1,141 @@
-# BMAD Workshop Setup Runbook (Stable v6)
+# BMAD Workshop Setup Runbook
 
-## 1. Purpose
+## Purpose
 
 This runbook standardizes workshop delivery so facilitators can run the same
-high-quality session from setup through follow-up without improvising critical
-logistics.
+session repeatedly without improvising branch flow or environment setup.
 
-## 2. Roles
+## Roles
 
-- Workshop Lead: owns agenda timing, learning outcomes, and live facilitation.
-- Technical Producer: owns environment health, branch transitions, and troubleshooting.
-- Support Facilitator (optional): handles participant blockers and captures
-  recurring issues.
+- Workshop lead: owns agenda, pacing, and learning outcomes.
+- Technical producer: owns environment health, branch transitions, and recovery.
+- Support facilitator: optional; handles participant blockers.
 
-## 3. Pre-Session Timeline
+## Pre-Session Timeline
 
 ### T-7 days
 
-- Confirm workshop date, duration, and audience profile (skill level, IDE
-  preference, OS mix).
-- Freeze the workshop baseline branch set for this cohort.
-- Run `./scripts/workshop-preflight.sh --strict` on facilitator machine.
+- Confirm date, duration, audience profile, and IDE/OS mix.
+- Freeze the track branches you will deliver.
+- Run `./scripts/workshop-preflight.sh --track desk-booking --strict`.
 
 ### T-2 days
 
 - Do a full dry run from a fresh clone.
-- Verify all stage transitions and expected artifacts.
-- Finalize delivery pack links and facilitator notes.
+- Verify every branch transition and expected artifact boundary.
+- Rehearse the facilitator script.
 
 ### T-60 minutes
 
-- Open a clean terminal in the workshop repo.
-- Verify network access for `npm`/`npx`.
-- Re-run `./scripts/workshop-preflight.sh`.
-- Pre-open reference tabs/files:
+- Open a clean terminal in the repo.
+- Re-run `./scripts/workshop-preflight.sh --track desk-booking`.
+- Pre-open:
   - `README.md`
   - `workshop-reviewer.sh`
-  - `workshop-video-script.md` (timing aid)
+  - `workshop-video-script.md`
 
-## 4. Participant Setup Flow
-
-Use this exact setup sequence:
+## Participant Setup Flow
 
 ```bash
 git clone git@github.com:dickymoore/bmad-6-workshop.git
 cd bmad-6-workshop
 npx bmad-method@latest install --modules bmm --tools codex --yes
+git checkout workshop/desk-booking/10-analysis
 ```
 
-If participants are on managed machines, keep a fallback command ready:
+Compatibility inputs still work, but facilitators should teach the namespaced
+branch names.
+
+## Facilitator Session Automation
+
+Use the session setup scripts to create one worktree per stage:
+
+- PowerShell:
+
+```powershell
+./scripts/setup-workshop-session.ps1 -Track desk-booking -Mode all -Session Wed-AM
+```
+
+- Bash:
 
 ```bash
-npm cache clean --force
-npx bmad-method@latest install --modules bmm --tools codex --yes
+./scripts/setup-workshop-session.sh --track desk-booking --mode all --session Wed-AM
 ```
 
-## 4A. Facilitator Session Automation
+Teardown after each run:
 
-Use these scripts to create one folder per stage branch for a single workshop
-run, then open all folders in separate VS Code windows.
+- PowerShell:
 
-- PowerShell (Windows):
-  - `./scripts/setup-workshop-session.ps1 -Mode all -Session Wed-AM`
-  - Optional desktop orchestration:
-    `-UseVirtualDesktops` (requires compatible PowerShell desktop commands).
-- Bash (Linux/macOS):
-  - `./scripts/setup-workshop-session.sh --mode all --session Wed-AM`
-- Teardown after each run:
-  - `./scripts/setup-workshop-session.ps1 -Mode teardown -Session Wed-AM`
-  - `./scripts/setup-workshop-session.sh --mode teardown --session Wed-AM`
+```powershell
+./scripts/setup-workshop-session.ps1 -Track desk-booking -Mode teardown -Session Wed-AM
+```
 
-## 5. Live Delivery Cadence
+- Bash:
+
+```bash
+./scripts/setup-workshop-session.sh --track desk-booking --mode teardown --session Wed-AM
+```
+
+## Live Delivery Cadence
 
 Target runtime: 2.5 to 3 hours.
 
-1. Orientation (`main`)
+1. `main`
+   - orient participants to the repo and branch model
+   - confirm Codex + BMAD setup
+2. `workshop/desk-booking/10-analysis`
+   - analyst flow, product brief, research setup
+3. `workshop/desk-booking/20-planning`
+   - planning outputs, ADR, workshop-level alignment
+4. `workshop/desk-booking/30-solutioning`
+   - PRD, UX, architecture direction
+5. `workshop/desk-booking/40-implementation-setup`
+   - architecture completion, epics, readiness
+6. `workshop/desk-booking/50-ready-for-dev`
+   - sprint artifacts and dev handoff
+7. `workshop/desk-booking/60-implementation`
+   - implementation
+8. `workshop/desk-booking/70-complete`
+   - stabilization and course correction
+9. `workshop/desk-booking/80-mvp`
+   - final demoable state
 
-- Explain branch progression and expected artifacts.
-- Confirm everyone can run the preflight script.
+## Facilitation Guardrails
 
-1. Analysis (`workshop/10-analysis`)
+- Do not skip stage gates.
+- Keep commands deterministic; avoid inventing alternate branch names live.
+- If a participant is blocked, move them to support and keep the main flow moving.
+- Time-box rabbit holes.
 
-- First Codex interaction: run `/skills` (verify BMAD skills), then run
-  `bmad-help` (for example `$bmad-help`) before activating analyst flows.
-- Activate analyst role and generate discovery outputs.
-- Emphasize quality of assumptions and constraints.
-
-1. Planning (`workshop/20-planning`)
-
-- Produce product brief + research + ADR artifacts.
-- Confirm clarity and completeness before moving on.
-
-1. Solutioning (`workshop/30-solutioning`)
-
-- Build PRD and UX spec.
-- Validate traceability from requirements to solution intent.
-
-1. Implementation Setup (`workshop/40-implementation-setup`,
-   `workshop/50-ready-for-dev`)
-
-- Generate architecture, epics, readiness docs, sprint artifacts.
-- Verify dev handoff quality.
-
-1. Build + Stabilize (`workshop/60-implementation`,
-   `workshop/70-complete`, `workshop/80-mvp`)
-
-- Run app, fix issues, validate final MVP behavior.
-- Ensure testing and story status are current.
-
-Legacy branch aliases remain accepted for one compatibility cycle, but all
-facilitator guidance should use canonical `workshop/*` names.
-
-## 6. Facilitation Guardrails
-
-- Do not skip stage gates; validate branch state before advancing.
-- Keep command inputs deterministic; avoid ad-hoc aliasing during live delivery.
-- Record every blocker pattern once; convert repeated blockers into preflight checks.
-- Time-box rabbit holes: 5 minutes, then park and continue.
-
-## 7. Incident Playbook
+## Incident Playbook
 
 ### Install failures
 
-- Run preflight output remediations first.
-- If still blocked, pair participant with support facilitator and continue class.
+- Run the preflight remediations first.
+- If still blocked, pair the participant with support and continue.
 
 ### Branch mismatch
-
-- Run:
 
 ```bash
 git fetch origin --prune
 git checkout <target-branch>
 ```
 
+Preferred target branches are the namespaced `workshop/desk-booking/*` ones.
+
 ### Runtime app issues
 
-- Check stage-specific app location:
-  - early stages: `office-floorplans/`
-  - later stages: repo root app
+- Early stages: `office-floorplans/`
+- Later stages: repo root app
 
-## 8. Success Criteria
+## Success Criteria
 
-By end of workshop:
+- Participants understand the BMAD flow from analysis to MVP.
+- Participants can identify what each stage branch should and should not contain.
+- Participants can run the final app stages independently.
 
-- Participants can describe end-to-end BMAD flow from analysis to MVP.
-- Participants can navigate and validate stage artifacts independently.
-- Participants can run final app stage with confidence.
+## Post-Session Actions
 
-## 9. Post-Session Actions
-
-Within 24 hours:
-
-- Capture top 5 friction points.
-- Convert friction points into script or documentation improvements.
-- Version and archive the session delivery pack used for the cohort.
+- Capture the top friction points.
+- Convert repeat friction into script or documentation changes.
+- Archive the exact delivery pack used for that cohort.

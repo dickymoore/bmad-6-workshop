@@ -5,28 +5,8 @@ SCRIPT_NAME=$(basename "$0")
 ROOT_DIR=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
-WORKSHOP_BRANCHES=(
-  main
-  workshop/10-analysis
-  workshop/20-planning
-  workshop/30-solutioning
-  workshop/40-implementation-setup
-  workshop/50-ready-for-dev
-  workshop/60-implementation
-  workshop/70-complete
-  workshop/80-mvp
-)
-
-declare -A LEGACY_TO_CANONICAL=(
-  [stage-1]=workshop/10-analysis
-  [stage-2]=workshop/20-planning
-  [stage-3]=workshop/30-solutioning
-  [stage-4]=workshop/40-implementation-setup
-  [ready-for-dev]=workshop/50-ready-for-dev
-  [implementation-in-progress]=workshop/60-implementation
-  [complete]=workshop/70-complete
-  [mvp]=workshop/80-mvp
-)
+# shellcheck source=scripts/lib/workshop_tracks.sh
+source "$SCRIPT_DIR/lib/workshop_tracks.sh"
 
 declare -A TARGET_BRANCH_SET=()
 
@@ -42,11 +22,12 @@ Required:
   --apply                Execute changes. Without this flag, script runs as dry-run.
 
 Scope:
-  --all                  Migrate all canonical workshop branches.
+  --all                  Migrate all canonical branches for the selected track.
   --branch <name>        Migrate specific branch (repeatable).
-                         Accepts canonical names or legacy aliases.
+                         Accepts namespaced canonical names plus compatibility aliases.
 
 Options:
+  --track <id>           Workshop track id (default: value from workshops/index.json).
   --repo <path>          Target repo (default: current git root).
   --npm-tag <tag>        bmad-method npm tag (default: latest).
   --user-name <name>     BMAD installer user name (default: git user.name or Workshop).
@@ -72,15 +53,7 @@ fail() {
 
 canonicalize_branch() {
   local branch="$1"
-  if [[ "$branch" == "main" ]]; then
-    echo "main"
-    return 0
-  fi
-  if [[ -n "${LEGACY_TO_CANONICAL[$branch]:-}" ]]; then
-    echo "${LEGACY_TO_CANONICAL[$branch]}"
-    return 0
-  fi
-  echo "$branch"
+  workshop_resolve_branch "$TRACK" "$branch"
 }
 
 add_target_branch() {
@@ -89,7 +62,7 @@ add_target_branch() {
   canonical_branch=$(canonicalize_branch "$input_branch")
 
   if [[ "$canonical_branch" != "$input_branch" ]]; then
-    log "mapped legacy branch '$input_branch' -> '$canonical_branch'"
+    log "mapped branch '$input_branch' -> '$canonical_branch'"
   fi
 
   if [[ -n "${TARGET_BRANCH_SET[$canonical_branch]:-}" ]]; then
@@ -149,6 +122,7 @@ prepare_payload() {
   cp "$SCRIPT_DIR/audit-bmad-v6.sh" "$payload_dir/scripts/"
   cp "$SCRIPT_DIR/migrate-bmad-v6.sh" "$payload_dir/scripts/"
   cp "$SCRIPT_DIR/verify-bmad-v6.sh" "$payload_dir/scripts/"
+  cp -R "$SCRIPT_DIR/lib" "$payload_dir/scripts/lib"
 
   if [[ -f "$repo/workshop-reviewer.sh" ]]; then
     cp "$repo/workshop-reviewer.sh" "$payload_dir/workshop-reviewer.sh"
@@ -161,6 +135,8 @@ sync_shared_assets() {
 
   mkdir -p "$repo/scripts"
   cp "$payload_dir/scripts/"*.sh "$repo/scripts/"
+  rm -rf "$repo/scripts/lib"
+  cp -R "$payload_dir/scripts/lib" "$repo/scripts/lib"
   chmod +x "$repo/scripts/"*.sh
 
   if [[ -f "$payload_dir/workshop-reviewer.sh" ]]; then
@@ -179,7 +155,6 @@ replace_in_file() {
 
 replace_shared_markers() {
   local repo="$1"
-  local branch="$2"
   local readme="$repo/README.md"
   [[ -f "$readme" ]] || return 0
 
@@ -262,6 +237,7 @@ commit_if_requested() {
   log "branch=$branch committed"
 }
 
+TRACK=$(workshop_default_track)
 REPO="$ROOT_DIR"
 NPM_TAG="latest"
 USER_NAME="$(git config user.name 2>/dev/null || echo Workshop)"
@@ -271,6 +247,7 @@ COMMIT_MESSAGE="Migrate BMAD workshop branch to stable v6"
 APPLY=false
 MIGRATE_ALL=false
 TARGET_BRANCHES=()
+PENDING_BRANCHES=()
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -284,7 +261,12 @@ while [[ $# -gt 0 ]]; do
       ;;
     --branch)
       [[ $# -ge 2 ]] || fail "Missing value for --branch"
-      add_target_branch "$2"
+      PENDING_BRANCHES+=("$2")
+      shift 2
+      ;;
+    --track)
+      [[ $# -ge 2 ]] || fail "Missing value for --track"
+      TRACK="$2"
       shift 2
       ;;
     --repo)
@@ -329,11 +311,16 @@ done
 require_git_repo "$REPO"
 
 if $MIGRATE_ALL; then
-  TARGET_BRANCHES=("${WORKSHOP_BRANCHES[@]}")
-elif [[ ${#TARGET_BRANCHES[@]} -eq 0 ]]; then
-  current_branch=$(git -C "$REPO" rev-parse --abbrev-ref HEAD)
-  [[ "$current_branch" != "HEAD" ]] || fail "Detached HEAD is not supported without --branch"
-  add_target_branch "$current_branch"
+  mapfile -t TARGET_BRANCHES < <(workshop_list_branches "$TRACK" 1)
+else
+  for branch in "${PENDING_BRANCHES[@]}"; do
+    add_target_branch "$branch"
+  done
+  if [[ ${#TARGET_BRANCHES[@]} -eq 0 ]]; then
+    current_branch=$(git -C "$REPO" rev-parse --abbrev-ref HEAD)
+    [[ "$current_branch" != "HEAD" ]] || fail "Detached HEAD is not supported without --branch"
+    add_target_branch "$current_branch"
+  fi
 fi
 
 if [[ "$APPLY" != "true" ]]; then
@@ -370,7 +357,7 @@ for branch in "${TARGET_BRANCHES[@]}"; do
   append_log "$REPO" "$LOG_FILE" "START branch=$branch"
 
   sync_shared_assets "$REPO" "$PAYLOAD_DIR"
-  replace_shared_markers "$REPO" "$branch"
+  replace_shared_markers "$REPO"
 
   if [[ "$branch" != "main" ]]; then
     install_stable_bmad "$REPO" "$NPM_TAG" "$USER_NAME"

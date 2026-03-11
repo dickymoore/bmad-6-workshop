@@ -1,66 +1,81 @@
-# Workshop Branch Strategy and Naming Convention
+# Workshop Branch Strategy
 
-## 1. Goals
+## Goals
 
-- Make branch purpose obvious without opening docs.
-- Preserve workshop progression ordering.
-- Reduce onboarding friction for facilitators and participants.
+- Keep `main` as the shared workshop bootstrap.
+- Make each demo an explicit track instead of baking desk-booking into the whole repo.
+- Leave room for parallel workshops without reworking the automation again.
 
-## 2. Proposed Convention
+## Branch Model
 
-Use `workshop/<order>-<slug>` for stage branches.
+Shared entry point:
 
-Examples:
+- `main`
 
-- `workshop/10-analysis`
-- `workshop/20-planning`
-- `workshop/30-solutioning`
+Desk-booking track:
 
-Keep `main` unchanged as the workshop entry point.
+- `workshop/desk-booking/10-analysis`
+- `workshop/desk-booking/20-planning`
+- `workshop/desk-booking/30-solutioning`
+- `workshop/desk-booking/40-implementation-setup`
+- `workshop/desk-booking/50-ready-for-dev`
+- `workshop/desk-booking/60-implementation`
+- `workshop/desk-booking/70-complete`
+- `workshop/desk-booking/80-mvp`
 
-## 3. Suggested Mapping
+Future tracks should follow the same pattern:
 
-- `stage-1` -> `workshop/10-analysis`
-- `stage-2` -> `workshop/20-planning`
-- `stage-3` -> `workshop/30-solutioning`
-- `stage-4` -> `workshop/40-implementation-setup`
-- `ready-for-dev` -> `workshop/50-ready-for-dev`
-- `implementation-in-progress` -> `workshop/60-implementation`
-- `complete` -> `workshop/70-complete`
-- `mvp` -> `workshop/80-mvp`
+- `workshop/<track>/10-analysis`
+- `workshop/<track>/20-planning`
+- ...
 
-## 4. Migration Status (Current)
+## Track Metadata
 
-- Canonical branches are created and published on origin.
-- Legacy names remain as compatibility aliases for one workshop cycle.
-- All facilitator docs and automation should present canonical names first.
+Track definitions now live in `workshops/`.
 
-## 5. Migration Method
+- `workshops/index.json` selects the default track.
+- `workshops/desk-booking/track.json` defines branch order, folder mapping,
+  stage guidance, required patterns, forbidden patterns, and compatibility names.
 
-1. Create the new branch names from current source branches.
-2. Update references in:
-   - `README.md`
-   - facilitator runbook
-   - automation scripts (`workshop-reviewer.sh`, verification helpers)
-3. Keep compatibility aliases (old names) for one workshop cycle and accept
-   them in CLI flags/positional branch arguments.
-4. Remove old aliases only after all docs and facilitator habits are updated.
+Automation on `main` reads this data instead of hard-coding a single desk-booking ladder.
 
-## 6. Compatibility Window + Exit Criteria
+## Compatibility Policy
 
-- Window: one full workshop release cycle after canonical-name rollout.
-- Exit criteria:
-  - facilitator script runs use canonical names only for two consecutive runs
-  - no incoming issues referencing legacy branch names in runbooks/reviewer
-  - `--all` script runs remain stable on canonical progression
+The scripts still accept these older names for the desk-booking track:
 
-## 7. Safety Controls
+- Old canonical:
+  - `workshop/10-analysis`
+  - `workshop/20-planning`
+  - `workshop/30-solutioning`
+  - `workshop/40-implementation-setup`
+  - `workshop/50-ready-for-dev`
+  - `workshop/60-implementation`
+  - `workshop/70-complete`
+  - `workshop/80-mvp`
+- Legacy aliases:
+  - `stage-1`
+  - `stage-2`
+  - `stage-3`
+  - `stage-4`
+  - `ready-for-dev`
+  - `implementation-in-progress`
+  - `complete`
+  - `mvp`
 
-- Protect `main` and all active workshop branches.
-- Block force-push on facilitator-facing branches.
-- Require at least one reviewer for branch-name migration PR.
+Docs and facilitator flow should use the namespaced `workshop/desk-booking/*`
+branches first. Compatibility names are there to avoid breaking live delivery
+or older notes during the transition.
 
-## 8. Decision Record
+## Migration Method
 
-Do not rename immediately before a live workshop. Apply rename in a dedicated
-maintenance window with full script/doc updates in the same PR.
+1. Make automation track-aware on `main`.
+2. Create namespaced desk-booking branches from the existing canonical workshop branches.
+3. Update branch-local README guidance to point at namespaced next branches.
+4. Keep compatibility names working until facilitators stop relying on them.
+
+## Safety Rules
+
+- Do not delete old compatibility branches casually.
+- Do not break `main`; it is the shared bootstrap for all tracks.
+- Stage branches must still obey the pre-artifact rule: each branch contains
+  only the outputs up to that stage, not the outputs participants are meant to create next.

@@ -17,6 +17,8 @@ param(
   [ValidateRange(0, 999)]
   [int]$MaxBranches = 0,
 
+  [string]$Track,
+
   [switch]$Reset,
   [switch]$ExcludeMain,
   [switch]$NoCode,
@@ -160,6 +162,9 @@ if ($NoCode) {
 }
 if ($MaxBranches -gt 0) {
   $forwardArgs += @('-MaxBranches', $MaxBranches.ToString())
+}
+if (-not [string]::IsNullOrWhiteSpace($Track)) {
+  $forwardArgs += @('-Track', $Track)
 }
 if ($UseVirtualDesktops -and ($Mode -eq 'all' -or $Mode -eq 'launch')) {
   $forwardArgs += '-UseVirtualDesktops'

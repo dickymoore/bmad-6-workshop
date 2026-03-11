@@ -6,39 +6,20 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 DEFAULT_SOURCE_REPO=$(git -C "$SCRIPT_DIR/.." rev-parse --show-toplevel 2>/dev/null || pwd)
 DEFAULT_SESSIONS_ROOT="$DEFAULT_SOURCE_REPO/workshop-sessions"
 
+# shellcheck source=scripts/lib/workshop_tracks.sh
+source "$SCRIPT_DIR/lib/workshop_tracks.sh"
+
 MODE="all"
 SESSION=""
 SESSIONS_ROOT=""
 SOURCE_REPO=""
+TRACK=$(workshop_default_track)
 INCLUDE_MAIN=1
 OPEN_CODE=1
 RESET=0
 USE_VIRTUAL_DESKTOPS=0
 MAX_BRANCHES=0
 BMAD_NPM_TAG="${BMAD_NPM_TAG:-latest}"
-
-ALL_BRANCHES=(
-  main
-  workshop/10-analysis
-  workshop/20-planning
-  workshop/30-solutioning
-  workshop/40-implementation-setup
-  workshop/50-ready-for-dev
-  workshop/60-implementation
-  workshop/70-complete
-  workshop/80-mvp
-)
-
-declare -A SOURCE_BRANCH_ALIAS=(
-  [workshop/10-analysis]=stage-1
-  [workshop/20-planning]=stage-2
-  [workshop/30-solutioning]=stage-3
-  [workshop/40-implementation-setup]=stage-4
-  [workshop/50-ready-for-dev]=ready-for-dev
-  [workshop/60-implementation]=implementation-in-progress
-  [workshop/70-complete]=complete
-  [workshop/80-mvp]=mvp
-)
 
 log() {
   printf '[%s] %s\n' "$(date +'%Y-%m-%d %H:%M:%S')" "$*"
@@ -66,6 +47,7 @@ Options:
                             Default: ${DEFAULT_SESSIONS_ROOT}
   --source-repo <path>      Source repo used to discover origin URL.
                             Default: current repo root.
+  --track <id>              Workshop track id (default: value from workshops/index.json).
   --max-branches <n>        Limit session to first n mapped branches.
   --exclude-main            Skip main branch worktree.
   --no-code                 Do not open VS Code windows in launch/all.
@@ -433,24 +415,13 @@ bootstrap_codex_workspace() {
 
 folder_name_for_branch() {
   local branch="$1"
-  case "$branch" in
-    main) echo "00-main" ;;
-    workshop/10-analysis) echo "10-analysis" ;;
-    workshop/20-planning) echo "20-planning" ;;
-    workshop/30-solutioning) echo "30-solutioning" ;;
-    workshop/40-implementation-setup) echo "40-implementation-setup" ;;
-    workshop/50-ready-for-dev) echo "50-ready-for-dev" ;;
-    workshop/60-implementation) echo "60-implementation" ;;
-    workshop/70-complete) echo "70-complete" ;;
-    workshop/80-mvp) echo "80-mvp" ;;
-    *) fail "No folder mapping configured for branch: $branch" ;;
-  esac
+  workshop_branch_field "$TRACK" "$branch" folder
 }
 
 selected_branches() {
   local branch
   local count=0
-  for branch in "${ALL_BRANCHES[@]}"; do
+  while IFS= read -r branch; do
     if [[ "$branch" == "main" && "$INCLUDE_MAIN" -eq 0 ]]; then
       continue
     fi
@@ -459,7 +430,7 @@ selected_branches() {
     fi
     printf '%s\n' "$branch"
     count=$((count + 1))
-  done
+  done < <(workshop_list_branches "$TRACK" 1)
 }
 
 session_dir() {
@@ -500,27 +471,17 @@ sync_source_repo() {
 resolve_mirror_ref() {
   local mirror="$1"
   local branch="$2"
-  local alias_branch="${SOURCE_BRANCH_ALIAS[$branch]:-}"
 
-  if git --git-dir="$mirror" show-ref --verify --quiet "refs/remotes/origin/$branch"; then
-    printf '%s\n' "refs/remotes/origin/$branch"
-    return 0
-  fi
-  if git --git-dir="$mirror" show-ref --verify --quiet "refs/heads/$branch"; then
-    printf '%s\n' "refs/heads/$branch"
-    return 0
-  fi
-
-  if [[ -n "$alias_branch" ]]; then
-    if git --git-dir="$mirror" show-ref --verify --quiet "refs/remotes/origin/$alias_branch"; then
-      printf '%s\n' "refs/remotes/origin/$alias_branch"
+  while IFS= read -r candidate; do
+    if git --git-dir="$mirror" show-ref --verify --quiet "refs/remotes/origin/$candidate"; then
+      printf '%s\n' "refs/remotes/origin/$candidate"
       return 0
     fi
-    if git --git-dir="$mirror" show-ref --verify --quiet "refs/heads/$alias_branch"; then
-      printf '%s\n' "refs/heads/$alias_branch"
+    if git --git-dir="$mirror" show-ref --verify --quiet "refs/heads/$candidate"; then
+      printf '%s\n' "refs/heads/$candidate"
       return 0
     fi
-  fi
+  done < <(workshop_branch_candidates "$TRACK" "$branch")
 
   return 1
 }
@@ -640,6 +601,11 @@ while [[ $# -gt 0 ]]; do
     --source-repo)
       [[ $# -ge 2 ]] || fail "Missing value for --source-repo"
       SOURCE_REPO="$2"
+      shift 2
+      ;;
+    --track)
+      [[ $# -ge 2 ]] || fail "Missing value for --track"
+      TRACK="$2"
       shift 2
       ;;
     --exclude-main)

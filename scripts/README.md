@@ -1,100 +1,96 @@
 # Workshop Script Reference
 
-This repo includes workshop support scripts for BMAD stable-v6 migration checks
-and facilitator session setup.
+The workshop automation now runs off track definitions in `workshops/`.
+
+Current default track: `desk-booking`
 
 ## `scripts/audit-bmad-v6.sh`
 
-- Purpose: detect legacy BMAD markers and branch-level alignment gaps.
-- Typical use:
-  - `./scripts/audit-bmad-v6.sh --all`
-  - `./scripts/audit-bmad-v6.sh --branch workshop/20-planning --show-hits`
-  - `./scripts/audit-bmad-v6.sh --branch stage-2 --show-hits` (legacy alias)
-- Exit codes:
-  - `0` = all audited branches clean
-  - `1` = violations found
-  - `2` = usage/runtime error
+- Purpose: detect legacy BMAD markers and missing stable-v6 structure.
+- When to run: after migration work, after branch-content edits, or before merge.
+- Example:
+
+```bash
+./scripts/audit-bmad-v6.sh --track desk-booking --all --show-hits
+./scripts/audit-bmad-v6.sh --track desk-booking --branch workshop/desk-booking/20-planning
+./scripts/audit-bmad-v6.sh --track desk-booking --branch stage-2
+```
 
 ## `scripts/verify-bmad-v6.sh`
 
-- Purpose: enforce workshop stage contracts (required/forbidden files +
-  stable manifest/config checks).
-- Typical use:
-  - `./scripts/verify-bmad-v6.sh --all --show-failures`
-  - `./scripts/verify-bmad-v6.sh --branch workshop/80-mvp`
-  - `./scripts/verify-bmad-v6.sh --branch mvp` (legacy alias)
-- Exit codes:
-  - `0` = verification pass
-  - `1` = branch verification failures
-  - `2` = usage/runtime error
+- Purpose: enforce required/forbidden file rules for each branch in a track.
+- When to run: after updating workshop content, READMEs, or reviewer logic.
+- Example:
+
+```bash
+./scripts/verify-bmad-v6.sh --track desk-booking --all --show-failures
+./scripts/verify-bmad-v6.sh --track desk-booking --branch workshop/desk-booking/80-mvp
+./scripts/verify-bmad-v6.sh --track desk-booking --branch mvp
+```
 
 ## `workshop-reviewer.sh`
 
-- Purpose: facilitator script for stage checks and runnable app smoke checks.
-- Typical use:
-  - `./workshop-reviewer.sh --all` (stage contract + guidance)
-  - `./workshop-reviewer.sh --dev --all` (dev server smoke check)
-  - `./workshop-reviewer.sh --e2e --all` (Playwright e2e on app branches)
+- Purpose: facilitator branch checker plus dev/e2e smoke runner.
+- When to run: during workshop QA, dry-runs, and final rehearsal.
+- Example:
+
+```bash
+./workshop-reviewer.sh --track desk-booking --all
+./workshop-reviewer.sh --track desk-booking --dev --all
+./workshop-reviewer.sh --track desk-booking --e2e --all
+```
+
 - Notes:
-  - `--all` runs canonical `workshop/*` branch progression.
-  - `--branch`/positional branch accepts canonical names and legacy aliases.
-  - `--dev`/`--e2e` may switch branches; run from a clean tree.
-  - App e2e is expected only on `workshop/60-implementation`,
-    `workshop/70-complete`, and `workshop/80-mvp`.
+  - `--all` walks the namespaced canonical track branches.
+  - positional branch arguments still accept compatibility names.
+  - app e2e is expected only on the desk-booking app stages:
+    `workshop/desk-booking/60-implementation`,
+    `workshop/desk-booking/70-complete`,
+    `workshop/desk-booking/80-mvp`
+
+## `scripts/workshop-preflight.sh`
+
+- Purpose: facilitator machine and repo readiness check.
+- When to run: before every rehearsal or live session.
+- Example:
+
+```bash
+./scripts/workshop-preflight.sh --track desk-booking --strict
+```
 
 ## `scripts/setup-workshop-session.ps1`
 
-- Purpose: one-command Windows facilitator setup for a single workshop session.
-- Modes:
-  - `prepare`: create a session folder with one worktree per branch.
-  - `launch`: open VS Code windows for an existing session.
-  - `desktops`: move already-open VS Code windows for a session onto separate
-    Windows virtual desktops (Windows PowerShell with VirtualDesktop module).
-  - `all`: run `prepare` then `launch`.
-  - `teardown`: close matching VS Code windows (best effort) and remove
-    session folder.
-- Typical use:
-  - `./scripts/setup-workshop-session.ps1 -Mode all -Session Wed-AM`
-  - `./scripts/setup-workshop-session.ps1 -Mode launch -Session Wed-AM`
-  - `./scripts/setup-workshop-session.ps1 -Mode desktops -Session Wed-AM`
-    `-MaxBranches 1`
-  - `./scripts/setup-workshop-session.ps1 -Mode teardown -Session Wed-AM`
+- Purpose: Windows facilitator setup for a single session.
+- Modes: `prepare`, `launch`, `desktops`, `all`, `teardown`.
+- When to run: before each rehearsal or delivery slot.
+- Example:
+
+```powershell
+./scripts/setup-workshop-session.ps1 -Track desk-booking -Mode all -Session Wed-AM
+./scripts/setup-workshop-session.ps1 -Track desk-booking -Mode desktops -Session Wed-AM
+./scripts/setup-workshop-session.ps1 -Track desk-booking -Mode teardown -Session Wed-AM
+```
+
 - Notes:
-  - Includes `main` by default plus all canonical `workshop/*` branches.
-  - `-MaxBranches <n>` limits prepare/launch/desktops to the first n mapped
-    branches (handy for quick smoke testing).
-  - `-UseVirtualDesktops` is optional and requires compatible PowerShell
-    desktop commands (for example `New-Desktop`/`Switch-Desktop`).
-  - `prepare` now bootstraps per-worktree `.codex` folders (auth/config +
-    skills mirrored from `.agents/skills`) and `launch` opens each VS Code
-    window with `CODEX_HOME` set to that worktree’s `.codex`.
-  - If a workshop branch does not track `_bmad` and `.agents/skills`, the
-    script provisions a stable BMAD Codex bundle into that session worktree so
-    `$bmad-help` and related skills stay available.
-  - `prepare` also injects `CODEX_HOME` into workspace terminal settings so
-    WSL VS Code terminals inherit the per-worktree `.codex` automatically.
-  - Session worktrees also get a folder-open VS Code task that starts
-    `codex --yolo` in a dedicated visible terminal panel.
+  - includes `main` plus the selected track by default
+  - `-MaxBranches <n>` limits the stage set for smoke tests
+  - if a branch does not track `_bmad` and `.agents/skills`, the script provisions a stable bundle into the session worktree
+  - session worktrees get `.codex`, `.vscode/settings.json`, and a folder-open task that starts `codex --yolo`
 
 ## `scripts/setup-workshop-session.sh`
 
-- Purpose: bash parity script for Linux/macOS facilitator setup.
+- Purpose: bash parity for facilitator session setup.
 - Modes: `prepare`, `launch`, `all`, `teardown`.
-- Typical use:
-  - `./scripts/setup-workshop-session.sh --mode all --session Wed-AM`
-  - `./scripts/setup-workshop-session.sh --mode all --session Wed-AM`
-    `--max-branches 1 --exclude-main`
-  - `./scripts/setup-workshop-session.sh --mode teardown --session Wed-AM`
+- When to run: from Linux/macOS/WSL.
+- Example:
+
+```bash
+./scripts/setup-workshop-session.sh --track desk-booking --mode all --session Wed-AM
+./scripts/setup-workshop-session.sh --track desk-booking --mode all --session Wed-AM --max-branches 2
+./scripts/setup-workshop-session.sh --track desk-booking --mode teardown --session Wed-AM
+```
+
 - Notes:
-  - Virtual desktop orchestration is PowerShell-only.
-  - `--max-branches <n>` limits prepare/launch to the first n mapped branches.
-  - `prepare` now bootstraps per-worktree `.codex` folders (auth/config +
-    skills mirrored from `.agents/skills`) and `launch` opens each VS Code
-    window with `CODEX_HOME` set to that worktree’s `.codex`.
-  - If a workshop branch does not track `_bmad` and `.agents/skills`, the
-    script provisions a stable BMAD Codex bundle into that session worktree so
-    `$bmad-help` and related skills stay available.
-  - `prepare` also writes workspace terminal settings so `CODEX_HOME` points
-    at `${workspaceFolder}/.codex` inside VS Code terminals.
-  - Session worktrees also get a folder-open VS Code task that starts
-    `codex --yolo` in a dedicated visible terminal panel.
+  - virtual desktop control is PowerShell-only
+  - includes `main` plus the selected track by default
+  - session worktrees get the same BMAD/Codex bootstrap as the PowerShell version
