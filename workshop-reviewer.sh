@@ -156,6 +156,23 @@ raise SystemExit(0 if 'test:e2e' in data.get('scripts', {}) else 1)
 PY
 }
 
+cleanup_e2e_artifacts() {
+  local tracked_paths=(
+    test-results/html-report/index.html
+    test-results/html/index.html
+    test-results/junit.xml
+  )
+  local tracked_path
+
+  for tracked_path in "${tracked_paths[@]}"; do
+    if git ls-files --error-unmatch "$tracked_path" >/dev/null 2>&1; then
+      git restore --worktree --source=HEAD -- "$tracked_path" >/dev/null 2>&1 || true
+    fi
+  done
+
+  rm -rf test-results/artifacts playwright-report blob-report 2>/dev/null || true
+}
+
 wait_for_server() {
   local url="$1"
   local pid="$2"
@@ -235,27 +252,34 @@ run_e2e() {
   port=$(pick_port)
   local url="http://localhost:$port"
   local log="/tmp/workshop-e2e-${branch//\//-}.log"
+  local status=0
 
   if ! has_e2e_script; then
     echo "  E2E SKIP (no test:e2e script)"
     return 0
   fi
 
+  cleanup_e2e_artifacts
   npm run dev -- --port "$port" --strictPort >"$log" 2>&1 &
   local pid=$!
 
   if ! wait_for_server "$url" "$pid"; then
     kill "$pid" 2>/dev/null || true
     wait "$pid" 2>/dev/null || true
+    cleanup_e2e_artifacts
     echo "  E2E FAIL (dev server did not start, see $log)"
     return 1
   fi
 
-  BASE_URL="$url" E2E_RUN=1 npm run test:e2e
-  local status=$?
+  if BASE_URL="$url" E2E_RUN=1 npm run test:e2e; then
+    status=0
+  else
+    status=$?
+  fi
 
   kill "$pid" 2>/dev/null || true
   wait "$pid" 2>/dev/null || true
+  cleanup_e2e_artifacts
   return "$status"
 }
 
