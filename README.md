@@ -2,8 +2,8 @@
 
 # BMAD BMM Stage 1 (Analysis)
 ## App locations (workshop note)
-- Stages `stage-1` through `ready-for-dev`: no runnable app in the repo root; the floorplan demo lives in `office-floorplans/` (Next.js).
-- Stages `implementation-in-progress`, `complete`, `mvp`: run the desk booking app from the repo root (Vite).
+- Stages `workshop/desk-booking/10-analysis` through `workshop/desk-booking/50-ready-for-dev`: no runnable app in the repo root; the floorplan demo lives in `office-floorplans/` (Next.js).
+- Stages `workshop/desk-booking/60-implementation`, `workshop/desk-booking/70-complete`, `workshop/desk-booking/80-mvp`: run the desk booking app from the repo root (Vite).
 
 1. Run Codex.
 2. Run `/bmad-help` to confirm the stable command set.
@@ -14,7 +14,7 @@
 7. Review created artifacts under `docs/`.
 8. Exit Codex.
 9. `git stash`
-10. `git checkout stage-2`
+10. `git checkout workshop/desk-booking/20-planning`
 
 # Office Floorplans Assets
 The project files now live in `office-floorplans/`.
