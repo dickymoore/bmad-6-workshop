@@ -1,0 +1,242 @@
+{
+  "id": "desk-booking",
+  "display_name": "Desk Booking",
+  "bootstrap": {
+    "branch": "main",
+    "folder": "00-main",
+    "guidance": "Main: verify tooling + install BMAD stable v6, then checkout workshop/desk-booking/10-analysis.\n- Suggested next: `git checkout workshop/desk-booking/10-analysis` and follow `README.md`.",
+    "required_patterns": [
+      "^README\\.md$",
+      "^office-floorplans/",
+      "^scripts/audit-bmad-v6\\.sh$",
+      "^scripts/migrate-bmad-v6\\.sh$",
+      "^scripts/verify-bmad-v6\\.sh$"
+    ],
+    "forbidden_patterns": [
+      "^\\.bmad/",
+      "^_bmad/",
+      "^\\.agents/",
+      "^docs/",
+      "^data/",
+      "^package\\.json$",
+      "^src/",
+      "^tests/"
+    ]
+  },
+  "stages": [
+    {
+      "id": "10-analysis",
+      "name": "Analysis",
+      "branch": "workshop/desk-booking/10-analysis",
+      "old_canonical": "workshop/10-analysis",
+      "legacy_aliases": ["stage-1"],
+      "source_branch": "workshop/10-analysis",
+      "folder": "10-analysis",
+      "next_branch": "workshop/desk-booking/20-planning",
+      "guidance": "Stage 1 (Analysis): use `/bmad-agent-bmm-analyst` + `/bmad-bmm-create-product-brief` and research workflows.\n- When done: stash and `git checkout workshop/desk-booking/20-planning`.",
+      "required_patterns": [
+        "^_bmad/_config/manifest\\.yaml$",
+        "^_bmad/bmm/config\\.yaml$",
+        "^\\.agents/skills/",
+        "^office-floorplans/",
+        "^scripts/audit-bmad-v6\\.sh$",
+        "^scripts/migrate-bmad-v6\\.sh$",
+        "^scripts/verify-bmad-v6\\.sh$"
+      ],
+      "forbidden_patterns": [
+        "^\\.bmad/",
+        "^docs/",
+        "^data/",
+        "^package\\.json$",
+        "^src/",
+        "^tests/"
+      ]
+    },
+    {
+      "id": "20-planning",
+      "name": "Planning",
+      "branch": "workshop/desk-booking/20-planning",
+      "old_canonical": "workshop/20-planning",
+      "legacy_aliases": ["stage-2"],
+      "source_branch": "workshop/20-planning",
+      "folder": "20-planning",
+      "next_branch": "workshop/desk-booking/30-solutioning",
+      "guidance": "Stage 2 (Planning): use `/bmad-agent-bmm-pm` + `/bmad-bmm-create-prd` and `/bmad-bmm-create-ux-design`.\n- When done: stash and `git checkout workshop/desk-booking/30-solutioning`.",
+      "required_patterns": [
+        "^_bmad/_config/manifest\\.yaml$",
+        "^_bmad/bmm/config\\.yaml$",
+        "^\\.agents/skills/",
+        "^docs/adr/ADR-001-tech-stack\\.md$",
+        "^docs/bmm-product-brief-.*\\.md$",
+        "^docs/bmm-research-technical-.*\\.md$",
+        "^docs/brainstorming-session-results-.*\\.md$",
+        "^scripts/audit-bmad-v6\\.sh$"
+      ],
+      "forbidden_patterns": [
+        "^\\.bmad/",
+        "^docs/prd\\.md$",
+        "^docs/ux-design-specification\\.md$",
+        "^data/",
+        "^package\\.json$",
+        "^src/",
+        "^tests/"
+      ]
+    },
+    {
+      "id": "30-solutioning",
+      "name": "Solutioning",
+      "branch": "workshop/desk-booking/30-solutioning",
+      "old_canonical": "workshop/30-solutioning",
+      "legacy_aliases": ["stage-3"],
+      "source_branch": "workshop/30-solutioning",
+      "folder": "30-solutioning",
+      "next_branch": "workshop/desk-booking/40-implementation-setup",
+      "guidance": "Stage 3 (Solutioning): use `/bmad-agent-bmm-architect` + `/bmad-bmm-create-architecture` and `/bmad-bmm-create-epics-and-stories`.\n- When done: stash and `git checkout workshop/desk-booking/40-implementation-setup`.",
+      "required_patterns": [
+        "^_bmad/_config/manifest\\.yaml$",
+        "^_bmad/bmm/config\\.yaml$",
+        "^\\.agents/skills/",
+        "^docs/prd\\.md$",
+        "^docs/ux-design-specification\\.md$"
+      ],
+      "forbidden_patterns": [
+        "^\\.bmad/",
+        "^docs/architecture\\.md$",
+        "^docs/epics\\.md$",
+        "^docs/implementation-readiness-report-.*\\.md$",
+        "^docs/sprint-artifacts/",
+        "^data/",
+        "^package\\.json$",
+        "^src/",
+        "^tests/"
+      ]
+    },
+    {
+      "id": "40-implementation-setup",
+      "name": "Implementation Setup",
+      "branch": "workshop/desk-booking/40-implementation-setup",
+      "old_canonical": "workshop/40-implementation-setup",
+      "legacy_aliases": ["stage-4"],
+      "source_branch": "workshop/40-implementation-setup",
+      "folder": "40-implementation-setup",
+      "next_branch": "workshop/desk-booking/50-ready-for-dev",
+      "guidance": "Stage 4 (Implementation setup): run `/bmad-bmm-check-implementation-readiness`, then `/bmad-bmm-sprint-planning` and `/bmad-bmm-create-story`.\n- When done: `git checkout workshop/desk-booking/50-ready-for-dev`.",
+      "required_patterns": [
+        "^_bmad/_config/manifest\\.yaml$",
+        "^_bmad/bmm/config\\.yaml$",
+        "^\\.agents/skills/",
+        "^docs/architecture\\.md$",
+        "^docs/epics\\.md$",
+        "^docs/implementation-readiness-report-.*\\.md$",
+        "^docs/test-design-epic-1\\.md$"
+      ],
+      "forbidden_patterns": [
+        "^\\.bmad/",
+        "^docs/sprint-artifacts/",
+        "^data/",
+        "^package\\.json$",
+        "^src/",
+        "^tests/"
+      ]
+    },
+    {
+      "id": "50-ready-for-dev",
+      "name": "Ready for Dev",
+      "branch": "workshop/desk-booking/50-ready-for-dev",
+      "old_canonical": "workshop/50-ready-for-dev",
+      "legacy_aliases": ["ready-for-dev"],
+      "source_branch": "workshop/50-ready-for-dev",
+      "folder": "50-ready-for-dev",
+      "next_branch": "workshop/desk-booking/60-implementation",
+      "guidance": "Ready-for-dev: use `/bmad-agent-bmm-dev` + `/bmad-bmm-dev-story` and `/bmad-bmm-code-review`.\n- When done: `git checkout workshop/desk-booking/60-implementation`.",
+      "required_patterns": [
+        "^_bmad/_config/manifest\\.yaml$",
+        "^_bmad/bmm/config\\.yaml$",
+        "^\\.agents/skills/",
+        "^docs/sprint-artifacts/sprint-status\\.yaml$",
+        "^docs/sprint-artifacts/1-1-.*\\.md$"
+      ],
+      "forbidden_patterns": [
+        "^\\.bmad/",
+        "^data/",
+        "^package\\.json$",
+        "^src/",
+        "^tests/"
+      ]
+    },
+    {
+      "id": "60-implementation",
+      "name": "Implementation",
+      "branch": "workshop/desk-booking/60-implementation",
+      "old_canonical": "workshop/60-implementation",
+      "legacy_aliases": ["implementation-in-progress"],
+      "source_branch": "workshop/60-implementation",
+      "folder": "60-implementation",
+      "next_branch": "workshop/desk-booking/70-complete",
+      "guidance": "Implementation stage: finish stories via `/bmad-bmm-dev-story`, run app/tests, and update sprint status.\n- When done: `git checkout workshop/desk-booking/70-complete`.",
+      "required_patterns": [
+        "^_bmad/_config/manifest\\.yaml$",
+        "^_bmad/bmm/config\\.yaml$",
+        "^\\.agents/skills/",
+        "^package\\.json$",
+        "^src/",
+        "^tests/",
+        "^data/",
+        "^docs/sprint-artifacts/sprint-status\\.yaml$"
+      ],
+      "forbidden_patterns": [
+        "^\\.bmad/"
+      ]
+    },
+    {
+      "id": "70-complete",
+      "name": "Complete",
+      "branch": "workshop/desk-booking/70-complete",
+      "old_canonical": "workshop/70-complete",
+      "legacy_aliases": ["complete"],
+      "source_branch": "workshop/70-complete",
+      "folder": "70-complete",
+      "next_branch": "workshop/desk-booking/80-mvp",
+      "guidance": "Complete stage: run app and use `/bmad-bmm-correct-course` for any meaningful pivot.\n- When done: `git checkout workshop/desk-booking/80-mvp`.",
+      "required_patterns": [
+        "^_bmad/_config/manifest\\.yaml$",
+        "^_bmad/bmm/config\\.yaml$",
+        "^\\.agents/skills/",
+        "^package\\.json$",
+        "^src/",
+        "^tests/",
+        "^data/",
+        "^docs/sprint-artifacts/sprint-status\\.yaml$"
+      ],
+      "forbidden_patterns": [
+        "^\\.bmad/"
+      ]
+    },
+    {
+      "id": "80-mvp",
+      "name": "MVP",
+      "branch": "workshop/desk-booking/80-mvp",
+      "old_canonical": "workshop/80-mvp",
+      "legacy_aliases": ["mvp"],
+      "source_branch": "workshop/80-mvp",
+      "folder": "80-mvp",
+      "next_branch": null,
+      "guidance": "MVP stage: final working app; run dev/e2e and demonstrate stable-v6 BMAD workflow usage.",
+      "required_patterns": [
+        "^_bmad/_config/manifest\\.yaml$",
+        "^_bmad/bmm/config\\.yaml$",
+        "^\\.agents/skills/",
+        "^package\\.json$",
+        "^src/",
+        "^tests/",
+        "^data/",
+        "^public/",
+        "^scripts/",
+        "^docs/sprint-artifacts/sprint-status\\.yaml$"
+      ],
+      "forbidden_patterns": [
+        "^\\.bmad/"
+      ]
+    }
+  ]
+}
