@@ -157,6 +157,12 @@ function Copy-DirectoryIfExists {
   return $false
 }
 
+function Escape-TomlBasicString {
+  param([Parameter(Mandatory = $true)][string]$Value)
+
+  return ($Value.Replace('\', '\\').Replace('"', '\"'))
+}
+
 function Ensure-VSCodeCodexEnv {
   param([Parameter(Mandatory = $true)][string]$BranchPath)
 
@@ -292,6 +298,36 @@ function Protect-CodexSecrets {
       Write-Warning "Unable to tighten permissions on $target"
     }
   }
+}
+
+function Ensure-CodexTrustEntry {
+  param(
+    [Parameter(Mandatory = $true)][string]$CodexPath,
+    [Parameter(Mandatory = $true)][string]$ProjectPath
+  )
+
+  if ([string]::IsNullOrWhiteSpace($ProjectPath)) {
+    return
+  }
+
+  $configPath = Join-Path $CodexPath 'config.toml'
+  if (-not (Test-Path -LiteralPath $CodexPath)) {
+    New-Item -ItemType Directory -Path $CodexPath -Force | Out-Null
+  }
+  if (-not (Test-Path -LiteralPath $configPath -PathType Leaf)) {
+    New-Item -ItemType File -Path $configPath -Force | Out-Null
+  }
+
+  $escapedPath = Escape-TomlBasicString -Value $ProjectPath
+  $sectionHeader = "[projects.""$escapedPath""]"
+  $content = Get-Content -LiteralPath $configPath -Raw -ErrorAction SilentlyContinue
+
+  if (-not [string]::IsNullOrWhiteSpace($content) -and $content.Contains($sectionHeader)) {
+    return
+  }
+
+  $entry = "`n$sectionHeader`ntrust_level = ""trusted""`n"
+  Add-Content -LiteralPath $configPath -Value $entry
 }
 
 function Sync-SystemSkills {
@@ -502,6 +538,7 @@ function Bootstrap-CodexWorkspace {
   Sync-BmadSkills -BranchPath $BranchPath
   Apply-BmadCodexCompatibility -BranchPath $BranchPath
   Ensure-VSCodeCodexEnv -BranchPath $BranchPath
+  Ensure-CodexTrustEntry -CodexPath $codexPath -ProjectPath $BranchPath
   Ensure-WorktreeExcludes -BranchPath $BranchPath
   Protect-CodexSecrets -CodexPath $codexPath
 

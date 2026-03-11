@@ -108,6 +108,13 @@ copy_dir_if_exists() {
   return 1
 }
 
+toml_escape_string() {
+  local value="$1"
+  value=${value//\\/\\\\}
+  value=${value//\"/\\\"}
+  printf '%s\n' "$value"
+}
+
 ensure_vscode_codex_env() {
   local branch_path="$1"
   local vscode_dir="$branch_path/.vscode"
@@ -201,6 +208,32 @@ set_codex_secret_permissions() {
     [[ -f "$file" ]] || continue
     chmod 600 "$file" 2>/dev/null || true
   done
+}
+
+ensure_codex_trust_entry() {
+  local codex_dir="$1"
+  local project_path="$2"
+  local config_path="$codex_dir/config.toml"
+  local escaped_path
+
+  [[ -n "$project_path" ]] || return 0
+  mkdir -p "$codex_dir"
+  touch "$config_path"
+
+  escaped_path=$(toml_escape_string "$project_path")
+
+  if grep -Fq "[projects.\"$escaped_path\"]" "$config_path"; then
+    if awk -v section="[projects.\"$escaped_path\"]" '
+      $0 == section { in_section=1; next }
+      /^\[/ && in_section { exit !found }
+      in_section && $0 ~ /^trust_level *= *"trusted"$/ { found=1 }
+      END { if (in_section && found) exit 0; if (in_section) exit 1; exit 1 }
+    ' "$config_path"; then
+      return 0
+    fi
+  fi
+
+  printf '\n[projects."%s"]\ntrust_level = "trusted"\n' "$escaped_path" >> "$config_path"
 }
 
 sync_system_skills() {
@@ -387,6 +420,7 @@ bootstrap_codex_workspace() {
   sync_bmad_skills "$branch_path"
   apply_bmad_codex_compat "$branch_path"
   ensure_vscode_codex_env "$branch_path"
+  ensure_codex_trust_entry "$codex_dir" "$branch_path"
   ensure_worktree_excludes "$branch_path"
   set_codex_secret_permissions "$codex_dir"
 
