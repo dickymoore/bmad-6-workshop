@@ -80,6 +80,13 @@ Compatibility mappings still accepted by the helper scripts:
 The track definitions now live under `workshops/`. The current default track is
 `desk-booking`, which is defined in `workshops/desk-booking/track.json`.
 
+Additional scaffolded track:
+
+- `albemarle-pulse`
+  - participant start: `workshop/albemarle-pulse/10-analysis`
+  - rolling authoring branch: `authoring/albemarle-pulse`
+  - track definition: `workshops/albemarle-pulse/track.json`
+
 ## Workshop Operations
 
 For facilitators and operators preparing or delivering the workshop:

@@ -12,6 +12,10 @@ Shared entry point:
 
 - `main`
 
+Rolling authoring branches:
+
+- `authoring/<track>`
+
 Desk-booking track:
 
 - `workshop/desk-booking/10-analysis`
@@ -28,6 +32,11 @@ Future tracks should follow the same pattern:
 - `workshop/<track>/10-analysis`
 - `workshop/<track>/20-planning`
 - ...
+
+Recommended authoring pattern for every track:
+
+- do real BMAD work on `authoring/<track>`
+- cut the frozen `workshop/<track>/*` branches only at stage boundaries
 
 ## Track Metadata
 

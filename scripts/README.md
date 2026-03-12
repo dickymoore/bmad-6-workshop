@@ -94,3 +94,29 @@ Current default track: `desk-booking`
   - virtual desktop control is PowerShell-only
   - includes `main` plus the selected track by default
   - session worktrees get the same BMAD/Codex bootstrap as the PowerShell version
+
+## `scripts/cut-workshop-stage.sh`
+
+- Purpose: create the next frozen participant branch from `authoring/<track>`.
+- When to run: immediately after completing a stage on the rolling authoring branch.
+- Example:
+
+```bash
+./scripts/cut-workshop-stage.sh --track albemarle-pulse --completed-stage 10-analysis
+```
+
+- Notes:
+  - requires a clean working tree
+  - expects to run from `authoring/<track>` by default
+  - creates an annotated tag, the next `workshop/<track>/*` branch, and appends to `workshop-logs/<track>/cuts.md`
+  - pushes the branch and tag unless `--no-push` is supplied
+
+## `scripts/start-workshop-authoring-log.sh`
+
+- Purpose: start a local transcript for one workshop authoring stage using the Unix `script` command.
+- When to run: at the start of each BMAD stage authoring session.
+- Example:
+
+```bash
+./scripts/start-workshop-authoring-log.sh --track albemarle-pulse --stage 10-analysis
+```

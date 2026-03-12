@@ -2,6 +2,10 @@
   "bootstrap_branch": "main",
   "default_track": "desk-booking",
   "tracks": {
+    "albemarle-pulse": {
+      "display_name": "Albemarle Pulse",
+      "path": "workshops/albemarle-pulse/track.json"
+    },
     "desk-booking": {
       "display_name": "Desk Booking",
       "path": "workshops/desk-booking/track.json"

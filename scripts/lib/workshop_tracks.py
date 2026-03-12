@@ -57,6 +57,23 @@ def resolve_entry(track, branch):
     return entry
 
 
+def resolve_stage(track, stage_id):
+    if stage_id == "main":
+        bootstrap = dict(track["bootstrap"])
+        bootstrap["kind"] = "bootstrap"
+        bootstrap["track"] = track["id"]
+        return bootstrap
+
+    for stage in track["stages"]:
+        if stage["id"] == stage_id:
+            entry = dict(stage)
+            entry["kind"] = "stage"
+            entry["track"] = track["id"]
+            return entry
+
+    raise SystemExit(f"Unknown stage id for track {track['id']}: {stage_id}")
+
+
 def source_candidates(track, branch):
     entry = resolve_entry(track, branch)
     candidates = []
@@ -113,6 +130,14 @@ def main():
     p_candidates.add_argument("--track")
     p_candidates.add_argument("--branch", required=True)
 
+    p_stage_branch = sub.add_parser("stage-branch")
+    p_stage_branch.add_argument("--track")
+    p_stage_branch.add_argument("--stage-id", required=True)
+
+    p_stage_next = sub.add_parser("stage-next-branch")
+    p_stage_next.add_argument("--track")
+    p_stage_next.add_argument("--stage-id", required=True)
+
     args = parser.parse_args()
 
     if args.command == "default-track":
@@ -149,6 +174,16 @@ def main():
     if args.command == "branch-candidates":
         for candidate in source_candidates(track, args.branch):
             print(candidate)
+        return
+
+    if args.command == "stage-branch":
+        entry = resolve_stage(track, args.stage_id)
+        print(entry["branch"])
+        return
+
+    if args.command == "stage-next-branch":
+        entry = resolve_stage(track, args.stage_id)
+        emit_value(entry.get("next_branch"))
         return
 
 

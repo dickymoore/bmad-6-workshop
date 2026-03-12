@@ -85,3 +85,27 @@ workshop_branch_candidates() {
 
   workshop_tracks_cmd "${args[@]}"
 }
+
+workshop_stage_branch() {
+  local track="${1:-}"
+  local stage_id="${2:?stage id is required}"
+  local args=(stage-branch --stage-id "$stage_id")
+
+  if [[ -n "$track" ]]; then
+    args+=(--track "$track")
+  fi
+
+  workshop_tracks_cmd "${args[@]}"
+}
+
+workshop_stage_next_branch() {
+  local track="${1:-}"
+  local stage_id="${2:?stage id is required}"
+  local args=(stage-next-branch --stage-id "$stage_id")
+
+  if [[ -n "$track" ]]; then
+    args+=(--track "$track")
+  fi
+
+  workshop_tracks_cmd "${args[@]}"
+}
