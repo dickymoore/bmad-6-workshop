@@ -13,7 +13,7 @@ STAGE=""
 LOGS_ROOT="$ROOT_DIR/workshop-logs"
 
 usage() {
-  cat <<USAGE
+  cat <<'USAGE'
 Usage:
   ./${SCRIPT_NAME} --track <id> --stage <stage-id> [--logs-root <path>]
 
