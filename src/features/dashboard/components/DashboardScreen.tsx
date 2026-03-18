@@ -1,4 +1,5 @@
 import { AtmosphericHeader } from "@/features/dashboard/components/AtmosphericHeader";
+import { LocalMapFrame } from "@/features/dashboard/components/LocalMapFrame";
 import { ModeSummaryGrid } from "@/features/dashboard/components/ModeSummaryGrid";
 
 type NearbyModeViewModel = {
@@ -22,9 +23,27 @@ type DashboardViewModel = {
   nearbyModeHeading: string;
   nearbyModeIntro: string;
   nearbyModes: readonly NearbyModeViewModel[];
-  mapPlaceholder: {
+  localMap: {
     title: string;
-    label: string;
+    ariaLabel: string;
+    state: string;
+    stateLabel: string;
+    venueAnchor: {
+      key: string;
+      label: string;
+      x: number;
+      y: number;
+      caption: string;
+    };
+    selectedNearbyNodes: readonly {
+      key: string;
+      label: string;
+      x: number;
+      y: number;
+      caption: string;
+    }[];
+    localityEmphasis: string | null;
+    fallbackCopy: string | null;
   };
 };
 
@@ -37,15 +56,7 @@ export function DashboardScreen({ viewModel }: { viewModel: DashboardViewModel }
 
         <div className="dashboard-lower-grid" aria-label="Shared nearby departure structure">
           <ModeSummaryGrid viewModel={viewModel} />
-
-          <section
-            className="dashboard-reserved dashboard-reserved--map"
-            aria-label={viewModel.mapPlaceholder.title}
-          >
-            <p className="dashboard-reserved__label">{viewModel.mapPlaceholder.title}</p>
-            <p className="dashboard-reserved__caption">{viewModel.mapPlaceholder.label}</p>
-            <div className="dashboard-reserved__surface" aria-hidden="true" />
-          </section>
+          <LocalMapFrame viewModel={viewModel.localMap} />
         </div>
       </section>
     </main>

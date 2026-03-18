@@ -11,11 +11,137 @@ export const NEARBY_MODE_STATES = Object.freeze([
   "disrupted",
 ]);
 
+export const LOCAL_MAP_STATES = Object.freeze([
+  "default",
+  "fallback",
+]);
+
 export const DASHBOARD_ADVISORY_LANGUAGE_PATTERN =
   /\bbest option\b|\brecommended\b|\bswitch to\b|\btake\b/i;
 
 function freezeSnapshot(snapshot) {
   return Object.freeze({ ...snapshot });
+}
+
+function normalizeMapPoint(point, fieldName) {
+  if (!point || typeof point !== "object") {
+    throw new Error(`Dashboard local map field "${fieldName}" must be an object`);
+  }
+
+  const { key, label, x, y } = point;
+
+  for (const [name, value] of Object.entries({ key, label })) {
+    if (typeof value !== "string" || value.trim().length === 0) {
+      throw new Error(`Dashboard local map field "${fieldName}.${name}" must be a non-empty string`);
+    }
+  }
+
+  for (const [name, value] of Object.entries({ x, y })) {
+    if (typeof value !== "number" || Number.isNaN(value) || value < 0 || value > 100) {
+      throw new Error(`Dashboard local map field "${fieldName}.${name}" must be a number between 0 and 100`);
+    }
+  }
+
+  if (DASHBOARD_ADVISORY_LANGUAGE_PATTERN.test(label)) {
+    throw new Error(`Dashboard local map field "${fieldName}.label" must stay fact-only`);
+  }
+
+  return freezeSnapshot({
+    key: key.trim(),
+    label: label.trim(),
+    x,
+    y,
+  });
+}
+
+function normalizeLocalMap(localMap) {
+  if (!localMap || typeof localMap !== "object") {
+    throw new Error('Dashboard snapshot field "localMap" must be an object');
+  }
+
+  const {
+    title,
+    state,
+    venueAnchor,
+    selectedNearbyNodes,
+    localityEmphasis,
+    fallbackCopy,
+  } = localMap;
+
+  if (typeof title !== "string" || title.trim().length === 0) {
+    throw new Error('Dashboard snapshot field "localMap.title" must be a non-empty string');
+  }
+
+  if (DASHBOARD_ADVISORY_LANGUAGE_PATTERN.test(title)) {
+    throw new Error('Dashboard snapshot field "localMap.title" must stay fact-only');
+  }
+
+  if (!LOCAL_MAP_STATES.includes(state)) {
+    throw new Error(`Unsupported local map state: ${state}`);
+  }
+
+  const normalizedVenueAnchor = normalizeMapPoint(venueAnchor, "localMap.venueAnchor");
+
+  if (!Array.isArray(selectedNearbyNodes) || selectedNearbyNodes.length === 0) {
+    throw new Error('Dashboard snapshot field "localMap.selectedNearbyNodes" must be a non-empty array');
+  }
+
+  const seenKeys = new Set([normalizedVenueAnchor.key]);
+  const normalizedNearbyNodes = Object.freeze(
+    selectedNearbyNodes.map((node, index) => {
+      const normalizedNode = normalizeMapPoint(node, `localMap.selectedNearbyNodes[${index}]`);
+
+      if (seenKeys.has(normalizedNode.key)) {
+        throw new Error(`Dashboard local map key "${normalizedNode.key}" must be unique`);
+      }
+
+      seenKeys.add(normalizedNode.key);
+      return normalizedNode;
+    }),
+  );
+
+  if (
+    localityEmphasis != null &&
+    (
+      typeof localityEmphasis !== "object" ||
+      typeof localityEmphasis.label !== "string" ||
+      localityEmphasis.label.trim().length === 0
+    )
+  ) {
+    throw new Error('Dashboard snapshot field "localMap.localityEmphasis.label" must be a non-empty string when present');
+  }
+
+  if (typeof localityEmphasis?.label === "string" && DASHBOARD_ADVISORY_LANGUAGE_PATTERN.test(localityEmphasis.label)) {
+    throw new Error('Dashboard snapshot field "localMap.localityEmphasis.label" must stay fact-only');
+  }
+
+  if (fallbackCopy != null && (typeof fallbackCopy !== "string" || fallbackCopy.trim().length === 0)) {
+    throw new Error('Dashboard snapshot field "localMap.fallbackCopy" must be a non-empty string when present');
+  }
+
+  if (typeof fallbackCopy === "string" && DASHBOARD_ADVISORY_LANGUAGE_PATTERN.test(fallbackCopy)) {
+    throw new Error('Dashboard snapshot field "localMap.fallbackCopy" must stay fact-only');
+  }
+
+  if (state === "fallback" && typeof fallbackCopy !== "string") {
+    throw new Error('Dashboard snapshot field "localMap.fallbackCopy" is required when state is "fallback"');
+  }
+
+  if (state !== "fallback" && fallbackCopy != null) {
+    throw new Error('Dashboard snapshot field "localMap.fallbackCopy" is only allowed when state is "fallback"');
+  }
+
+  return freezeSnapshot({
+    title: title.trim(),
+    state,
+    venueAnchor: normalizedVenueAnchor,
+    selectedNearbyNodes: normalizedNearbyNodes,
+    localityEmphasis:
+      typeof localityEmphasis?.label === "string"
+        ? freezeSnapshot({ label: localityEmphasis.label.trim() })
+        : null,
+    fallbackCopy: typeof fallbackCopy === "string" ? fallbackCopy.trim() : null,
+  });
 }
 
 function normalizeNearbyModes(nearbyModes) {
@@ -84,6 +210,7 @@ export function createDashboardSnapshot(input) {
     placeLabel,
     freshnessLabel,
     supportLabel,
+    localMap,
     nearbyModes,
   } = input;
 
@@ -121,6 +248,7 @@ export function createDashboardSnapshot(input) {
     placeLabel: placeLabel.trim(),
     freshnessLabel: freshnessLabel.trim(),
     supportLabel: supportLabel.trim(),
+    localMap: normalizeLocalMap(localMap),
     nearbyModes: normalizeNearbyModes(nearbyModes),
   });
 }

@@ -13,9 +13,9 @@ const MODE_STATE_LABELS = Object.freeze({
   disrupted: "Disrupted",
 });
 
-const MAP_PLACEHOLDER = Object.freeze({
-  title: "Local frame",
-  label: "Royal Institution map frame held for nearby orientation.",
+const LOCAL_MAP_STATE_LABELS = Object.freeze({
+  default: "Default local frame",
+  fallback: "Fallback local frame",
 });
 
 const DASHBOARD_METADATA = Object.freeze({
@@ -45,7 +45,26 @@ export function presentDashboardSnapshot(snapshotInput) {
         }),
       ),
     ),
-    mapPlaceholder: MAP_PLACEHOLDER,
+    localMap: Object.freeze({
+      title: snapshot.localMap.title,
+      ariaLabel: "Fixed local map anchored to the Royal Institution",
+      state: snapshot.localMap.state,
+      stateLabel: LOCAL_MAP_STATE_LABELS[snapshot.localMap.state],
+      venueAnchor: Object.freeze({
+        ...snapshot.localMap.venueAnchor,
+        caption: "Anchor",
+      }),
+      selectedNearbyNodes: Object.freeze(
+        snapshot.localMap.selectedNearbyNodes.map((node) =>
+          Object.freeze({
+            ...node,
+            caption: "Nearby node",
+          }),
+        ),
+      ),
+      localityEmphasis: snapshot.localMap.localityEmphasis?.label ?? null,
+      fallbackCopy: snapshot.localMap.fallbackCopy,
+    }),
   });
 }
 

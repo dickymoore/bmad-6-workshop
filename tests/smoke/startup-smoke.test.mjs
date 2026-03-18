@@ -60,7 +60,7 @@ test("story 1.1 separates public and non-public ops routes", () => {
   assert.equal(/notFound\s*\(/.test(opsPage), true, "ops route should stay hidden until secured access exists");
 });
 
-test("story 1.3 public route composes the Royal Institution dashboard feature instead of the starter shell", () => {
+test("story 1.5 public route composes the Royal Institution dashboard feature with a fixed passive local map", () => {
   const pagePath = join(root, "src", "app", "(public)", "page.tsx");
   const contractPath = join(root, "src", "lib", "contracts", "dashboard-snapshot.js");
   const snapshotPath = join(root, "src", "features", "dashboard", "data", "overall-departure-snapshot.js");
@@ -69,6 +69,7 @@ test("story 1.3 public route composes the Royal Institution dashboard feature in
   const headerPath = join(root, "src", "features", "dashboard", "components", "AtmosphericHeader.tsx");
   const modeGridPath = join(root, "src", "features", "dashboard", "components", "ModeSummaryGrid.tsx");
   const modeCardPath = join(root, "src", "features", "dashboard", "components", "ModeSummaryCard.tsx");
+  const localMapPath = join(root, "src", "features", "dashboard", "components", "LocalMapFrame.tsx");
   assert.equal(existsSync(pagePath), true, "expected public route page");
   assert.equal(existsSync(contractPath), true, "expected dashboard snapshot contract");
   assert.equal(existsSync(snapshotPath), true, "expected fixture-backed dashboard snapshot");
@@ -77,6 +78,7 @@ test("story 1.3 public route composes the Royal Institution dashboard feature in
   assert.equal(existsSync(headerPath), true, "expected atmospheric header component");
   assert.equal(existsSync(modeGridPath), true, "expected nearby mode summary grid component");
   assert.equal(existsSync(modeCardPath), true, "expected nearby mode summary card component");
+  assert.equal(existsSync(localMapPath), true, "expected fixed local map component");
 
   const page = readFileSync(pagePath, "utf8");
   const contract = readFileSync(contractPath, "utf8");
@@ -86,8 +88,9 @@ test("story 1.3 public route composes the Royal Institution dashboard feature in
   const header = readFileSync(headerPath, "utf8");
   const modeGrid = readFileSync(modeGridPath, "utf8");
   const modeCard = readFileSync(modeCardPath, "utf8");
-  const publicFeature = [page, contract, snapshot, presenter, screen, header, modeGrid, modeCard].join("\n");
-  const publicCopySources = [page, snapshot, presenter, screen, header, modeGrid, modeCard].join("\n");
+  const localMap = readFileSync(localMapPath, "utf8");
+  const publicFeature = [page, contract, snapshot, presenter, screen, header, modeGrid, modeCard, localMap].join("\n");
+  const publicCopySources = [page, snapshot, presenter, screen, header, modeGrid, modeCard, localMap].join("\n");
 
   assert.equal(/Create Next App/i.test(page), false, "public route should not contain generic starter content");
   assert.equal(/display-shell/i.test(publicFeature), false, "story 1.3 should retire the temporary display-shell presenter");
@@ -98,19 +101,36 @@ test("story 1.3 public route composes the Royal Institution dashboard feature in
   );
   assert.equal(/overallState|weatherSummary|placeLabel|freshnessLabel/i.test(contract), true, "dashboard contract should cover overall picture fields");
   assert.equal(/nearbyModes|summary|state/i.test(contract), true, "dashboard contract should cover nearby mode summaries");
+  assert.equal(/localMap|selectedNearbyNodes|fallbackCopy/.test(contract), true, "dashboard contract should cover fixed local-map data");
   assert.equal(/calm|watchful|strained|disrupted/i.test(contract), true, "dashboard contract should encode approved overall-state vocabulary");
   assert.equal(/available|caution|disrupted/i.test(contract), true, "dashboard contract should encode approved nearby-mode vocabulary");
-  assert.equal(/must be unique/i.test(contract), true, "dashboard contract should require unique nearby-mode keys");
+  assert.equal(/must be unique/i.test(contract), true, "dashboard contract should require stable unique keys");
   assert.equal(/Royal Institution|Albemarle Street/i.test(publicFeature), true, "public route should remain venue-specific");
   assert.equal(/AtmosphericHeader|DashboardScreen/.test(page), true, "public route should compose dashboard feature components");
   assert.equal(/ModeSummaryGrid|ModeSummaryCard/.test(screen + modeGrid), true, "public route should include shared-reading mode summaries");
-  assert.equal(/Nearby modes|Local frame/i.test(publicFeature), true, "public route should keep nearby modes and future map regions");
-  assert.equal(/Map placeholder/i.test(publicCopySources), false, "public route should not expose internal placeholder copy");
+  assert.equal(/LocalMapFrame|Green Park|Piccadilly Arcade|Local frame/i.test(publicFeature), true, "public route should include fixed local-map locality cues");
+  assert.equal(
+    /const isFallback = viewModel\.state === "fallback";/.test(localMap),
+    true,
+    "local map component should branch explicitly for fallback handling",
+  );
+  assert.equal(
+    /\(isFallback \? viewModel\.fallbackCopy : viewModel\.localityEmphasis\)/.test(localMap),
+    true,
+    "fallback mode should prioritize simplified fallback explanation over locality emphasis copy",
+  );
+  assert.equal(
+    /\{isFallback \? null : \(/.test(localMap),
+    true,
+    "fallback mode should simplify the map treatment instead of rendering the default corridor overlay",
+  );
+  assert.equal(/Map placeholder/i.test(publicCopySources), false, "public route should not expose placeholder copy");
   assert.equal(
     /<button|<input|<form|<select|<textarea|href=/i.test(publicFeature),
     false,
     "public route should remain passive and non-interactive",
   );
+  assert.equal(/<svg|role="img"|aria-label="Fixed local map anchored to the Royal Institution"/.test(localMap), true, "local map should render as a passive framed graphic");
 });
 
 test("story 1.2 keeps CI focused on Node 24 build readiness for venue promotion", () => {
