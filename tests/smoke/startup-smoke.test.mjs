@@ -60,22 +60,45 @@ test("story 1.1 separates public and non-public ops routes", () => {
   assert.equal(/notFound\s*\(/.test(opsPage), true, "ops route should stay hidden until secured access exists");
 });
 
-test("story 1.1 public route is a calm placeholder, not generic starter content", () => {
+test("story 1.3 public route composes the Royal Institution dashboard feature instead of the starter shell", () => {
   const pagePath = join(root, "src", "app", "(public)", "page.tsx");
-  const presenterPath = join(root, "src", "features", "display-shell", "presenter.js");
+  const contractPath = join(root, "src", "lib", "contracts", "dashboard-snapshot.js");
+  const snapshotPath = join(root, "src", "features", "dashboard", "data", "overall-departure-snapshot.js");
+  const presenterPath = join(root, "src", "features", "dashboard", "presenters", "dashboard-presenter.js");
+  const screenPath = join(root, "src", "features", "dashboard", "components", "DashboardScreen.tsx");
+  const headerPath = join(root, "src", "features", "dashboard", "components", "AtmosphericHeader.tsx");
   assert.equal(existsSync(pagePath), true, "expected public route page");
+  assert.equal(existsSync(contractPath), true, "expected dashboard snapshot contract");
+  assert.equal(existsSync(snapshotPath), true, "expected fixture-backed dashboard snapshot");
   assert.equal(existsSync(presenterPath), true, "expected public display presenter");
+  assert.equal(existsSync(screenPath), true, "expected dashboard screen component");
+  assert.equal(existsSync(headerPath), true, "expected atmospheric header component");
 
   const page = readFileSync(pagePath, "utf8");
+  const contract = readFileSync(contractPath, "utf8");
+  const snapshot = readFileSync(snapshotPath, "utf8");
   const presenter = readFileSync(presenterPath, "utf8");
+  const screen = readFileSync(screenPath, "utf8");
+  const header = readFileSync(headerPath, "utf8");
+  const publicFeature = [page, contract, snapshot, presenter, screen, header].join("\n");
+  const publicCopySources = [page, snapshot, presenter, screen, header].join("\n");
 
   assert.equal(/Create Next App/i.test(page), false, "public route should not contain generic starter content");
-  assert.equal(/Public Display Shell/i.test(page), false, "public route should not use developer-facing shell labels");
-  assert.equal(/Starter scaffold only/i.test(page), false, "public route should not expose scaffold language");
-  assert.equal(/Route Planner/i.test(page), false, "public route should not frame itself as a route planner");
-  assert.equal(/getPublicDisplayShellContent/.test(page), true, "public route should render presenter-backed display content");
-  assert.equal(/Royal Institution|Albemarle Pulse|departure/i.test(presenter), true, "public route should signal product-specific content");
-  assert.equal(/No click, scroll, or search required/i.test(presenter), true, "public route should remain non-interactive");
+  assert.equal(/display-shell/i.test(publicFeature), false, "story 1.3 should retire the temporary display-shell presenter");
+  assert.equal(
+    /Route Planner|best option|recommended|switch to|take\b/i.test(publicCopySources),
+    false,
+    "public route should stay fact-only",
+  );
+  assert.equal(/overallState|weatherSummary|placeLabel|freshnessLabel/i.test(contract), true, "dashboard contract should cover overall picture fields");
+  assert.equal(/calm|watchful|strained|disrupted/i.test(contract), true, "dashboard contract should encode approved overall-state vocabulary");
+  assert.equal(/Royal Institution|Albemarle Street/i.test(publicFeature), true, "public route should remain venue-specific");
+  assert.equal(/AtmosphericHeader|DashboardScreen/.test(page), true, "public route should compose dashboard feature components");
+  assert.equal(
+    /<button|<input|<form|<select|<textarea|href=/i.test(publicFeature),
+    false,
+    "public route should remain passive and non-interactive",
+  );
 });
 
 test("story 1.2 keeps CI focused on Node 24 build readiness for venue promotion", () => {

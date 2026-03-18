@@ -1,25 +1,15 @@
-import { getPublicDisplayShellContent } from "@/features/display-shell/presenter";
+import { DashboardScreen } from "@/features/dashboard/components/DashboardScreen";
+import { getOverallDepartureSnapshot } from "@/features/dashboard/data/overall-departure-snapshot";
+import {
+  getDashboardMetadata,
+  presentDashboardSnapshot,
+} from "@/features/dashboard/presenters/dashboard-presenter";
+
+export const metadata = getDashboardMetadata();
 
 export default function PublicDisplayPage() {
-  const content = getPublicDisplayShellContent();
+  const snapshot = getOverallDepartureSnapshot();
+  const viewModel = presentDashboardSnapshot(snapshot);
 
-  return (
-    <main className="shell-page">
-      <section className="shell-card" aria-labelledby="display-shell-title">
-        <p className="shell-kicker">{content.venueLabel}</p>
-        <h1 className="shell-title" id="display-shell-title">
-          {content.title}
-        </h1>
-        <p className="shell-copy">{content.summary}</p>
-        <div className="shell-meta">
-          <div>
-            <strong>Format:</strong> {content.formatLabel}
-          </div>
-          <div>
-            <strong>Interaction:</strong> {content.interactionLabel}
-          </div>
-        </div>
-      </section>
-    </main>
-  );
+  return <DashboardScreen viewModel={viewModel} />;
 }
