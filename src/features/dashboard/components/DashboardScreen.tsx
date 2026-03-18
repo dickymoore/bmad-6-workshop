@@ -51,12 +51,23 @@ export function DashboardScreen({ viewModel }: { viewModel: DashboardViewModel }
   return (
     <main className="dashboard-page">
       <div className="dashboard-backdrop" aria-hidden="true" />
-      <section className="dashboard-shell" aria-label="Royal Institution departure picture">
-        <AtmosphericHeader viewModel={viewModel} />
+      <section
+        className="dashboard-shell dashboard-shell--venue dashboard-shell--desktop"
+        aria-label="Royal Institution departure picture"
+      >
+        <div className="dashboard-shell__header">
+          <AtmosphericHeader viewModel={viewModel} />
+        </div>
 
-        <div className="dashboard-lower-grid" aria-label="Shared nearby departure structure">
-          <ModeSummaryGrid viewModel={viewModel} />
-          <LocalMapFrame viewModel={viewModel.localMap} />
+        <div className="dashboard-shell__body">
+          <div className="dashboard-lower-grid" aria-label="Shared nearby departure structure">
+            <div className="dashboard-lower-grid__modes">
+              <ModeSummaryGrid viewModel={viewModel} />
+            </div>
+            <div className="dashboard-lower-grid__map">
+              <LocalMapFrame viewModel={viewModel.localMap} />
+            </div>
+          </div>
         </div>
       </section>
     </main>

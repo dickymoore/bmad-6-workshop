@@ -133,6 +133,88 @@ test("story 1.5 public route composes the Royal Institution dashboard feature wi
   assert.equal(/<svg|role="img"|aria-label="Fixed local map anchored to the Royal Institution"/.test(localMap), true, "local map should render as a passive framed graphic");
 });
 
+test("story 1.6 keeps the public display locked to venue-sized layout pillars and explicit verification evidence", () => {
+  const screenPath = join(root, "src", "features", "dashboard", "components", "DashboardScreen.tsx");
+  const headerPath = join(root, "src", "features", "dashboard", "components", "AtmosphericHeader.tsx");
+  const modeGridPath = join(root, "src", "features", "dashboard", "components", "ModeSummaryGrid.tsx");
+  const localMapPath = join(root, "src", "features", "dashboard", "components", "LocalMapFrame.tsx");
+  const globalCssPath = join(root, "src", "app", "globals.css");
+  const verificationNotesPath = join(root, "docs", "sprint-artifacts", "1-6-display-verification-notes.md");
+
+  assert.equal(existsSync(screenPath), true, "expected dashboard screen component");
+  assert.equal(existsSync(headerPath), true, "expected atmospheric header component");
+  assert.equal(existsSync(modeGridPath), true, "expected nearby mode summary grid component");
+  assert.equal(existsSync(localMapPath), true, "expected fixed local map component");
+  assert.equal(existsSync(globalCssPath), true, "expected global stylesheet");
+  assert.equal(existsSync(verificationNotesPath), true, "expected explicit story 1.6 verification notes artifact");
+
+  const screen = readFileSync(screenPath, "utf8");
+  const header = readFileSync(headerPath, "utf8");
+  const modeGrid = readFileSync(modeGridPath, "utf8");
+  const localMap = readFileSync(localMapPath, "utf8");
+  const globalCss = readFileSync(globalCssPath, "utf8");
+  const verificationNotes = readFileSync(verificationNotesPath, "utf8");
+  const publicFeature = [screen, header, modeGrid, localMap].join("\n");
+
+  assert.equal(
+    /dashboard-shell--venue|dashboard-shell--desktop/.test(screen + globalCss),
+    true,
+    "public display should expose venue-sized and desktop adaptation hooks without changing the route structure",
+  );
+  assert.equal(
+    /width:\s*max\(100%,\s*1024px\)/.test(globalCss),
+    false,
+    "desktop-sized layout should not force horizontal overflow at the 1024px target",
+  );
+  assert.equal(
+    /max-width:\s*1480px|margin-inline:\s*auto/.test(globalCss),
+    true,
+    "dashboard shell should stay centered on venue screens without oversizing the supported desktop target",
+  );
+  assert.equal(
+    /dashboard-shell__header|dashboard-shell__body/.test(screen),
+    true,
+    "dashboard screen should preserve one canonical header-first, modes-second, map-third composition",
+  );
+  assert.equal(
+    /dashboard-lower-grid__modes|dashboard-lower-grid__map/.test(screen),
+    true,
+    "dashboard lower grid should keep nearby modes and fixed local map as stable layout pillars",
+  );
+  assert.equal(
+    /@media\s*\(min-width:\s*1366px\)|@media\s*\(min-width:\s*1024px\)/.test(globalCss),
+    true,
+    "global styles should define venue-sized and secondary desktop breakpoints",
+  );
+  assert.equal(
+    /@media\s*\(max-height:\s*820px\)|compact-height/.test(globalCss),
+    true,
+    "global styles should define a compact-height fallback for constrained venue surfaces",
+  );
+  assert.equal(
+    /\.atmospheric-header__footer p:last-child,\s*[\r\n]+\s*\.mode-summary-panel__intro|\.local-map-panel__intro,\s*[\r\n]+\s*\.local-map-panel__fallback/.test(
+      globalCss,
+    ),
+    false,
+    "compact-height tuning should compress support detail without hiding trust cues or fallback map context",
+  );
+  assert.equal(
+    /prefers-reduced-motion:\s*reduce/.test(globalCss),
+    true,
+    "public display should document reduced-motion-safe behavior in CSS",
+  );
+  assert.equal(
+    /mobile|drawer|tab|planner|touch/i.test(publicFeature),
+    false,
+    "public display should not collapse into mobile-first or planner-like patterns",
+  );
+  assert.equal(
+    /real-device|contrast|reduced-motion|shared readability|1366|1024/i.test(verificationNotes),
+    true,
+    "verification notes should make venue-sized validation explicit in the artifact set",
+  );
+});
+
 test("story 1.2 keeps CI focused on Node 24 build readiness for venue promotion", () => {
   const workflowPath = join(root, ".github", "workflows", "build-readiness.yml");
 
