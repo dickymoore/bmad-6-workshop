@@ -1,0 +1,5 @@
+[2026-03-18 17:15:06] [INFO] Project root: /home/codexuser/bmad-6-workshop
+[2026-03-18 17:15:06] [INFO] Provider: codex
+[2026-03-18 17:15:06] [INFO] Log file: /home/codexuser/bmad-6-workshop/logs/ralph-20260318-171506.log
+[2026-03-18 17:15:06] [INFO] Checking dependencies...
+[2026-03-18 17:15:06] [ERROR] Missing dependencies:

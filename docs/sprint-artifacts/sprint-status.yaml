@@ -42,7 +42,7 @@ story_location: /home/codexuser/bmad-6-workshop/docs/sprint-artifacts
 development_status:
   epic-1: in-progress
   1-1-set-up-initial-project-from-approved-starter-template: done
-  1-2-establish-baseline-quality-gates-and-build-readiness: backlog
+  1-2-establish-baseline-quality-gates-and-build-readiness: done
   1-3-render-the-overall-departure-picture: backlog
   1-4-show-nearby-mode-summaries-for-shared-reading: backlog
   1-5-anchor-the-display-with-a-fixed-local-map: backlog

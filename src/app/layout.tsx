@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 
+import { getPublicDisplayShellMetadata } from "@/features/display-shell/presenter";
+
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "Albemarle Pulse",
-  description: "Royal Institution departure display shell",
-};
+const shellMetadata = getPublicDisplayShellMetadata();
+
+export const metadata: Metadata = shellMetadata;
 
 export default function RootLayout({
   children,

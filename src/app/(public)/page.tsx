@@ -1,23 +1,22 @@
+import { getPublicDisplayShellContent } from "@/features/display-shell/presenter";
+
 export default function PublicDisplayPage() {
+  const content = getPublicDisplayShellContent();
+
   return (
     <main className="shell-page">
       <section className="shell-card" aria-labelledby="display-shell-title">
-        <p className="shell-kicker">Royal Institution foyer</p>
+        <p className="shell-kicker">{content.venueLabel}</p>
         <h1 className="shell-title" id="display-shell-title">
-          Albemarle Pulse
+          {content.title}
         </h1>
-        <p className="shell-copy">
-          A shared departure view for visitors leaving from the Royal
-          Institution. The public screen stays calm, local, and
-          non-interactive, holding space for nearby travel, weather, and trust
-          cues without asking anyone to search or choose a route.
-        </p>
+        <p className="shell-copy">{content.summary}</p>
         <div className="shell-meta">
           <div>
-            <strong>Format:</strong> Shared public display
+            <strong>Format:</strong> {content.formatLabel}
           </div>
           <div>
-            <strong>Interaction:</strong> No click, scroll, or search required
+            <strong>Interaction:</strong> {content.interactionLabel}
           </div>
         </div>
       </section>

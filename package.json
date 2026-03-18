@@ -6,8 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "test": "node --test"
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run test:smoke && npm run test:unit",
+    "test:smoke": "node --test tests/smoke/*.test.mjs",
+    "test:unit": "vitest run",
+    "validate": "npm run lint && npm run typecheck && npm test && npm run build"
   },
   "engines": {
     "node": "24.x"
@@ -23,6 +27,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.7",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "file:tools/vitest-lite"
   }
 }

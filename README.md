@@ -55,3 +55,30 @@ Use these as pressure tests during analysis:
 
 At the end of this branch, analysis outputs should exist.
 Planning outputs should not.
+
+## Baseline Build-Readiness Gate
+
+Before promoting the public display build to the venue laptop, run the baseline
+quality gate from the repo root:
+
+```bash
+npm run validate
+```
+
+That gate runs:
+
+- `npm run lint`
+- `npm run typecheck`
+- `npm test`
+- `npm run build`
+
+The intent is operational, not ceremonial: any change that weakens code
+quality, type safety, test coverage, or production buildability should fail
+before the foyer display is manually promoted. The matching GitHub Actions
+workflow in `.github/workflows/build-readiness.yml` mirrors the same checks on
+Node 24 so public-display reliability is verified before venue rollout.
+
+Unit coverage currently runs through the lightweight local `vitest`
+compatibility package at `tools/vitest-lite/` so the baseline gate stays
+available even in restricted workshop environments without pulling in heavier
+test infrastructure early.
