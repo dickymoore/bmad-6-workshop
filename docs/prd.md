@@ -15,6 +15,8 @@ editHistory:
     changes: 'Improved measurability and SMART quality across success criteria, functional requirements, and non-functional requirements; restored concise why-now rationale; tightened requirement language for laptop-run MVP use.'
   - date: 2026-03-18
     changes: 'Applied validation follow-up fixes to business success checks, operator-side functional requirements, and remaining non-functional verification wording.'
+  - date: 2026-03-18
+    changes: 'Reconciled web-app implementation wording with the approved architecture by removing SPA-specific language and making the server-rendered shell with selective client components the implementation source of truth.'
 documentCounts:
   briefCount: 1
   researchCount: 2
@@ -224,13 +226,13 @@ To protect against innovation failure, the PRD should preserve two rules:
 
 ### Project-Type Overview
 
-Albemarle Pulse is a single-page web application that behaves as a live, venue-based public display rather than a conventional navigational website. Its primary operating mode is a controlled browser on a venue laptop, where the application remains open as an always-on foyer instrument for the Royal Institution.
+Albemarle Pulse is a browser-based public-display web application that behaves as a live, venue-based foyer instrument rather than a conventional navigational website. Its primary operating mode is a controlled browser on a venue laptop, where the application remains open as an always-on public surface for the Royal Institution.
 
 This is a specialized screen-based web app with ambient public-display behavior, not a general-purpose consumer website. The platform posture prioritizes composure, stability, readability, and trust under live conditions over SEO, acquisition flows, or multi-device reach.
 
 ### Technical Architecture Considerations
 
-The application should be built as an SPA because its primary experience is a persistent live surface rather than multi-page navigation. It should maintain a stable structural frame while data updates are absorbed through calm polling or refresh behavior. Real-time behavior is required, but visual churn is not: the UI must feel current without looking like it is constantly refreshing.
+The implementation source of truth for MVP is the approved architecture: a server-rendered shell with selective client components supporting live display behavior on one persistent public surface. It should maintain a stable structural frame while data updates are absorbed through calm polling or refresh behavior. Real-time behavior is required, but visual churn is not: the UI must feel current without looking like it is constantly refreshing.
 
 For MVP, browser support should target a single controlled desktop browser environment running on the venue laptop. This allows the PRD to prioritize display integrity, layout stability, and public reliability over wide early browser compatibility. Broader browser support can be considered later if the product expands beyond the foyer-display use case.
 
@@ -260,7 +262,7 @@ Accessibility combines public-display readability with baseline web accessibilit
 
 ### Implementation Considerations
 
-Implementation should preserve the distinction between a live web app and a noisy dashboard. The application should use calm polling or refresh behavior, avoid decorative motion, and maintain layout consistency under both normal and degraded source conditions.
+Implementation should preserve the distinction between a live public-display web application and a noisy dashboard. The server-rendered shell and selective client refresh behavior should support calm polling, avoid decorative motion, and maintain layout consistency under both normal and degraded source conditions.
 
 Because the MVP runs in a controlled browser environment, implementation should also prioritize operational simplicity: reliable startup, stable long-running behavior, clean recovery after interruption, and a presentation model that remains trustworthy in front of visitors. This product should feel infrastructural in use, even though it is delivered as a web application.
 
