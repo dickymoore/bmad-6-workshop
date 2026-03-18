@@ -7,10 +7,16 @@ const HEADLINES = Object.freeze({
   disrupted: "Disrupted across the Royal Institution threshold",
 });
 
-const RESERVED_SECTIONS = Object.freeze([
-  Object.freeze({ title: "Nearby modes", variant: "summary" }),
-  Object.freeze({ title: "Local frame", variant: "map" }),
-]);
+const MODE_STATE_LABELS = Object.freeze({
+  available: "Available",
+  caution: "Caution",
+  disrupted: "Disrupted",
+});
+
+const MAP_PLACEHOLDER = Object.freeze({
+  title: "Local frame",
+  label: "Royal Institution map frame held for nearby orientation.",
+});
 
 const DASHBOARD_METADATA = Object.freeze({
   title: "Albemarle Pulse | Royal Institution departures",
@@ -29,7 +35,17 @@ export function presentDashboardSnapshot(snapshotInput) {
     mobilitySummary: snapshot.mobilitySummary,
     freshnessLabel: snapshot.freshnessLabel,
     supportLabel: snapshot.supportLabel,
-    reservedSections: RESERVED_SECTIONS,
+    nearbyModeHeading: "Nearby modes",
+    nearbyModeIntro: "From here, now: the nearby departure modes are reading as follows.",
+    nearbyModes: Object.freeze(
+      snapshot.nearbyModes.map((mode) =>
+        Object.freeze({
+          ...mode,
+          stateLabel: MODE_STATE_LABELS[mode.state],
+        }),
+      ),
+    ),
+    mapPlaceholder: MAP_PLACEHOLDER,
   });
 }
 

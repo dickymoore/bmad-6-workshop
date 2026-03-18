@@ -67,12 +67,16 @@ test("story 1.3 public route composes the Royal Institution dashboard feature in
   const presenterPath = join(root, "src", "features", "dashboard", "presenters", "dashboard-presenter.js");
   const screenPath = join(root, "src", "features", "dashboard", "components", "DashboardScreen.tsx");
   const headerPath = join(root, "src", "features", "dashboard", "components", "AtmosphericHeader.tsx");
+  const modeGridPath = join(root, "src", "features", "dashboard", "components", "ModeSummaryGrid.tsx");
+  const modeCardPath = join(root, "src", "features", "dashboard", "components", "ModeSummaryCard.tsx");
   assert.equal(existsSync(pagePath), true, "expected public route page");
   assert.equal(existsSync(contractPath), true, "expected dashboard snapshot contract");
   assert.equal(existsSync(snapshotPath), true, "expected fixture-backed dashboard snapshot");
   assert.equal(existsSync(presenterPath), true, "expected public display presenter");
   assert.equal(existsSync(screenPath), true, "expected dashboard screen component");
   assert.equal(existsSync(headerPath), true, "expected atmospheric header component");
+  assert.equal(existsSync(modeGridPath), true, "expected nearby mode summary grid component");
+  assert.equal(existsSync(modeCardPath), true, "expected nearby mode summary card component");
 
   const page = readFileSync(pagePath, "utf8");
   const contract = readFileSync(contractPath, "utf8");
@@ -80,8 +84,10 @@ test("story 1.3 public route composes the Royal Institution dashboard feature in
   const presenter = readFileSync(presenterPath, "utf8");
   const screen = readFileSync(screenPath, "utf8");
   const header = readFileSync(headerPath, "utf8");
-  const publicFeature = [page, contract, snapshot, presenter, screen, header].join("\n");
-  const publicCopySources = [page, snapshot, presenter, screen, header].join("\n");
+  const modeGrid = readFileSync(modeGridPath, "utf8");
+  const modeCard = readFileSync(modeCardPath, "utf8");
+  const publicFeature = [page, contract, snapshot, presenter, screen, header, modeGrid, modeCard].join("\n");
+  const publicCopySources = [page, snapshot, presenter, screen, header, modeGrid, modeCard].join("\n");
 
   assert.equal(/Create Next App/i.test(page), false, "public route should not contain generic starter content");
   assert.equal(/display-shell/i.test(publicFeature), false, "story 1.3 should retire the temporary display-shell presenter");
@@ -91,9 +97,15 @@ test("story 1.3 public route composes the Royal Institution dashboard feature in
     "public route should stay fact-only",
   );
   assert.equal(/overallState|weatherSummary|placeLabel|freshnessLabel/i.test(contract), true, "dashboard contract should cover overall picture fields");
+  assert.equal(/nearbyModes|summary|state/i.test(contract), true, "dashboard contract should cover nearby mode summaries");
   assert.equal(/calm|watchful|strained|disrupted/i.test(contract), true, "dashboard contract should encode approved overall-state vocabulary");
+  assert.equal(/available|caution|disrupted/i.test(contract), true, "dashboard contract should encode approved nearby-mode vocabulary");
+  assert.equal(/must be unique/i.test(contract), true, "dashboard contract should require unique nearby-mode keys");
   assert.equal(/Royal Institution|Albemarle Street/i.test(publicFeature), true, "public route should remain venue-specific");
   assert.equal(/AtmosphericHeader|DashboardScreen/.test(page), true, "public route should compose dashboard feature components");
+  assert.equal(/ModeSummaryGrid|ModeSummaryCard/.test(screen + modeGrid), true, "public route should include shared-reading mode summaries");
+  assert.equal(/Nearby modes|Local frame/i.test(publicFeature), true, "public route should keep nearby modes and future map regions");
+  assert.equal(/Map placeholder/i.test(publicCopySources), false, "public route should not expose internal placeholder copy");
   assert.equal(
     /<button|<input|<form|<select|<textarea|href=/i.test(publicFeature),
     false,

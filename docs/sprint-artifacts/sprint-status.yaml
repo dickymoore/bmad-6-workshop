@@ -44,7 +44,7 @@ development_status:
   1-1-set-up-initial-project-from-approved-starter-template: done
   1-2-establish-baseline-quality-gates-and-build-readiness: done
   1-3-render-the-overall-departure-picture: done
-  1-4-show-nearby-mode-summaries-for-shared-reading: backlog
+  1-4-show-nearby-mode-summaries-for-shared-reading: done
   1-5-anchor-the-display-with-a-fixed-local-map: backlog
   1-6-verify-the-primary-display-on-real-venue-sized-surfaces: backlog
   epic-1-retrospective: optional

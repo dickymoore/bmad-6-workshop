@@ -1,8 +1,13 @@
 import { AtmosphericHeader } from "@/features/dashboard/components/AtmosphericHeader";
+import { ModeSummaryGrid } from "@/features/dashboard/components/ModeSummaryGrid";
 
-type ReservedSection = {
-  title: string;
-  variant: string;
+type NearbyModeViewModel = {
+  key: string;
+  label: string;
+  state: string;
+  stateLabel: string;
+  summary: string;
+  nuance: string | null;
 };
 
 type DashboardViewModel = {
@@ -14,7 +19,13 @@ type DashboardViewModel = {
   mobilitySummary: string;
   freshnessLabel: string;
   supportLabel: string;
-  reservedSections: readonly ReservedSection[];
+  nearbyModeHeading: string;
+  nearbyModeIntro: string;
+  nearbyModes: readonly NearbyModeViewModel[];
+  mapPlaceholder: {
+    title: string;
+    label: string;
+  };
 };
 
 export function DashboardScreen({ viewModel }: { viewModel: DashboardViewModel }) {
@@ -24,17 +35,17 @@ export function DashboardScreen({ viewModel }: { viewModel: DashboardViewModel }
       <section className="dashboard-shell" aria-label="Royal Institution departure picture">
         <AtmosphericHeader viewModel={viewModel} />
 
-        <div className="dashboard-lower-grid" aria-label="Reserved display structure">
-          {viewModel.reservedSections.map((section) => (
-            <section
-              key={section.title}
-              className={`dashboard-reserved dashboard-reserved--${section.variant}`}
-              aria-label={section.title}
-            >
-              <p className="dashboard-reserved__label">{section.title}</p>
-              <div className="dashboard-reserved__surface" aria-hidden="true" />
-            </section>
-          ))}
+        <div className="dashboard-lower-grid" aria-label="Shared nearby departure structure">
+          <ModeSummaryGrid viewModel={viewModel} />
+
+          <section
+            className="dashboard-reserved dashboard-reserved--map"
+            aria-label={viewModel.mapPlaceholder.title}
+          >
+            <p className="dashboard-reserved__label">{viewModel.mapPlaceholder.title}</p>
+            <p className="dashboard-reserved__caption">{viewModel.mapPlaceholder.label}</p>
+            <div className="dashboard-reserved__surface" aria-hidden="true" />
+          </section>
         </div>
       </section>
     </main>

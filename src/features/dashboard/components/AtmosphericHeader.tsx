@@ -1,8 +1,3 @@
-type ReservedSection = {
-  title: string;
-  variant: string;
-};
-
 type DashboardViewModel = {
   placeLabel: string;
   overallState: string;
@@ -12,7 +7,6 @@ type DashboardViewModel = {
   mobilitySummary: string;
   freshnessLabel: string;
   supportLabel: string;
-  reservedSections: readonly ReservedSection[];
 };
 
 export function AtmosphericHeader({ viewModel }: { viewModel: DashboardViewModel }) {
