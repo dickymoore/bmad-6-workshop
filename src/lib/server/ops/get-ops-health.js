@@ -1,4 +1,5 @@
 import { getDashboardApiResponse } from "../dashboard/dashboard-service.js";
+import { createDegradedImpactDiagnostics } from "./get-degraded-impact-diagnostics.js";
 
 const READINESS_LABELS = Object.freeze({
   current: "Current",
@@ -144,6 +145,7 @@ export function createOpsHealthPayload({ dashboardResponse } = {}) {
   const publishedAt = dashboardResponse?.meta?.publishedAt ?? null;
   const checks = CHECK_DEFINITIONS.map((definition) => createCheck(definition, snapshot));
   const issues = createIssues(snapshot, snapshotState, checks);
+  const diagnostics = createDegradedImpactDiagnostics({ dashboardResponse });
   const readinessState = classifyReadiness({
     snapshot,
     snapshotState,
@@ -159,6 +161,7 @@ export function createOpsHealthPayload({ dashboardResponse } = {}) {
     }),
     checks: Object.freeze(checks),
     issues: Object.freeze(issues),
+    diagnostics,
     evidence: Object.freeze({
       snapshotState,
       publishedAt,
@@ -190,6 +193,11 @@ export async function getOpsHealthPayload({
         ),
       ),
       issues: Object.freeze(["Live readiness could not be confirmed from this local surface."]),
+      diagnostics: Object.freeze({
+        summary: "Detailed degraded diagnostics could not be confirmed from this local surface.",
+        affectedAreas: Object.freeze([]),
+        healthyAreas: Object.freeze([]),
+      }),
       evidence: Object.freeze({
         snapshotState: "fallback",
         publishedAt: null,

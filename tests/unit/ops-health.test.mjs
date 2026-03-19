@@ -6,6 +6,7 @@ import {
   createOpsHealthPayload,
   getOpsHealthPayload,
 } from "../../src/lib/server/ops/get-ops-health.js";
+import { createDegradedImpactDiagnostics } from "../../src/lib/server/ops/get-degraded-impact-diagnostics.js";
 import { createOpsHealthRouteResponse } from "../../src/lib/server/ops/create-ops-health-route-response.js";
 
 function createCurrentSnapshot(snapshotOverrides = {}) {
@@ -78,6 +79,12 @@ function createDashboardResponse(snapshotOverrides = {}, metaOverrides = {}) {
     refreshIntervalMs: 30_000,
     snapshotState: "live",
     ...metaOverrides,
+  });
+}
+
+function createDiagnostics(snapshotOverrides = {}, metaOverrides = {}) {
+  return createDegradedImpactDiagnostics({
+    dashboardResponse: createDashboardResponse(snapshotOverrides, metaOverrides),
   });
 }
 
@@ -230,6 +237,11 @@ describe("ops health route", () => {
           },
         ],
         issues: [],
+        diagnostics: {
+          summary: "No degraded areas are narrowing the public picture.",
+          affectedAreas: [],
+          healthyAreas: ["Weather remains healthy."],
+        },
         evidence: {
           snapshotState: "live",
           publishedAt: "2026-03-19T08:00:00.000Z",
@@ -245,6 +257,223 @@ describe("ops health route", () => {
 
     expect(payload.readiness.state).toBe("current");
     expect(payload.checks.length).toBe(1);
+    expect(payload.diagnostics).toEqual({
+      summary: "No degraded areas are narrowing the public picture.",
+      affectedAreas: [],
+      healthyAreas: ["Weather remains healthy."],
+    });
     expect(/TfL|WeatherAPI|stack|token|secret/i.test(JSON.stringify(payload))).toBe(false);
+  });
+});
+
+describe("degraded impact diagnostics", () => {
+  it("classifies a single narrowed signal as local-only impact and lists healthy areas", () => {
+    const diagnostics = createDiagnostics({
+      headerStatus: {
+        weather: {
+          state: "carried-forward",
+          label: "Carried forward",
+          detail: "Weather is carried forward while live weather detail narrows.",
+        },
+        mobility: {
+          state: "live",
+          label: "Live",
+          detail: "Movement is reading live for the foyer.",
+        },
+      },
+      headerTrust: {
+        weather: {
+          state: "reduced-confidence",
+          label: "Reduced confidence",
+          detail: "Weather is carried forward while live weather detail narrows.",
+          confidence: "narrowed",
+        },
+        mobility: {
+          state: "current",
+          label: "Current",
+          detail: "Movement is current for the foyer.",
+          confidence: "full",
+        },
+      },
+    });
+
+    expect(diagnostics.summary).toBe("1 degraded area is narrowing the public picture.");
+    expect(diagnostics.affectedAreas.length).toBe(1);
+    expect(diagnostics.affectedAreas[0].areaLabel).toBe("Weather");
+    expect(diagnostics.affectedAreas[0].impactScope).toBe("Local-only impact");
+    expect(diagnostics.affectedAreas[0].signals.map((signal) => signal.label)).toEqual([
+      "Weather source",
+      "Weather trust",
+    ]);
+    expect(diagnostics.healthyAreas).toContain("Movement remains healthy.");
+    expect(diagnostics.healthyAreas).toContain("The local frame remains healthy.");
+  });
+
+  it("classifies several narrowed local signals as multiple-local-signals impact", () => {
+    const diagnostics = createDiagnostics({
+      nearbyModes: createCurrentSnapshot().nearbyModes.map((mode) => {
+        if (mode.key === "bus") {
+          return {
+            ...mode,
+            disruptionScope: "locally-disrupted",
+            sourceStatus: {
+              state: "carried-forward",
+              label: "Carried forward",
+              detail: "Bus is carried forward while live detail narrows.",
+            },
+            trust: {
+              state: "reduced-confidence",
+              label: "Reduced confidence",
+              detail: "Bus is less certain just now.",
+              confidence: "narrowed",
+            },
+          };
+        }
+
+        if (mode.key === "roads") {
+          return {
+            ...mode,
+            disruptionScope: "locally-disrupted",
+            sourceStatus: {
+              state: "unavailable",
+              label: "Unavailable",
+              detail: "Roads are temporarily unavailable for the foyer.",
+            },
+            trust: {
+              state: "unavailable",
+              label: "Unavailable",
+              detail: "Roads are temporarily unavailable.",
+              confidence: "narrowed",
+            },
+          };
+        }
+
+        return mode;
+      }),
+    });
+
+    expect(diagnostics.affectedAreas.length).toBe(2);
+    expect([...new Set(diagnostics.affectedAreas.map((area) => area.impactScope))]).toEqual([
+      "Multiple-local-signals impact",
+    ]);
+    expect(diagnostics.healthyAreas).toContain("Tube and rail remain healthy nearby.");
+  });
+
+  it("shows optional-feed failures while preserving healthy core evidence", () => {
+    const diagnostics = createDiagnostics({
+      nearbyModes: createCurrentSnapshot().nearbyModes.map((mode) =>
+        mode.key === "cycles-scooters"
+          ? {
+              ...mode,
+              sourceStatus: {
+                state: "unavailable",
+                label: "Unavailable",
+                detail: "Cycles and scooters are temporarily unavailable for the foyer.",
+              },
+              trust: {
+                state: "unavailable",
+                label: "Unavailable",
+                detail: "Cycles and scooters are temporarily unavailable.",
+                confidence: "narrowed",
+              },
+            }
+          : mode,
+      ),
+    });
+
+    expect(diagnostics.affectedAreas.length).toBe(1);
+    expect(diagnostics.affectedAreas[0].areaLabel).toBe("Cycles and scooters");
+    expect(diagnostics.healthyAreas).toContain("Weather remains healthy.");
+    expect(diagnostics.healthyAreas).toContain("Tube and rail remain healthy nearby.");
+  });
+
+  it("surfaces disruption emphasis when affected modes are strained before trust labels narrow", () => {
+    const diagnostics = createDiagnostics({
+      disruptionEmphasis: {
+        level: "local",
+        headline: "Bus is disrupted nearby",
+        detail: "Bus is under the most strain while the rest of the picture stays readable.",
+        affectedModeKeys: ["bus"],
+      },
+      nearbyModes: createCurrentSnapshot().nearbyModes.map((mode) =>
+        mode.key === "bus"
+          ? {
+              ...mode,
+              state: "disrupted",
+              disruptionScope: "locally-disrupted",
+            }
+          : mode,
+      ),
+    });
+
+    expect(diagnostics.summary).toBe("1 degraded area is narrowing the public picture.");
+    expect(diagnostics.affectedAreas).toEqual([
+      {
+        id: "bus",
+        areaLabel: "Bus",
+        impactScope: "Local-only impact",
+        signals: [
+          {
+            label: "Operational impact",
+            stateLabel: "Affected nearby",
+            detail: "Bus is under the most strain while the rest of the picture stays readable.",
+          },
+        ],
+      },
+    ]);
+    expect(diagnostics.healthyAreas).toContain("Weather remains healthy.");
+  });
+
+  it("does not claim healthy areas when the snapshot is in fallback", () => {
+    const diagnostics = createDiagnostics(
+      {
+        overallState: "watchful",
+        nearbyModes: createCurrentSnapshot().nearbyModes,
+      },
+      {
+        snapshotState: "fallback",
+      },
+    );
+
+    expect(diagnostics.summary).toBe("No degraded areas are narrowing the public picture.");
+    expect(diagnostics.healthyAreas).toEqual([]);
+  });
+
+  it("classifies broad strain as overall departure-picture impact", () => {
+    const diagnostics = createDiagnostics(
+      {
+        overallState: "disrupted",
+        disruptionEmphasis: {
+          level: "overall",
+          headline: "Disrupted across the departure picture",
+          detail: "The nearby departure picture is under visible strain while remaining readable.",
+          affectedModeKeys: ["tube-rail", "bus"],
+        },
+        nearbyModes: createCurrentSnapshot().nearbyModes.map((mode) => ({
+          ...mode,
+          disruptionScope: "overall-disrupted",
+          sourceStatus: {
+            state: "carried-forward",
+            label: "Carried forward",
+            detail: `${mode.label} is carried forward while live detail narrows.`,
+          },
+          trust: {
+            state: "reduced-confidence",
+            label: "Reduced confidence",
+            detail: `${mode.label} is less certain just now.`,
+            confidence: "narrowed",
+          },
+        })),
+      },
+      {
+        snapshotState: "last-safe",
+      },
+    );
+
+    expect(diagnostics.affectedAreas.length > 1).toBe(true);
+    expect([...new Set(diagnostics.affectedAreas.map((area) => area.impactScope))]).toEqual([
+      "Overall departure-picture impact",
+    ]);
+    expect(diagnostics.summary).toBe("Several degraded areas are affecting the overall departure picture.");
   });
 });

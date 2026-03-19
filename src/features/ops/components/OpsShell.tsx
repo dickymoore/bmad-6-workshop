@@ -14,6 +14,20 @@ type OpsHealthStatus = {
     detail: string;
   }[];
   issues: readonly string[];
+  diagnostics: {
+    summary: string;
+    affectedAreas: readonly {
+      id: string;
+      areaLabel: string;
+      impactScope: string;
+      signals: readonly {
+        label: string;
+        stateLabel: string;
+        detail: string;
+      }[];
+    }[];
+    healthyAreas: readonly string[];
+  };
   evidence: {
     snapshotState: string;
     publishedAt: string | null;
@@ -98,6 +112,51 @@ export function OpsShell({ status }: { status: OpsHealthStatus }) {
                   ))}
                 </ul>
               </div>
+
+              <section className="ops-diagnostics" aria-labelledby="ops-diagnostics-heading">
+                <p className="ops-readiness__label">{viewModel.diagnosticsHeading}</p>
+                <h3 className="ops-diagnostics__title" id="ops-diagnostics-heading">
+                  Signal and scope
+                </h3>
+                <p className="ops-diagnostics__summary">{viewModel.diagnosticsSummary}</p>
+
+                {viewModel.diagnosticsAreas.length > 0 ? (
+                  <ul className="ops-diagnostics__list" aria-label="Degraded impact diagnostics">
+                    {viewModel.diagnosticsAreas.map((area: OpsHealthStatus["diagnostics"]["affectedAreas"][number]) => (
+                      <li className="ops-diagnostics__card" key={area.id}>
+                        <div className="ops-diagnostics__card-header">
+                          <h4 className="ops-diagnostics__card-title">{area.areaLabel}</h4>
+                          <p className="ops-diagnostics__scope">{area.impactScope}</p>
+                        </div>
+                        <ul className="ops-diagnostics__signals">
+                          {area.signals.map((signal) => (
+                            <li className="ops-diagnostics__signal" key={`${area.id}-${signal.label}`}>
+                              <p className="ops-diagnostics__signal-line">
+                                <span className="ops-diagnostics__signal-label">{signal.label}</span>
+                                <span className="ops-diagnostics__signal-state">{signal.stateLabel}</span>
+                              </p>
+                              <p className="ops-diagnostics__signal-detail">{signal.detail}</p>
+                            </li>
+                          ))}
+                        </ul>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+
+                {viewModel.healthyAreas.length > 0 ? (
+                  <div className="ops-diagnostics__healthy">
+                    <p className="ops-readiness__label">{viewModel.healthyAreasHeading}</p>
+                    <ul className="ops-readiness__issue-list">
+                      {viewModel.healthyAreas.map((area: string) => (
+                        <li className="ops-readiness__issue" key={area}>
+                          {area}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </section>
             </section>
           </section>
 

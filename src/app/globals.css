@@ -882,7 +882,10 @@ a {
 }
 
 .ops-readiness__check,
-.ops-readiness__issues {
+.ops-readiness__issues,
+.ops-diagnostics,
+.ops-diagnostics__card,
+.ops-diagnostics__healthy {
   margin-top: 16px;
   padding: 14px 16px;
   border: 1px solid rgba(122, 91, 47, 0.16);
@@ -924,6 +927,94 @@ a {
 .ops-readiness__issue-list {
   display: grid;
   gap: 10px;
+}
+
+.ops-diagnostics__title,
+.ops-diagnostics__summary,
+.ops-diagnostics__scope,
+.ops-diagnostics__signal-line,
+.ops-diagnostics__signal-detail {
+  margin: 0;
+}
+
+.ops-diagnostics__title {
+  margin-top: 8px;
+  font-size: 1.05rem;
+  color: var(--text);
+}
+
+.ops-diagnostics__summary,
+.ops-diagnostics__scope,
+.ops-diagnostics__signal-detail {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.ops-diagnostics__list,
+.ops-diagnostics__signals {
+  margin: 16px 0 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.ops-diagnostics__list {
+  display: grid;
+  gap: 12px;
+}
+
+.ops-diagnostics__card,
+.ops-diagnostics__healthy {
+  margin-top: 0;
+}
+
+.ops-diagnostics__card-header {
+  display: grid;
+  gap: 6px;
+}
+
+.ops-diagnostics__card-title,
+.ops-diagnostics__signal-label,
+.ops-diagnostics__signal-state {
+  color: var(--text);
+}
+
+.ops-diagnostics__card-title {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.ops-diagnostics__scope {
+  font-size: 0.92rem;
+}
+
+.ops-diagnostics__signals {
+  display: grid;
+  gap: 10px;
+}
+
+.ops-diagnostics__signal {
+  padding-top: 10px;
+  border-top: 1px solid rgba(122, 91, 47, 0.12);
+}
+
+.ops-diagnostics__signal:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.ops-diagnostics__signal-line {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ops-diagnostics__signal-state {
+  font-size: 0.88rem;
+}
+
+.ops-diagnostics__signal-detail {
+  margin-top: 6px;
 }
 
 .ops-shell__skip-link:focus-visible {

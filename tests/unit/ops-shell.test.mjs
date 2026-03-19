@@ -109,6 +109,8 @@ describe("ops shell", () => {
       "Pass",
     ]);
     expect(viewModel.issuesHeading).toBe("Current ops state");
+    expect(viewModel.diagnosticsHeading).toBe("Degraded impact");
+    expect(viewModel.diagnosticsSummary).toBe("No degraded areas are narrowing the public picture.");
   });
 
   it("shows calm issue language without provider internals when readiness narrows", () => {
@@ -142,6 +144,47 @@ describe("ops shell", () => {
 
     expect(viewModel.readinessLabel).toBe("Reduced confidence");
     expect(viewModel.issues.join(" ")).toContain("carried forward");
+    expect(viewModel.diagnosticsAreas.length).toBe(1);
+    expect(viewModel.diagnosticsAreas[0].areaLabel).toBe("Weather");
+    expect(viewModel.diagnosticsAreas[0].impactScope).toBe("Local-only impact");
+    expect(viewModel.healthyAreas).toContain("Movement remains healthy.");
     expect(/WeatherAPI|TfL|stack trace|token|secret/i.test(viewModel.issues.join(" "))).toBe(false);
+    expect(/WeatherAPI|TfL|stack trace|token|secret/i.test(JSON.stringify(viewModel.diagnosticsAreas))).toBe(false);
+  });
+
+  it("normalizes partial diagnostics payloads before rendering", () => {
+    const status = createStatus();
+    const viewModel = createOpsShellViewModel({
+      ...status,
+      diagnostics: {
+        summary: " ",
+        affectedAreas: [
+          {
+            id: "",
+            areaLabel: "",
+            impactScope: "",
+            signals: [{}],
+          },
+        ],
+        healthyAreas: ["  Weather remains healthy.  ", "", null],
+      },
+    });
+
+    expect(viewModel.diagnosticsSummary).toBe("No degraded areas are narrowing the public picture.");
+    expect(viewModel.diagnosticsAreas).toEqual([
+      {
+        id: "diagnostic-area",
+        areaLabel: "Affected area",
+        impactScope: "Local-only impact",
+        signals: [
+          {
+            label: "Signal",
+            stateLabel: "Attention needed",
+            detail: "Signal detail is temporarily unavailable from this local surface.",
+          },
+        ],
+      },
+    ]);
+    expect(viewModel.healthyAreas).toEqual(["Weather remains healthy."]);
   });
 });
