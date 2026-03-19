@@ -15,7 +15,7 @@ development_status:
   epic-2: in-progress
   2-1-keep-the-departure-picture-current-during-normal-operation: done
   2-2-show-trend-and-freshness-where-confidence-matters: done
-  2-3-surface-serious-disruption-without-breaking-composure: backlog
+  2-3-surface-serious-disruption-without-breaking-composure: done
   2-4-preserve-honest-usefulness-during-provider-failure: backlog
   2-5-maintain-stable-live-reading-during-updates-and-motion-changes: backlog
   epic-2-retrospective: optional

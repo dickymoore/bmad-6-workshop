@@ -23,6 +23,18 @@ export const LOCAL_MAP_STATES = Object.freeze([
   "fallback",
 ]);
 
+export const DISRUPTION_EMPHASIS_LEVELS = Object.freeze([
+  "none",
+  "local",
+  "overall",
+]);
+
+export const MODE_DISRUPTION_SCOPES = Object.freeze([
+  "unaffected-readable",
+  "locally-disrupted",
+  "overall-disrupted",
+]);
+
 export const DASHBOARD_ADVISORY_LANGUAGE_PATTERN =
   /\bbest option\b|\brecommended\b|\bswitch to\b|\btake\b/i;
 
@@ -197,7 +209,7 @@ function normalizeLocalMap(localMap) {
   });
 }
 
-function normalizeNearbyModes(nearbyModes) {
+function normalizeNearbyModes(nearbyModes, overallState) {
   if (!Array.isArray(nearbyModes) || nearbyModes.length === 0) {
     throw new Error('Dashboard snapshot field "nearbyModes" must be a non-empty array');
   }
@@ -210,7 +222,7 @@ function normalizeNearbyModes(nearbyModes) {
         throw new Error(`Dashboard nearby mode at index ${index} must be an object`);
       }
 
-      const { key, label, state, summary, nuance, trust } = mode;
+      const { key, label, state, disruptionScope, summary, nuance, trust } = mode;
 
       for (const [field, value] of Object.entries({ key, label, summary })) {
         if (typeof value !== "string" || value.trim().length === 0) {
@@ -220,6 +232,10 @@ function normalizeNearbyModes(nearbyModes) {
 
       if (!NEARBY_MODE_STATES.includes(state)) {
         throw new Error(`Unsupported nearby mode state: ${state}`);
+      }
+
+      if (disruptionScope != null && !MODE_DISRUPTION_SCOPES.includes(disruptionScope)) {
+        throw new Error(`Unsupported nearby mode disruption scope: ${disruptionScope}`);
       }
 
       for (const [field, value] of Object.entries({
@@ -248,12 +264,131 @@ function normalizeNearbyModes(nearbyModes) {
         key: normalizedKey,
         label: label.trim(),
         state,
+        disruptionScope:
+          disruptionScope ??
+          (state === "disrupted"
+            ? overallState === "disrupted"
+              ? "overall-disrupted"
+              : "locally-disrupted"
+            : "unaffected-readable"),
         summary: summary.trim(),
         nuance: typeof nuance === "string" ? nuance.trim() : null,
         trust: normalizeTrustSignal(trust, `nearbyModes[${index}].trust`),
       });
     }),
   );
+}
+
+function createDefaultDisruptionEmphasis({ overallState, nearbyModes }) {
+  const affectedModeKeys = nearbyModes
+    .filter((mode) => mode.state === "disrupted")
+    .map((mode) => mode.key);
+
+  if (overallState === "disrupted") {
+    return freezeSnapshot({
+      level: "overall",
+      headline: "Disrupted across the departure picture",
+      detail: "The nearby departure picture is under visible strain while remaining readable.",
+      affectedModeKeys: Object.freeze(affectedModeKeys),
+    });
+  }
+
+  if (affectedModeKeys.length > 0) {
+    const affectedModes = nearbyModes.filter((mode) => affectedModeKeys.includes(mode.key));
+    const headline =
+      affectedModes.length === 1
+        ? `${affectedModes[0].label} is disrupted nearby`
+        : "Multiple nearby modes are disrupted";
+
+    return freezeSnapshot({
+      level: "local",
+      headline,
+      detail: "The affected nearby modes are under the most strain while the rest of the picture stays readable.",
+      affectedModeKeys: Object.freeze(affectedModeKeys),
+    });
+  }
+
+  return freezeSnapshot({
+    level: "none",
+    headline: null,
+    detail: null,
+    affectedModeKeys: Object.freeze([]),
+  });
+}
+
+function normalizeDisruptionEmphasis(disruptionEmphasis, { overallState, nearbyModes }) {
+  if (disruptionEmphasis == null) {
+    return createDefaultDisruptionEmphasis({ overallState, nearbyModes });
+  }
+
+  if (!disruptionEmphasis || typeof disruptionEmphasis !== "object") {
+    throw new Error('Dashboard snapshot field "disruptionEmphasis" must be an object when present');
+  }
+
+  const { level, headline, detail, affectedModeKeys } = disruptionEmphasis;
+
+  if (!DISRUPTION_EMPHASIS_LEVELS.includes(level)) {
+    throw new Error(`Unsupported disruption emphasis level: ${level}`);
+  }
+
+  if (!Array.isArray(affectedModeKeys)) {
+    throw new Error('Dashboard snapshot field "disruptionEmphasis.affectedModeKeys" must be an array');
+  }
+
+  const knownModeKeys = new Set(nearbyModes.map((mode) => mode.key));
+  const seenKeys = new Set();
+  const normalizedAffectedModeKeys = Object.freeze(
+    affectedModeKeys.map((key, index) => {
+      if (typeof key !== "string" || key.trim().length === 0) {
+        throw new Error(
+          `Dashboard snapshot field "disruptionEmphasis.affectedModeKeys[${index}]" must be a non-empty string`,
+        );
+      }
+
+      const normalizedKey = key.trim();
+
+      if (!knownModeKeys.has(normalizedKey)) {
+        throw new Error(`Dashboard disruption emphasis key "${normalizedKey}" must exist in nearbyModes`);
+      }
+
+      if (seenKeys.has(normalizedKey)) {
+        throw new Error(`Dashboard disruption emphasis key "${normalizedKey}" must be unique`);
+      }
+
+      seenKeys.add(normalizedKey);
+      return normalizedKey;
+    }),
+  );
+
+  if (level === "none") {
+    if (headline != null || detail != null || normalizedAffectedModeKeys.length > 0) {
+      throw new Error('Dashboard disruption emphasis level "none" cannot include headline, detail, or affected modes');
+    }
+
+    return freezeSnapshot({
+      level,
+      headline: null,
+      detail: null,
+      affectedModeKeys: normalizedAffectedModeKeys,
+    });
+  }
+
+  for (const [field, value] of Object.entries({ headline, detail })) {
+    if (typeof value !== "string" || value.trim().length === 0) {
+      throw new Error(`Dashboard snapshot field "disruptionEmphasis.${field}" must be a non-empty string`);
+    }
+
+    if (DASHBOARD_ADVISORY_LANGUAGE_PATTERN.test(value)) {
+      throw new Error(`Dashboard snapshot field "disruptionEmphasis.${field}" must stay fact-only`);
+    }
+  }
+
+  return freezeSnapshot({
+    level,
+    headline: headline.trim(),
+    detail: detail.trim(),
+    affectedModeKeys: normalizedAffectedModeKeys,
+  });
 }
 
 export function createDashboardSnapshot(input) {
@@ -265,6 +400,7 @@ export function createDashboardSnapshot(input) {
     mobilitySummary,
     placeLabel,
     supportLabel,
+    disruptionEmphasis,
     headerTrust,
     localMap,
     nearbyModes,
@@ -303,6 +439,12 @@ export function createDashboardSnapshot(input) {
     }
   }
 
+  const normalizedNearbyModes = normalizeNearbyModes(nearbyModes, overallState);
+  const normalizedDisruptionEmphasis = normalizeDisruptionEmphasis(disruptionEmphasis, {
+    overallState,
+    nearbyModes: normalizedNearbyModes,
+  });
+
   return freezeSnapshot({
     publishedAt,
     overallState,
@@ -311,8 +453,9 @@ export function createDashboardSnapshot(input) {
     mobilitySummary: mobilitySummary.trim(),
     placeLabel: placeLabel.trim(),
     supportLabel: supportLabel.trim(),
+    disruptionEmphasis: normalizedDisruptionEmphasis,
     headerTrust: normalizeHeaderTrust(headerTrust),
     localMap: normalizeLocalMap(localMap),
-    nearbyModes: normalizeNearbyModes(nearbyModes),
+    nearbyModes: normalizedNearbyModes,
   });
 }

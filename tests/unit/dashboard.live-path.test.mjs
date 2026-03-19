@@ -123,9 +123,68 @@ describe("dashboard live path", () => {
     expect(built.snapshotState).toBe("live");
     expect(built.snapshot.publishedAt).toBe("2026-03-19T08:31:00.000Z");
     expect(built.snapshot.overallTrend).toBe("worsening");
+    expect(built.snapshot.disruptionEmphasis).toEqual({
+      level: "local",
+      headline: "Bus is disrupted nearby",
+      detail: "Bus is under the most strain nearby while the rest of the departure picture stays readable.",
+      affectedModeKeys: ["bus"],
+    });
     expect(built.snapshot.headerTrust.weather.state).toBe("current");
     expect(built.snapshot.headerTrust.mobility.state).toBe("stale");
+    expect(built.snapshot.nearbyModes.find((mode) => mode.key === "tube-rail")?.disruptionScope).toBe("unaffected-readable");
+    expect(built.snapshot.nearbyModes.find((mode) => mode.key === "bus")?.disruptionScope).toBe("locally-disrupted");
     expect(built.snapshot.nearbyModes.find((mode) => mode.key === "bus")?.trust.state).toBe("delayed");
+  });
+
+  it("does not invent serious disruption from reduced-confidence or stale live evidence alone", async () => {
+    const built = await buildDashboardSnapshot({
+      now: new Date("2026-03-19T08:31:00.000Z"),
+      async readHistory() {
+        return [];
+      },
+      async tflProvider() {
+        return {
+          mobilitySummary: "Nearby departures are still moving, with a slightly tighter live rhythm.",
+          signalObservedAt: "2026-03-19T08:01:00.000Z",
+          missedRefreshes: 3,
+          liveModes: [
+            {
+              key: "tube-rail",
+              state: "available",
+              summary: "Tube and rail are still reading open nearby.",
+              nuance: "Station approaches remain readable.",
+              signalObservedAt: "2026-03-19T08:01:00.000Z",
+              missedRefreshes: 3,
+            },
+            {
+              key: "bus",
+              state: "caution",
+              summary: "Bus spacing is a little uneven nearby.",
+              nuance: "Stops remain readable despite the slower refresh.",
+              signalObservedAt: "2026-03-19T08:01:00.000Z",
+              missedRefreshes: 3,
+            },
+          ],
+        };
+      },
+      async weatherProvider() {
+        return {
+          overallState: "watchful",
+          weatherSummary: "Rain is moving across Mayfair and the street is reading a little slower.",
+          signalObservedAt: "2026-03-19T08:28:00.000Z",
+        };
+      },
+    });
+
+    expect(built.snapshot.overallState).toBe("watchful");
+    expect(built.snapshot.disruptionEmphasis).toEqual({
+      level: "none",
+      headline: null,
+      detail: null,
+      affectedModeKeys: [],
+    });
+    expect(built.snapshot.nearbyModes.every((mode) => mode.state !== "disrupted")).toBe(true);
+    expect(built.snapshot.nearbyModes.some((mode) => mode.trust.state === "delayed")).toBe(true);
   });
 
   it("keeps one weaker signal local when the service falls back to the last safe snapshot", async () => {
@@ -181,6 +240,7 @@ describe("dashboard live path", () => {
     expect(response.data.overallTrend).toBe(null);
     expect(response.data.headerTrust.weather.state).toBe("reduced-confidence");
     expect(response.data.headerTrust.mobility.state).toBe("reduced-confidence");
+    expect(response.data.disruptionEmphasis.level).toBe("none");
     expect(response.data.nearbyModes.every((mode) => mode.trust.state === "reduced-confidence")).toBe(true);
   });
 

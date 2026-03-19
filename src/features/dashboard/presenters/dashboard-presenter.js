@@ -29,6 +29,18 @@ const DASHBOARD_METADATA = Object.freeze({
   description: "Overall departure picture for the Royal Institution foyer.",
 });
 
+const DISRUPTION_LABELS = Object.freeze({
+  none: null,
+  local: "Local disruption",
+  overall: "Serious disruption",
+});
+
+const MODE_DISRUPTION_LABELS = Object.freeze({
+  "unaffected-readable": "Readable nearby",
+  "locally-disrupted": "Disrupted nearby",
+  "overall-disrupted": "Disrupted across the picture",
+});
+
 function createTrendMessage(overallTrend) {
   if (overallTrend === "improving") {
     return "The departure picture is improving.";
@@ -67,6 +79,14 @@ export function presentDashboardSnapshot(snapshotInput) {
     currentnessMessage: createCurrentnessMessage(),
     stateKicker: "Overall departure picture",
     stateHeadline: HEADLINES[snapshot.overallState],
+    disruption: Object.freeze({
+      level: snapshot.disruptionEmphasis.level,
+      label: DISRUPTION_LABELS[snapshot.disruptionEmphasis.level],
+      title: snapshot.disruptionEmphasis.headline,
+      detail: snapshot.disruptionEmphasis.detail,
+      affectedModeKeys: snapshot.disruptionEmphasis.affectedModeKeys,
+      hasSeriousDisruption: snapshot.disruptionEmphasis.level !== "none",
+    }),
     weatherSummary: snapshot.weatherSummary,
     mobilitySummary: snapshot.mobilitySummary,
     weatherTrust: presentTrust(snapshot.headerTrust.weather),
@@ -80,6 +100,9 @@ export function presentDashboardSnapshot(snapshotInput) {
           ...mode,
           trust: presentTrust(mode.trust),
           stateLabel: MODE_STATE_LABELS[mode.state],
+          disruptionScope: mode.disruptionScope,
+          emphasisLabel: MODE_DISRUPTION_LABELS[mode.disruptionScope],
+          isDisrupted: mode.disruptionScope !== "unaffected-readable",
         }),
       ),
     ),

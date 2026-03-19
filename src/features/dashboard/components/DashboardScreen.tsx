@@ -7,6 +7,9 @@ type NearbyModeViewModel = {
   label: string;
   state: string;
   stateLabel: string;
+  disruptionScope: string;
+  emphasisLabel: string;
+  isDisrupted: boolean;
   summary: string;
   nuance: string | null;
   trust: {
@@ -26,6 +29,14 @@ type DashboardViewModel = {
   currentnessMessage: string;
   stateKicker: string;
   stateHeadline: string;
+  disruption: {
+    level: string;
+    label: string | null;
+    title: string | null;
+    detail: string | null;
+    affectedModeKeys: readonly string[];
+    hasSeriousDisruption: boolean;
+  };
   weatherSummary: string;
   mobilitySummary: string;
   weatherTrust: {

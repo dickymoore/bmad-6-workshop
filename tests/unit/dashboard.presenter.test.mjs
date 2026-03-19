@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { join, resolve } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import { createTrustSignal } from "../../src/lib/contracts/freshness.js";
@@ -12,6 +15,8 @@ import {
   presentDashboardSnapshot,
 } from "../../src/features/dashboard/presenters/dashboard-presenter.js";
 
+const root = resolve(process.cwd());
+
 function buildSnapshot(overrides = {}) {
   return createDashboardSnapshot({
     publishedAt: "2026-03-19T08:00:00.000Z",
@@ -21,6 +26,12 @@ function buildSnapshot(overrides = {}) {
     mobilitySummary: "Nearby departures are still moving, with a tighter rhythm under the rain.",
     placeLabel: "Royal Institution, Albemarle Street",
     supportLabel: "Weather and movement reinforce the same local read.",
+    disruptionEmphasis: {
+      level: "local",
+      headline: "Bus is disrupted nearby",
+      detail: "Bus is under the most strain nearby while the rest of the picture stays readable.",
+      affectedModeKeys: ["bus"],
+    },
     headerTrust: {
       weather: createTrustSignal({
         state: "current",
@@ -64,6 +75,7 @@ function buildSnapshot(overrides = {}) {
         key: "tube-rail",
         label: "Tube and rail",
         state: "available",
+        disruptionScope: "unaffected-readable",
         summary: "Green Park and Piccadilly lines are still reading open nearby.",
         nuance: "Station approaches may bunch lightly after talks end.",
         trust: createTrustSignal({
@@ -75,6 +87,7 @@ function buildSnapshot(overrides = {}) {
         key: "bus",
         label: "Bus",
         state: "caution",
+        disruptionScope: "locally-disrupted",
         summary: "West End stops are moving, though spacing is a little uneven in the rain.",
         nuance: "Street queues are forming lightly under shelter.",
         trust: createTrustSignal({
@@ -97,11 +110,53 @@ describe("dashboard snapshot contract", () => {
     const snapshot = buildSnapshot();
 
     expect(snapshot.overallTrend).toBe("steady");
+    expect(snapshot.disruptionEmphasis.level).toBe("local");
+    expect(snapshot.nearbyModes[1].disruptionScope).toBe("locally-disrupted");
     expect(snapshot.headerTrust.weather.state).toBe("current");
     expect(snapshot.nearbyModes[1].trust.state).toBe("delayed");
     expect(Object.isFrozen(snapshot)).toBe(true);
     expect(Object.isFrozen(snapshot.headerTrust)).toBe(true);
+    expect(Object.isFrozen(snapshot.disruptionEmphasis.affectedModeKeys)).toBe(true);
     expect(Object.isFrozen(snapshot.nearbyModes)).toBe(true);
+  });
+
+  it("backfills disruption defaults for older snapshots that omit the new emphasis fields", () => {
+    const snapshot = buildSnapshot({
+      disruptionEmphasis: undefined,
+      nearbyModes: [
+        {
+          key: "tube-rail",
+          label: "Tube and rail",
+          state: "available",
+          summary: "Green Park and Piccadilly lines are still reading open nearby.",
+          nuance: "Station approaches may bunch lightly after talks end.",
+          trust: createTrustSignal({
+            state: "current",
+            subject: "Tube and rail",
+          }),
+        },
+        {
+          key: "bus",
+          label: "Bus",
+          state: "disrupted",
+          summary: "West End stops are disrupted nearby.",
+          nuance: "Street queues are bunching while spacing breaks apart.",
+          trust: createTrustSignal({
+            state: "delayed",
+            subject: "Bus",
+          }),
+        },
+      ],
+    });
+
+    expect(snapshot.disruptionEmphasis).toEqual({
+      level: "local",
+      headline: "Bus is disrupted nearby",
+      detail: "The affected nearby modes are under the most strain while the rest of the picture stays readable.",
+      affectedModeKeys: ["bus"],
+    });
+    expect(snapshot.nearbyModes[0].disruptionScope).toBe("unaffected-readable");
+    expect(snapshot.nearbyModes[1].disruptionScope).toBe("locally-disrupted");
   });
 
   it("rejects advisory wording in public copy and trust details", () => {
@@ -149,8 +204,15 @@ describe("dashboard presenter", () => {
     expect(viewModel.currentnessMessage).toBe("Current signals refresh inside the same calm shared view.");
     expect(viewModel.weatherTrust.isNarrowed).toBe(false);
     expect(viewModel.mobilityTrust.isNarrowed).toBe(true);
+    expect(viewModel.disruption.level).toBe("local");
+    expect(viewModel.disruption.title).toBe("Bus is disrupted nearby");
+    expect(viewModel.disruption.affectedModeKeys).toEqual(["bus"]);
     expect(viewModel.nearbyModes[0].trust.isNarrowed).toBe(false);
+    expect(viewModel.nearbyModes[0].disruptionScope).toBe("unaffected-readable");
+    expect(viewModel.nearbyModes[0].emphasisLabel).toBe("Readable nearby");
     expect(viewModel.nearbyModes[1].trust.isNarrowed).toBe(true);
+    expect(viewModel.nearbyModes[1].disruptionScope).toBe("locally-disrupted");
+    expect(viewModel.nearbyModes[1].emphasisLabel).toBe("Disrupted nearby");
     expect(viewModel.nearbyModes[1].trust.detail).toMatch(/should be read with care/i);
   });
 
@@ -171,5 +233,89 @@ describe("dashboard presenter", () => {
     expect(viewModel.overallTrendLabel).toBe(null);
     expect(viewModel.trendMessage).toBe(null);
     expect(viewModel.currentnessMessage).toBe("Current signals refresh inside the same calm shared view.");
+  });
+
+  it("elevates overall disruption without switching to advisory or takeover language", () => {
+    const viewModel = presentDashboardSnapshot(
+      buildSnapshot({
+        overallState: "disrupted",
+        disruptionEmphasis: {
+          level: "overall",
+          headline: "Disrupted across the Royal Institution threshold",
+          detail: "Tube and bus are under visible strain across the nearby departure picture.",
+          affectedModeKeys: ["tube-rail", "bus"],
+        },
+        nearbyModes: [
+          {
+            key: "tube-rail",
+            label: "Tube and rail",
+            state: "disrupted",
+            disruptionScope: "overall-disrupted",
+            summary: "Tube and rail are disrupted nearby.",
+            nuance: "Platforms and approaches are reading under visible strain.",
+            trust: createTrustSignal({
+              state: "current",
+              subject: "Tube and rail",
+            }),
+          },
+          {
+            key: "bus",
+            label: "Bus",
+            state: "disrupted",
+            disruptionScope: "overall-disrupted",
+            summary: "Bus is disrupted nearby.",
+            nuance: "Street spacing is breaking apart around the local stops.",
+            trust: createTrustSignal({
+              state: "current",
+              subject: "Bus",
+            }),
+          },
+        ],
+      }),
+    );
+
+    expect(viewModel.disruption.level).toBe("overall");
+    expect(viewModel.disruption.label).toBe("Serious disruption");
+    expect(viewModel.disruption.title).toBe("Disrupted across the Royal Institution threshold");
+    expect(viewModel.disruption.detail).toBe("Tube and bus are under visible strain across the nearby departure picture.");
+    expect(viewModel.nearbyModes.every((mode) => mode.disruptionScope === "overall-disrupted")).toBe(true);
+    expect(viewModel.nearbyModes.every((mode) => mode.emphasisLabel === "Disrupted across the picture")).toBe(true);
+    expect(/best option|recommended|switch to|take buses instead|reroute now/i.test(viewModel.disruption.title)).toBe(false);
+    expect(/warning banner|control room|ops console/i.test(viewModel.disruption.detail)).toBe(false);
+  });
+
+  it("keeps the presenter semantics wired into the real public screen components", () => {
+    const viewModel = presentDashboardSnapshot(buildSnapshot());
+    const screenSource = readFileSync(
+      join(root, "src", "features", "dashboard", "components", "DashboardScreen.tsx"),
+      "utf8",
+    );
+    const headerSource = readFileSync(
+      join(root, "src", "features", "dashboard", "components", "AtmosphericHeader.tsx"),
+      "utf8",
+    );
+    const modeCardSource = readFileSync(
+      join(root, "src", "features", "dashboard", "components", "ModeSummaryCard.tsx"),
+      "utf8",
+    );
+    const publicSources = [screenSource, headerSource, modeCardSource].join("\n");
+
+    expect(viewModel.disruption.title).toBe("Bus is disrupted nearby");
+    expect(viewModel.nearbyModes[0].emphasisLabel).toBe("Readable nearby");
+    expect(viewModel.nearbyModes[1].emphasisLabel).toBe("Disrupted nearby");
+    expect(screenSource).toMatch(/<AtmosphericHeader viewModel=\{viewModel\} \/>/);
+    expect(screenSource).toMatch(/<ModeSummaryGrid viewModel=\{viewModel\} \/>/);
+    expect(screenSource).toMatch(/<LocalMapFrame viewModel=\{viewModel\.localMap\} \/>/);
+    expect(headerSource).toMatch(/viewModel\.disruption\.hasSeriousDisruption/);
+    expect(headerSource).toMatch(/viewModel\.disruption\.title/);
+    expect(headerSource).toMatch(/viewModel\.disruption\.detail/);
+    expect(modeCardSource).toMatch(/mode\.isDisrupted/);
+    expect(modeCardSource).toMatch(/mode\.emphasisLabel/);
+    expect(modeCardSource).toMatch(/mode\.trust\.detail/);
+    expect(
+      /warning banner|alert overlay|control room|ops console|Route Planner|best option|recommended|switch to|take buses instead|reroute now/i.test(
+        publicSources,
+      ),
+    ).toBe(false);
   });
 });

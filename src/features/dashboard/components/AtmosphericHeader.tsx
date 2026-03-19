@@ -7,6 +7,14 @@ type DashboardViewModel = {
   currentnessMessage: string;
   stateKicker: string;
   stateHeadline: string;
+  disruption: {
+    level: string;
+    label: string | null;
+    title: string | null;
+    detail: string | null;
+    affectedModeKeys: readonly string[];
+    hasSeriousDisruption: boolean;
+  };
   weatherSummary: string;
   mobilitySummary: string;
   weatherTrust: {
@@ -24,7 +32,10 @@ type DashboardViewModel = {
 
 export function AtmosphericHeader({ viewModel }: { viewModel: DashboardViewModel }) {
   return (
-    <header className="atmospheric-header" aria-labelledby="overall-departure-state">
+    <header
+      className={`atmospheric-header atmospheric-header--${viewModel.disruption.level}`}
+      aria-labelledby="overall-departure-state"
+    >
       <div className="atmospheric-header__eyebrow">
         <p className="atmospheric-header__place">{viewModel.placeLabel}</p>
         <p className={`status-chip status-chip--${viewModel.overallState}`}>
@@ -38,6 +49,13 @@ export function AtmosphericHeader({ viewModel }: { viewModel: DashboardViewModel
         <h1 className="atmospheric-header__headline" id="overall-departure-state">
           {viewModel.stateHeadline}
         </h1>
+        {viewModel.disruption.hasSeriousDisruption ? (
+          <div className={`disruption-callout disruption-callout--${viewModel.disruption.level}`}>
+            <p className="disruption-callout__label">{viewModel.disruption.label}</p>
+            <p className="disruption-callout__title">{viewModel.disruption.title}</p>
+            <p className="disruption-callout__detail">{viewModel.disruption.detail}</p>
+          </div>
+        ) : null}
         {viewModel.overallTrendLabel ? (
           <p className="atmospheric-header__trend" aria-label={`Trend ${viewModel.overallTrendLabel.toLowerCase()}`}>
             <span className={`trust-chip trust-chip--${viewModel.overallTrend ?? "steady"}`}>{viewModel.overallTrendLabel}</span>

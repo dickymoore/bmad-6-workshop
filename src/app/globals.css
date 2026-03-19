@@ -89,6 +89,18 @@ a {
   backdrop-filter: blur(14px);
 }
 
+.atmospheric-header--local {
+  box-shadow:
+    0 28px 90px rgba(23, 30, 27, 0.08),
+    inset 0 0 0 1px rgba(124, 53, 49, 0.08);
+}
+
+.atmospheric-header--overall {
+  box-shadow:
+    0 28px 90px rgba(23, 30, 27, 0.08),
+    inset 0 0 0 2px rgba(124, 53, 49, 0.14);
+}
+
 .atmospheric-header__eyebrow,
 .atmospheric-header__footer {
   display: flex;
@@ -159,6 +171,53 @@ a {
 
 .atmospheric-header__summary--weather {
   margin-top: 24px;
+}
+
+.disruption-callout {
+  max-width: 42ch;
+  margin-top: 22px;
+  padding: 16px 18px;
+  border: 1px solid rgba(124, 53, 49, 0.16);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(255, 252, 250, 0.9), rgba(249, 242, 239, 0.78)),
+    rgba(255, 251, 249, 0.88);
+}
+
+.disruption-callout__label,
+.disruption-callout__title,
+.disruption-callout__detail,
+.mode-summary-card__emphasis {
+  margin: 0;
+}
+
+.disruption-callout__label {
+  color: var(--disrupted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.disruption-callout__title {
+  margin-top: 8px;
+  font-size: clamp(1.2rem, 2vw, 1.55rem);
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+.disruption-callout__detail {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 0.98rem;
+  line-height: 1.45;
+}
+
+.disruption-callout--overall {
+  border-color: rgba(124, 53, 49, 0.24);
+  background:
+    linear-gradient(180deg, rgba(255, 249, 247, 0.94), rgba(248, 239, 236, 0.82)),
+    rgba(255, 248, 246, 0.9);
 }
 
 .atmospheric-header__summary--mobility {
@@ -325,6 +384,20 @@ a {
   box-shadow: inset 0 0 0 1px rgba(124, 53, 49, 0.12);
 }
 
+.mode-summary-card--locally-disrupted {
+  border-color: rgba(124, 53, 49, 0.18);
+  background:
+    linear-gradient(180deg, rgba(255, 250, 249, 0.92), rgba(249, 242, 239, 0.72)),
+    rgba(251, 246, 243, 0.92);
+}
+
+.mode-summary-card--overall-disrupted {
+  border-color: rgba(124, 53, 49, 0.24);
+  box-shadow:
+    inset 0 0 0 1px rgba(124, 53, 49, 0.16),
+    0 12px 24px rgba(124, 53, 49, 0.08);
+}
+
 .mode-summary-card__header {
   display: flex;
   justify-content: space-between;
@@ -344,6 +417,18 @@ a {
   margin-top: 8px;
   color: var(--muted);
   font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mode-summary-card__emphasis {
+  align-self: flex-start;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(124, 53, 49, 0.1);
+  color: var(--disrupted);
+  font-size: 0.72rem;
+  font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }

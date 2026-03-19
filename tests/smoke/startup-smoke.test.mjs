@@ -172,6 +172,9 @@ test("story 1.5 public route composes the Royal Institution dashboard feature wi
   );
   assert.equal(/spinner|loading takeover|manual refresh/i.test(publicFeature), false, "public route should avoid full-screen loading or manual refresh controls");
   assert.equal(/provider request failed|TfL|WeatherAPI|HTTP|cache/i.test(publicCopySources), false, "public copy should stay plain-language and non-technical");
+  assert.equal(/disruptionEmphasis|disruptionScope/.test(contract + presenter), true, "dashboard contract and presenter should model first-class disruption emphasis");
+  assert.equal(/disruption-callout|mode-summary-card--overall-disrupted|mode-summary-card__emphasis/.test(header + modeCard), true, "public UI should render calm structural disruption emphasis without a takeover");
+  assert.equal(/warning banner|alert overlay|control room|ops console|reroute now|take buses instead/i.test(publicCopySources), false, "story 2.3 should avoid alert-surface and operational language");
   assert.equal(/<svg|role="img"|aria-label="Fixed local map anchored to the Royal Institution"/.test(localMap), true, "local map should render as a passive framed graphic");
 });
 

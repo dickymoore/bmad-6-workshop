@@ -5,6 +5,9 @@ type NearbyModeViewModel = {
   label: string;
   state: string;
   stateLabel: string;
+  disruptionScope: string;
+  emphasisLabel: string;
+  isDisrupted: boolean;
   summary: string;
   nuance: string | null;
   trust: {

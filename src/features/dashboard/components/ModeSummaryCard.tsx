@@ -3,6 +3,9 @@ type NearbyModeViewModel = {
   label: string;
   state: string;
   stateLabel: string;
+  disruptionScope: string;
+  emphasisLabel: string;
+  isDisrupted: boolean;
   summary: string;
   nuance: string | null;
   trust: {
@@ -15,17 +18,21 @@ type NearbyModeViewModel = {
 
 export function ModeSummaryCard({ mode }: { mode: NearbyModeViewModel }) {
   return (
-    <article className={`mode-summary-card mode-summary-card--${mode.state}`} aria-label={mode.label}>
+    <article
+      className={`mode-summary-card mode-summary-card--${mode.state} mode-summary-card--${mode.disruptionScope}`}
+      aria-label={mode.label}
+    >
       <div className="mode-summary-card__header">
         <div>
           <p className="mode-summary-card__label">{mode.label}</p>
           <p className="mode-summary-card__state">
             <span className="mode-summary-card__state-mark" aria-hidden="true">
-              {mode.state === "available" ? "Open" : mode.state === "caution" ? "Watch" : "Held"}
+              {mode.state === "available" ? "Open" : mode.state === "caution" ? "Watch" : "Disrupted"}
             </span>
             <span>{mode.stateLabel}</span>
           </p>
         </div>
+        {mode.isDisrupted ? <p className="mode-summary-card__emphasis">{mode.emphasisLabel}</p> : null}
       </div>
       <p className="mode-summary-card__summary">{mode.summary}</p>
       {mode.nuance ? <p className="mode-summary-card__nuance">{mode.nuance}</p> : null}

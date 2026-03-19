@@ -16,6 +16,12 @@ function createBaseSnapshot({
     mobilitySummary: "Nearby departures are still moving, with a tighter rhythm under the rain.",
     placeLabel: "Royal Institution, Albemarle Street",
     supportLabel: "Weather and mobility reinforce the same local read.",
+    disruptionEmphasis: {
+      level: "none",
+      headline: null,
+      detail: null,
+      affectedModeKeys: [],
+    },
     headerTrust: {
       weather: createTrustSignal({
         state: "current",
@@ -89,6 +95,7 @@ function createBaseSnapshot({
         key: "tube-rail",
         label: "Tube and rail",
         state: "available",
+        disruptionScope: "unaffected-readable",
         summary: "Green Park and Piccadilly lines are still reading open within the short walk from here.",
         nuance: "Platforms may feel a little fuller once the current lecture lets out.",
         trust: createTrustSignal({
@@ -100,6 +107,7 @@ function createBaseSnapshot({
         key: "bus",
         label: "Bus",
         state: "caution",
+        disruptionScope: "unaffected-readable",
         summary: "West End stops nearby are moving, though spacing is a little uneven in the rain.",
         nuance: "Sheltered queues are beginning to gather along the wetter side streets.",
         trust: createTrustSignal({
@@ -111,6 +119,7 @@ function createBaseSnapshot({
         key: "roads",
         label: "Roads",
         state: "caution",
+        disruptionScope: "unaffected-readable",
         summary: "Mayfair traffic is still flowing, with slower turns around the wetter junctions.",
         nuance: "Street crossings remain readable, but the pace is not especially brisk.",
         trust: createTrustSignal({
@@ -121,9 +130,10 @@ function createBaseSnapshot({
       {
         key: "cycles-scooters",
         label: "Cycles and scooters",
-        state: "disrupted",
-        summary: "Open micromobility nearby is looking sparse while the rain sits over central London.",
-        nuance: "Any remaining vehicles are likely to be more scattered than usual from here.",
+        state: "caution",
+        disruptionScope: "unaffected-readable",
+        summary: "Open micromobility nearby is still moving, though vehicles are thinner under the rain.",
+        nuance: "Availability remains patchier than the clearer corridors nearby.",
         trust: createTrustSignal({
           state: "reduced-confidence",
           subject: "Cycles and scooters",

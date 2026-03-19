@@ -108,6 +108,61 @@ function deriveModeTrust({ now, publishedAt, baseMode, liveMode, tflOverview }) 
   });
 }
 
+function formatAffectedModeLabels(modes) {
+  if (modes.length === 0) {
+    return "";
+  }
+
+  if (modes.length === 1) {
+    return modes[0].label;
+  }
+
+  if (modes.length === 2) {
+    return `${modes[0].label} and ${modes[1].label}`;
+  }
+
+  return `${modes.slice(0, -1).map((mode) => mode.label).join(", ")}, and ${modes.at(-1).label}`;
+}
+
+function deriveDisruptionEmphasis({ overallState, nearbyModes }) {
+  const affectedModes = nearbyModes.filter((mode) => mode.state === "disrupted");
+
+  if (overallState === "disrupted") {
+    const affectedLabels = formatAffectedModeLabels(affectedModes);
+
+    return {
+      level: "overall",
+      headline: "Disrupted across the Royal Institution threshold",
+      detail:
+        affectedLabels.length > 0
+          ? `${affectedLabels} are under visible strain across the nearby departure picture.`
+          : "The nearby departure picture is under visible strain while remaining readable.",
+      affectedModeKeys: affectedModes.map((mode) => mode.key),
+    };
+  }
+
+  if (affectedModes.length > 0) {
+    const affectedLabels = formatAffectedModeLabels(affectedModes);
+
+    return {
+      level: "local",
+      headline:
+        affectedModes.length === 1
+          ? `${affectedModes[0].label} is disrupted nearby`
+          : "Multiple nearby modes are disrupted",
+      detail: `${affectedLabels} ${affectedModes.length === 1 ? "is" : "are"} under the most strain nearby while the rest of the departure picture stays readable.`,
+      affectedModeKeys: affectedModes.map((mode) => mode.key),
+    };
+  }
+
+  return {
+    level: "none",
+    headline: null,
+    detail: null,
+    affectedModeKeys: [],
+  };
+}
+
 export async function buildDashboardSnapshot({
   now = new Date(),
   getFallbackSnapshot = createFixtureDashboardSnapshot,
@@ -129,10 +184,15 @@ export async function buildDashboardSnapshot({
   const liveModes = createModeLookup(tflOverview?.liveModes ?? []);
   const nearbyModes = baseSnapshot.nearbyModes.map((mode) => {
     const liveMode = liveModes.get(mode.key);
+    const nextState = liveMode?.state ?? mode.state;
 
     return {
       ...mode,
-      state: liveMode?.state ?? mode.state,
+      state: nextState,
+      disruptionScope:
+        nextState === "disrupted"
+          ? "locally-disrupted"
+          : "unaffected-readable",
       summary: liveMode?.summary ?? mode.summary,
       nuance: liveMode?.nuance ?? mode.nuance,
       trust: deriveModeTrust({
@@ -145,6 +205,10 @@ export async function buildDashboardSnapshot({
     };
   });
   const overallState = deriveOverallState(nearbyModes, weatherOverview?.overallState);
+  const disruptionEmphasis = deriveDisruptionEmphasis({
+    overallState,
+    nearbyModes,
+  });
   const draftSnapshot = {
     ...baseSnapshot,
     publishedAt,
@@ -162,7 +226,16 @@ export async function buildDashboardSnapshot({
       weatherOverview,
       tflOverview,
     }),
-    nearbyModes,
+    disruptionEmphasis,
+    nearbyModes: nearbyModes.map((mode) => ({
+      ...mode,
+      disruptionScope:
+        mode.state === "disrupted"
+          ? overallState === "disrupted"
+            ? "overall-disrupted"
+            : "locally-disrupted"
+          : "unaffected-readable",
+    })),
   };
   const overallTrend = classifyOverallTrend({
     history,
