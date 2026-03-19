@@ -117,6 +117,7 @@ done
 Each generated phase folder includes `SPEAKER-GUIDE-LINKS.md` with relative links to the files called out in the speaker guide.
 The generated workspace also includes `files/installation/` so you can show the BMAD install payload itself.
 The generated `files/phase-1-analysis/DEMO-START-PROMPT.md` gives you the Albemarle Pulse opening prompt to paste into the demo.
+The generated `START-HERE.md` gives you a single entry page with links to the prompt, installation view, all phase folders, and `agent-replay/`.
 
 ## Operator Rules
 

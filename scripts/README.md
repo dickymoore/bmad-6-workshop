@@ -170,6 +170,7 @@ done
   - `files/installation/` shows the BMAD install payload from `main`, including `.agents/skills` and selected `_bmad` config files
   - `files/` contains phase folders like `phase-1-analysis/` and `phase-6-implementation/`
   - `files/phase-1-analysis/DEMO-START-PROMPT.md` contains the track-specific opening prompt for the live demo
+  - `START-HERE.md` gives you one top-level page linking to the prompt, installation view, phase folders, and `agent-replay/`
   - phases without a frozen branch yet still get placeholder folders
   - clones `https://github.com/dickymoore/agent-replay` into `agent-replay/`
   - generates `SPEAKER-GUIDE-LINKS.md` inside each facilitator folder with relative links to the files referenced in the speaker guide

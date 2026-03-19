@@ -109,6 +109,41 @@ Open \`${files_root}\` to browse the workshop without live branch switching.
 EOF
 }
 
+write_start_here() {
+  local path="$1"
+  local files_root="$2"
+  local prompt_rel="files/$(stage_folder_name 10-analysis)/DEMO-START-PROMPT.md"
+  local installation_rel="files/installation/"
+
+  cat > "$path" <<EOF
+# Start Here: ${TRACK}
+
+Use this file as the facilitator entry point for the workshop workspace.
+
+## Key links
+
+- [Demo start prompt](${prompt_rel})
+- [Installation view](${installation_rel})
+- [Files index](${files_root}/README.md)
+- [Agent Replay](agent-replay/)
+
+## Phase folders
+
+EOF
+
+  while IFS= read -r branch; do
+    local stage_id
+    stage_id=$(workshop_branch_field "$TRACK" "$branch" id)
+    local folder_name
+    folder_name=$(stage_folder_name "$stage_id")
+    printf -- '- [%s](files/%s/)\n' "$folder_name" "$folder_name" >> "$path"
+  done < <(workshop_list_branches "$TRACK" 0)
+
+  if [[ -d "$(dirname "$path")/files/bmb" ]]; then
+    printf -- '\n## Extras\n\n- [BMB exports](files/bmb/)\n' >> "$path"
+  fi
+}
+
 write_files_index() {
   local path="$1"
   cat > "$path" <<EOF
@@ -442,6 +477,8 @@ if [[ -n "$BMB_REPO" ]]; then
   copy_bmb_module "$files_root" "$BMB_REPO" "$BMB_MODULE"
   printf -- '\n## BMB exports\n\n- `bmb/%s/` -> copied from `%s`\n' "$BMB_MODULE" "$BMB_REPO" >> "$files_root/README.md"
 fi
+
+write_start_here "$dest_real/START-HERE.md" "files"
 
 log "generating speaker-guide link files"
 "$SCRIPT_DIR/generate-facilitator-links.py" --track "$TRACK" --files-root "$files_root"
