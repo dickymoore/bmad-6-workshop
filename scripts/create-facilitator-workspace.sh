@@ -203,6 +203,16 @@ ${exported_list}
 EOF
 }
 
+copy_demo_prompt() {
+  local files_root="$1"
+  local source_path="$ROOT_DIR/workshops/$TRACK/demo-start-prompt.md"
+  local phase_one_dir="$files_root/$(stage_folder_name 10-analysis)"
+
+  [[ -f "$source_path" ]] || return 0
+  mkdir -p "$phase_one_dir"
+  cp "$source_path" "$phase_one_dir/DEMO-START-PROMPT.md"
+}
+
 copy_bmb_module() {
   local files_root="$1"
   local repo_root="$2"
@@ -423,6 +433,9 @@ while IFS= read -r branch; do
     printf -- '- `%s/` -> `%s` (not yet cut)\n' "$folder_name" "$branch" >> "$files_root/README.md"
   fi
 done < <(workshop_list_branches "$TRACK" 0)
+
+copy_demo_prompt "$files_root"
+printf -- '\n## Prompt starters\n\n- `%s/DEMO-START-PROMPT.md` -> track-specific demo opener\n' "$(stage_folder_name 10-analysis)" >> "$files_root/README.md"
 
 if [[ -n "$BMB_REPO" ]]; then
   log "copying BMB module export for $BMB_MODULE"

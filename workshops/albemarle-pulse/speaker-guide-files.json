@@ -24,6 +24,10 @@
     "note": "Phase 1 outputs are shown from the next frozen snapshot because `phase-1-analysis/` mirrors the pre-analysis workshop branch.",
     "items": [
       {
+        "label": "Demo start prompt",
+        "patterns": ["phase-1-analysis/DEMO-START-PROMPT.md"]
+      },
+      {
         "label": "Product brief",
         "patterns": ["phase-2-planning/snapshot/docs/product-brief-*.md"]
       },
