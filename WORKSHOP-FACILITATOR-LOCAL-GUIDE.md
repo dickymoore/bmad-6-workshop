@@ -8,6 +8,7 @@ This is the operator guide for running repeated BMAD workshop sessions from one 
 - The current delivery track is `desk-booking`.
 - Stage branches for that track live under `workshop/desk-booking/*`.
 - Session setup scripts create one worktree/window per branch so you do not have to switch manually during delivery.
+- For no-branch-switch delivery, generate and browse `showcase/<track>/` from `main`.
 
 ## Branch Order
 
@@ -80,6 +81,12 @@ Rebuild a broken session:
 
 ```powershell
 ./scripts/setup-workshop-session.ps1 -Track desk-booking -Mode all -Session Wed-AM -Reset
+```
+
+Refresh a facilitator showcase:
+
+```bash
+./scripts/export-workshop-showcase.sh --track albemarle-pulse
 ```
 
 ## Operator Rules

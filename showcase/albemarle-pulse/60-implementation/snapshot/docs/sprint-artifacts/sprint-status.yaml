@@ -1,0 +1,28 @@
+generated: '2026-03-18'
+project: bmad-6-workshop-migration
+project_key: NOKEY
+tracking_system: file-system
+story_location: /home/codexuser/bmad-6-workshop/docs/sprint-artifacts
+development_status:
+  epic-1: done
+  1-1-set-up-initial-project-from-approved-starter-template: done
+  1-2-establish-baseline-quality-gates-and-build-readiness: done
+  1-3-render-the-overall-departure-picture: done
+  1-4-show-nearby-mode-summaries-for-shared-reading: done
+  1-5-anchor-the-display-with-a-fixed-local-map: done
+  1-6-verify-the-primary-display-on-real-venue-sized-surfaces: done
+  epic-1-retrospective: optional
+  epic-2: in-progress
+  2-1-keep-the-departure-picture-current-during-normal-operation: done
+  2-2-show-trend-and-freshness-where-confidence-matters: backlog
+  2-3-surface-serious-disruption-without-breaking-composure: backlog
+  2-4-preserve-honest-usefulness-during-provider-failure: backlog
+  2-5-maintain-stable-live-reading-during-updates-and-motion-changes: backlog
+  epic-2-retrospective: optional
+  epic-3: backlog
+  3-1-provide-a-separate-local-only-ops-access-surface: backlog
+  3-2-show-public-readiness-and-current-ops-state: backlog
+  3-3-diagnose-degraded-impact-by-signal-and-scope: backlog
+  3-4-trigger-lightweight-refresh-and-trust-check-actions: backlog
+  3-5-recover-the-display-after-interruption-or-restart: backlog
+  epic-3-retrospective: optional

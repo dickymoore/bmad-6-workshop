@@ -120,3 +120,18 @@ Current default track: `desk-booking`
 ```bash
 ./scripts/start-workshop-authoring-log.sh --track albemarle-pulse --stage 10-analysis
 ```
+
+## `scripts/export-workshop-showcase.sh`
+
+- Purpose: generate a facilitator-friendly folder view from the frozen `workshop/<track>/*` branches.
+- When to run: after cutting stage branches, or any time the facilitator showcase needs refreshing.
+- Example:
+
+```bash
+./scripts/export-workshop-showcase.sh --track albemarle-pulse
+```
+
+- Notes:
+  - writes to `showcase/<track>/` on the current branch
+  - exports each stage into `showcase/<track>/<stage>/snapshot/`
+  - leaves a placeholder folder for stages that have not been cut yet

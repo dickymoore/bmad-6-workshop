@@ -86,6 +86,7 @@ Additional scaffolded track:
   - participant start: `workshop/albemarle-pulse/10-analysis`
   - rolling authoring branch: `authoring/albemarle-pulse`
   - track definition: `workshops/albemarle-pulse/track.json`
+  - facilitator showcase on `main`: `showcase/albemarle-pulse/`
 
 ## Workshop Operations
 
@@ -97,6 +98,7 @@ For facilitators and operators preparing or delivering the workshop:
 - `scripts/workshop-preflight.sh`: readiness checks.
 - `scripts/setup-workshop-session.ps1`: Windows session preparation and launch.
 - `scripts/setup-workshop-session.sh`: bash session preparation and launch.
+- `scripts/export-workshop-showcase.sh`: generate a no-branch-switch facilitator view on `main`.
 - `workshop-video-script.md`: facilitation script for demo recording or live delivery.
 
 ## Scripts

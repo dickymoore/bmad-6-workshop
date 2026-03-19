@@ -248,13 +248,13 @@ for branch in "${TARGET_BRANCHES[@]}"; do
   req_result=$(check_requirements "$tree" "${requires[@]}" || true)
   if [[ -n "$req_result" ]]; then
     branch_failed=1
-    $SHOW_FAILURES && printf '%s\n' "$req_result" | sed "s/^/[$branch] /"
+    $SHOW_FAILURES && printf '%s\n' "$req_result" | awk -v prefix="[$branch] " '{ print prefix $0 }'
   fi
 
   forbid_result=$(check_forbidden "$tree" "${forbids[@]}" || true)
   if [[ -n "$forbid_result" ]]; then
     branch_failed=1
-    $SHOW_FAILURES && printf '%s\n' "$forbid_result" | sed "s/^/[$branch] /"
+    $SHOW_FAILURES && printf '%s\n' "$forbid_result" | awk -v prefix="[$branch] " '{ print prefix $0 }'
   fi
 
   marker_hits=$(legacy_markers "$REPO" "$ref")
@@ -262,7 +262,7 @@ for branch in "${TARGET_BRANCHES[@]}"; do
   if [[ -n "$marker_hits" ]]; then
     marker_count=$(wc -l <<<"$marker_hits" | tr -d ' ')
     branch_failed=1
-    $SHOW_FAILURES && printf '%s\n' "$marker_hits" | sed "s/^/[$branch] LEGACY: /"
+    $SHOW_FAILURES && printf '%s\n' "$marker_hits" | awk -v prefix="[$branch] LEGACY: " '{ print prefix $0 }'
   fi
 
   version="n/a"

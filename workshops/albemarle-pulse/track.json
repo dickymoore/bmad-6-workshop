@@ -66,10 +66,10 @@
         "^_bmad/_config/manifest\\.yaml$",
         "^_bmad/bmm/config\\.yaml$",
         "^\\.agents/skills/",
-        "^docs/adr/ADR-001-tech-stack\\.md$",
-        "^docs/bmm-product-brief-.*\\.md$",
-        "^docs/bmm-research-technical-.*\\.md$",
-        "^docs/brainstorming-session-results-.*\\.md$"
+        "^docs/product-brief-.*\\.md$",
+        "^docs/research/domain-.*\\.md$",
+        "^docs/research/technical-.*\\.md$",
+        "^_bmad-output/brainstorming/brainstorming-session-.*\\.md$"
       ],
       "forbidden_patterns": [
         "^\\.bmad/",

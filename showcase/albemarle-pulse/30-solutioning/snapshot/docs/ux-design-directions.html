@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Albemarle Pulse UX Design Directions</title>
+  <style>
+    :root {
+      --paper: #f3efe7;
+      --stone: #e4ddd1;
+      --chalk: #faf7f2;
+      --ink: #25211d;
+      --charcoal: #4b4640;
+      --bronze: #8f6d47;
+      --mineral: #61717a;
+      --line: rgba(37, 33, 29, 0.14);
+      --success: #5f7a66;
+      --warning: #9a804f;
+      --danger: #9b5f5b;
+      --shadow: 0 22px 60px rgba(54, 46, 38, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      background:
+        radial-gradient(circle at top left, rgba(143, 109, 71, 0.06), transparent 28%),
+        linear-gradient(180deg, #fbf8f4 0%, #f2ede5 100%);
+      color: var(--ink);
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .shell {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 32px 24px 72px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(280px, 1.1fr) minmax(360px, 0.9fr);
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+
+    .panel {
+      background: rgba(250, 247, 242, 0.78);
+      border: 1px solid rgba(37, 33, 29, 0.08);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .hero-copy {
+      padding: 28px 30px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 7px 12px;
+      font: 600 12px/1.2 Arial, sans-serif;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--bronze);
+      background: rgba(143, 109, 71, 0.1);
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(34px, 5vw, 62px);
+      line-height: 0.95;
+      font-weight: 600;
+      letter-spacing: -0.04em;
+    }
+
+    .hero-copy p,
+    .hero-tools p {
+      margin: 0 0 14px;
+      color: var(--charcoal);
+      font: 16px/1.6 Arial, sans-serif;
+    }
+
+    .hero-tools {
+      padding: 28px 30px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .controls {
+      display: grid;
+      gap: 16px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 8px;
+      font: 600 12px/1.2 Arial, sans-serif;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--charcoal);
+    }
+
+    select,
+    button {
+      width: 100%;
+      min-height: 48px;
+      border-radius: 14px;
+      border: 1px solid rgba(37, 33, 29, 0.12);
+      background: #fff;
+      color: var(--ink);
+      font: 14px/1.2 Arial, sans-serif;
+      padding: 0 14px;
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    button {
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      background: #f8f4ee;
+    }
+
+    .notes {
+      display: grid;
+      gap: 10px;
+      padding-top: 8px;
+      border-top: 1px solid var(--line);
+    }
+
+    .notes strong {
+      display: block;
+      margin-bottom: 4px;
+      font: 600 12px/1.2 Arial, sans-serif;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--charcoal);
+    }
+
+    .notes span {
+      color: var(--charcoal);
+      font: 14px/1.55 Arial, sans-serif;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(320px, 1fr));
+      gap: 24px;
+    }
+
+    .direction {
+      padding: 22px;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .direction:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 28px 70px rgba(54, 46, 38, 0.16);
+    }
+
+    .direction header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .direction h2 {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1;
+      font-weight: 600;
+      letter-spacing: -0.04em;
+    }
+
+    .direction .tag {
+      font: 600 11px/1.2 Arial, sans-serif;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--charcoal);
+    }
+
+    .summary {
+      margin-bottom: 14px;
+      color: var(--charcoal);
+      font: 14px/1.6 Arial, sans-serif;
+    }
+
+    .mock {
+      min-height: 540px;
+      border-radius: 22px;
+      overflow: hidden;
+      border: 1px solid rgba(37, 33, 29, 0.08);
+      background: linear-gradient(180deg, rgba(255,255,255,0.75), rgba(248,244,237,0.95));
+      position: relative;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .mock-top {
+      padding: 22px 24px 20px;
+      border-bottom: 1px solid rgba(37, 33, 29, 0.08);
+    }
+
+    .mock-top .micro {
+      margin-bottom: 8px;
+      font: 600 11px/1.2 Arial, sans-serif;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--bronze);
+    }
+
+    .state-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-end;
+    }
+
+    .state-title {
+      font-size: clamp(28px, 3.2vw, 44px);
+      line-height: 0.95;
+      letter-spacing: -0.05em;
+      margin: 0;
+      max-width: 8ch;
+    }
+
+    .state-meta {
+      text-align: right;
+      font: 13px/1.45 Arial, sans-serif;
+      color: var(--charcoal);
+      min-width: 110px;
+    }
+
+    .mock-body {
+      padding: 22px 24px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .split-2 {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+    }
+
+    .block {
+      border-radius: 18px;
+      border: 1px solid rgba(37, 33, 29, 0.08);
+      background: rgba(255,255,255,0.62);
+      padding: 18px;
+    }
+
+    .block h3 {
+      margin: 0 0 10px;
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--charcoal);
+      font-family: Arial, sans-serif;
+    }
+
+    .modes {
+      display: grid;
+      gap: 12px;
+    }
+
+    .mode {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 0;
+      border-top: 1px solid rgba(37, 33, 29, 0.08);
+    }
+
+    .mode:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .mode-name {
+      font-size: 20px;
+      line-height: 1;
+      margin: 0 0 4px;
+      letter-spacing: -0.03em;
+    }
+
+    .mode-note {
+      color: var(--charcoal);
+      font: 13px/1.45 Arial, sans-serif;
+    }
+
+    .badge {
+      min-width: 84px;
+      text-align: center;
+      padding: 9px 10px;
+      border-radius: 999px;
+      font: 700 12px/1 Arial, sans-serif;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: white;
+    }
+
+    .calm .badge.success,
+    .badge.success { background: var(--success); }
+    .strained .badge.warning,
+    .badge.warning { background: var(--warning); }
+    .disrupted .badge.danger,
+    .badge.danger { background: var(--danger); }
+
+    .map {
+      min-height: 220px;
+      border-radius: 16px;
+      background:
+        radial-gradient(circle at 25% 40%, rgba(97, 113, 122, 0.18), transparent 22%),
+        radial-gradient(circle at 68% 62%, rgba(143, 109, 71, 0.18), transparent 18%),
+        linear-gradient(135deg, rgba(228,221,209,0.9), rgba(248,244,237,0.8));
+      position: relative;
+      overflow: hidden;
+    }
+
+    .map::before,
+    .map::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(37,33,29,0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(37,33,29,0.08) 1px, transparent 1px);
+      background-size: 70px 70px;
+      opacity: 0.25;
+    }
+
+    .node {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--success);
+      border: 3px solid rgba(250,247,242,0.95);
+      box-shadow: 0 0 0 6px rgba(95,122,102,0.12);
+    }
+
+    .node.warn { background: var(--warning); box-shadow: 0 0 0 6px rgba(154,128,79,0.12); }
+    .node.danger { background: var(--danger); box-shadow: 0 0 0 6px rgba(155,95,91,0.12); }
+
+    .line {
+      position: absolute;
+      height: 2px;
+      background: rgba(37,33,29,0.24);
+      transform-origin: left center;
+    }
+
+    .mock-foot {
+      padding: 16px 24px 22px;
+      border-top: 1px solid rgba(37, 33, 29, 0.08);
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      color: var(--charcoal);
+      font: 13px/1.45 Arial, sans-serif;
+    }
+
+    .direction-notes {
+      margin-top: 14px;
+      display: grid;
+      gap: 4px;
+      color: var(--charcoal);
+      font: 13px/1.55 Arial, sans-serif;
+    }
+
+    .direction[data-view="hidden"] {
+      display: none;
+    }
+
+    body.compare .grid {
+      grid-template-columns: repeat(2, minmax(320px, 1fr));
+    }
+
+    body.focus .grid {
+      grid-template-columns: 1fr;
+    }
+
+    body.calm .atmo { background: linear-gradient(180deg, rgba(238,244,238,0.8), rgba(255,255,255,0)); }
+    body.strained .atmo { background: linear-gradient(180deg, rgba(244,240,228,0.82), rgba(255,255,255,0)); }
+    body.disrupted .atmo { background: linear-gradient(180deg, rgba(246,235,232,0.82), rgba(255,255,255,0)); }
+
+    .atmo {
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 180px;
+      pointer-events: none;
+    }
+
+    .legend {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      font: 12px/1.2 Arial, sans-serif;
+      color: var(--charcoal);
+    }
+
+    .legend span {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    @media (max-width: 1120px) {
+      .hero,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .split-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="compare calm">
+  <div class="shell">
+    <section class="hero">
+      <div class="panel hero-copy">
+        <span class="eyebrow">Albemarle Pulse</span>
+        <h1>UX Design Directions</h1>
+        <p>Six visual directions for a calm, fact-only, Royal Institution foyer display. Each direction keeps the same product contract and data grammar, but shifts hierarchy, map emphasis, and visual weight to test how the screen should feel in the room.</p>
+        <p>The references baked into these directions are: Apple Weather for atmospheric first read, Flighty for trustworthy status hierarchy, and TfL signage for public readability and shared orientation.</p>
+      </div>
+      <div class="panel hero-tools">
+        <div class="controls">
+          <div class="field">
+            <label for="state">Display state</label>
+            <select id="state">
+              <option value="calm">Calm conditions</option>
+              <option value="strained">Strained conditions</option>
+              <option value="disrupted">Disrupted conditions</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>View mode</label>
+            <div class="button-row">
+              <button type="button" data-mode="compare">Compare all</button>
+              <button type="button" data-mode="focus">Focus mode</button>
+              <button type="button" id="resetFilters">Reset</button>
+            </div>
+          </div>
+        </div>
+        <div class="notes">
+          <div>
+            <strong>How to evaluate</strong>
+            <span>Look for the direction that makes the room-scale read obvious, keeps trust cues composed, and feels most building-native rather than app-like.</span>
+          </div>
+          <div>
+            <strong>Core test</strong>
+            <span>Could a visitor understand “calm, strained, or disrupted” in 2-3 seconds and then confirm the story in 5-10 seconds up close?</span>
+          </div>
+          <div class="legend">
+            <span><i class="dot" style="background: var(--success)"></i>Calm / viable</span>
+            <span><i class="dot" style="background: var(--warning)"></i>Strained / caution</span>
+            <span><i class="dot" style="background: var(--danger)"></i>Disrupted / reduced trust</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid" id="directionGrid">
+      <article class="panel direction" data-direction="1">
+        <header>
+          <h2>01. Atmospheric Band</h2>
+          <span class="tag">Most aligned</span>
+        </header>
+        <p class="summary">Strong top atmospheric header, generous whitespace, and a balanced split between mode field and local map. This is the clearest expression of “mood first, facts second.”</p>
+        <div class="mock">
+          <div class="atmo"></div>
+          <div class="mock-top">
+            <div class="micro">Royal Institution | From here, now</div>
+            <div class="state-line">
+              <h3 class="state-title">Conditions broadly calm</h3>
+              <div class="state-meta">Light rain<br>Trend stable</div>
+            </div>
+          </div>
+          <div class="mock-body split-2">
+            <div class="block">
+              <h3>Nearby modes</h3>
+              <div class="modes">
+                <div class="mode"><div><div class="mode-name">Tube</div><div class="mode-note">Piccadilly and Central mostly steady</div></div><span class="badge success">Calm</span></div>
+                <div class="mode"><div><div class="mode-name">Bus</div><div class="mode-note">Good alternatives nearby</div></div><span class="badge success">Good</span></div>
+                <div class="mode"><div><div class="mode-name">Roads</div><div class="mode-note">Some pressure westbound</div></div><span class="badge warning">Mixed</span></div>
+                <div class="mode"><div><div class="mode-name">Bikes</div><div class="mode-note">Availability close to venue</div></div><span class="badge success">Ready</span></div>
+              </div>
+            </div>
+            <div class="block">
+              <h3>Local frame</h3>
+              <div class="map">
+                <div class="line" style="left: 18%; top: 28%; width: 48%; transform: rotate(16deg);"></div>
+                <div class="line" style="left: 42%; top: 54%; width: 28%; transform: rotate(-32deg);"></div>
+                <div class="node" style="left: 44%; top: 42%;"></div>
+                <div class="node warn" style="left: 26%; top: 22%;"></div>
+                <div class="node" style="left: 66%; top: 62%;"></div>
+              </div>
+            </div>
+          </div>
+          <div class="mock-foot">
+            <span>Freshness shown only where trust narrows</span>
+            <span>Read first from across the room</span>
+          </div>
+        </div>
+        <div class="direction-notes">
+          <div>Strength: strongest atmospheric first read</div>
+          <div>Risk: header dominance could reduce map salience</div>
+        </div>
+      </article>
+
+      <article class="panel direction" data-direction="2">
+        <header>
+          <h2>02. Civic Instrument</h2>
+          <span class="tag">Public signage</span>
+        </header>
+        <p class="summary">Tighter institutional structure with stronger sign-like bands and clearer civic labeling. Feels closest to a premium public information board.</p>
+        <div class="mock">
+          <div class="mock-top">
+            <div class="micro">Departure picture</div>
+            <div class="state-line">
+              <h3 class="state-title">Departures manageable</h3>
+              <div class="state-meta">Royal Institution<br>Updated 2 min ago</div>
+            </div>
+          </div>
+          <div class="mock-body">
+            <div class="block">
+              <h3>Mode status</h3>
+              <div class="modes">
+                <div class="mode"><div><div class="mode-name">Tube</div><div class="mode-note">Broadly usable, one line slightly strained</div></div><span class="badge warning">Mixed</span></div>
+                <div class="mode"><div><div class="mode-name">Bus</div><div class="mode-note">Nearby corridors steady</div></div><span class="badge success">Stable</span></div>
+                <div class="mode"><div><div class="mode-name">Roads</div><div class="mode-note">Heavier pressure eastbound</div></div><span class="badge warning">Busy</span></div>
+              </div>
+            </div>
+            <div class="split-2">
+              <div class="block">
+                <h3>Weather</h3>
+                <p class="summary">Light rain, cool air, street conditions manageable.</p>
+              </div>
+              <div class="block">
+                <h3>Trust</h3>
+                <p class="summary">Micromobility feed delayed. Core network picture remains current.</p>
+              </div>
+            </div>
+          </div>
+          <div class="mock-foot">
+            <span>Best for public clarity</span>
+            <span>Feels most institutional</span>
+          </div>
+        </div>
+        <div class="direction-notes">
+          <div>Strength: strongest shared readability</div>
+          <div>Risk: less atmospheric than Direction 01</div>
+        </div>
+      </article>
+
+      <article class="panel direction" data-direction="3">
+        <header>
+          <h2>03. Map Anchor</h2>
+          <span class="tag">Local geography</span>
+        </header>
+        <p class="summary">The fixed local map becomes the central anchor, with mode cards orbiting around it. Strongest for spatial reassurance and venue-centered relevance.</p>
+        <div class="mock">
+          <div class="mock-top">
+            <div class="micro">Local departure field</div>
+            <div class="state-line">
+              <h3 class="state-title">A few strains nearby</h3>
+              <div class="state-meta">Weather manageable<br>Trend steady</div>
+            </div>
+          </div>
+          <div class="mock-body split-2">
+            <div class="block" style="display:grid;">
+              <h3>Royal Institution vicinity</h3>
+              <div class="map" style="min-height: 320px;">
+                <div class="line" style="left: 10%; top: 38%; width: 70%; transform: rotate(12deg);"></div>
+                <div class="line" style="left: 32%; top: 20%; width: 22%; transform: rotate(90deg);"></div>
+                <div class="node" style="left: 49%; top: 40%;"></div>
+                <div class="node warn" style="left: 26%; top: 26%;"></div>
+                <div class="node danger" style="left: 67%; top: 58%;"></div>
+              </div>
+            </div>
+            <div class="modes">
+              <div class="block"><h3>Tube</h3><div class="mode-name">Mixed nearby</div><div class="mode-note">One relevant line running slower than normal</div></div>
+              <div class="block"><h3>Bus</h3><div class="mode-name">Viable</div><div class="mode-note">Strong fallback within a short walk</div></div>
+              <div class="block"><h3>Trust</h3><div class="mode-name">Current</div><div class="mode-note">Road picture stable, bike feed weaker</div></div>
+            </div>
+          </div>
+          <div class="mock-foot">
+            <span>Best for “from here” specificity</span>
+            <span>Map carries more narrative weight</span>
+          </div>
+        </div>
+        <div class="direction-notes">
+          <div>Strength: strongest location-specific identity</div>
+          <div>Risk: could over-emphasize cartography</div>
+        </div>
+      </article>
+
+      <article class="panel direction" data-direction="4">
+        <header>
+          <h2>04. Public Ledger</h2>
+          <span class="tag">Structured status</span>
+        </header>
+        <p class="summary">More compact and systematic, with a clearer report-like structure. Feels the most operationally explicit while still remaining restrained.</p>
+        <div class="mock">
+          <div class="mock-top">
+            <div class="micro">Departure summary board</div>
+            <div class="state-line">
+              <h3 class="state-title">Conditions strained</h3>
+              <div class="state-meta">Trend worsening<br>Use with care</div>
+            </div>
+          </div>
+          <div class="mock-body">
+            <div class="block">
+              <h3>Current picture</h3>
+              <div class="modes">
+                <div class="mode"><div><div class="mode-name">Tube</div><div class="mode-note">Relevant line delays affecting departure mood</div></div><span class="badge danger">Stress</span></div>
+                <div class="mode"><div><div class="mode-name">Bus</div><div class="mode-note">Still readable as fallback</div></div><span class="badge warning">Mixed</span></div>
+                <div class="mode"><div><div class="mode-name">Roads</div><div class="mode-note">Congestion elevated</div></div><span class="badge danger">Busy</span></div>
+                <div class="mode"><div><div class="mode-name">Weather</div><div class="mode-note">Rain increasing, exposure higher</div></div><span class="badge warning">Wet</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="mock-foot">
+            <span>Best for explicit disruption honesty</span>
+            <span>Most structured and report-like</span>
+          </div>
+        </div>
+        <div class="direction-notes">
+          <div>Strength: strongest under severe conditions</div>
+          <div>Risk: can edge toward dashboard density</div>
+        </div>
+      </article>
+
+      <article class="panel direction" data-direction="5">
+        <header>
+          <h2>05. Quiet Split</h2>
+          <span class="tag">Editorial balance</span>
+        </header>
+        <p class="summary">A softer, more editorial split-screen with atmospheric language on one side and concise public facts on the other. Feels the most serene.</p>
+        <div class="mock">
+          <div class="mock-body split-2" style="padding-top: 32px;">
+            <div class="block" style="background: rgba(255,255,255,0.42); display:flex; flex-direction:column; justify-content:space-between;">
+              <div>
+                <div class="micro">Albemarle Pulse</div>
+                <h3 class="state-title" style="margin-top: 0;">Leaving feels mostly steady</h3>
+                <p class="summary" style="margin-top: 16px;">A light-weather evening with enough viable options to leave confidently.</p>
+              </div>
+              <div class="summary">Trend stable • Shared read • From the Royal Institution</div>
+            </div>
+            <div class="block">
+              <h3>Nearby truth</h3>
+              <div class="modes">
+                <div class="mode"><div><div class="mode-name">Tube</div><div class="mode-note">Usable with minor pressure</div></div><span class="badge warning">Mixed</span></div>
+                <div class="mode"><div><div class="mode-name">Bus</div><div class="mode-note">Good if you want a simpler departure</div></div><span class="badge success">Good</span></div>
+                <div class="mode"><div><div class="mode-name">Trust</div><div class="mode-note">All core signals current</div></div><span class="badge success">Current</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="mock-foot">
+            <span>Best for calm elegance</span>
+            <span>Least technical in feel</span>
+          </div>
+        </div>
+        <div class="direction-notes">
+          <div>Strength: strongest emotional fit</div>
+          <div>Risk: needs care to preserve factual authority</div>
+        </div>
+      </article>
+
+      <article class="panel direction" data-direction="6">
+        <header>
+          <h2>06. Signal Tapestry</h2>
+          <span class="tag">Layered field</span>
+        </header>
+        <p class="summary">The most experimental direction: a stronger use of color-weighted zones and layered status fields. Tests how far the ambient room-scale read can be pushed.</p>
+        <div class="mock">
+          <div class="atmo"></div>
+          <div class="mock-top">
+            <div class="micro">Shared departure atmosphere</div>
+            <div class="state-line">
+              <h3 class="state-title">Conditions shifting slowly</h3>
+              <div class="state-meta">Rain softening<br>Bus strongest</div>
+            </div>
+          </div>
+          <div class="mock-body">
+            <div class="split-2">
+              <div class="block"><h3>Overall field</h3><p class="summary">The whole screen works harder as an ambient signal, with sections carrying different weights of calm and strain.</p></div>
+              <div class="block"><h3>Core use</h3><p class="summary">Best if you want the room to feel informed before anyone reads specifics.</p></div>
+            </div>
+            <div class="block">
+              <h3>Mode gradient</h3>
+              <div class="modes">
+                <div class="mode"><div><div class="mode-name">Tube</div><div class="mode-note">Slightly worse than the overall picture</div></div><span class="badge warning">Shift</span></div>
+                <div class="mode"><div><div class="mode-name">Bus</div><div class="mode-note">Most dependable nearby</div></div><span class="badge success">Strong</span></div>
+                <div class="mode"><div><div class="mode-name">Roads</div><div class="mode-note">Not catastrophic, just slower</div></div><span class="badge warning">Slow</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="mock-foot">
+            <span>Best for ambient mood</span>
+            <span>Most experimental visually</span>
+          </div>
+        </div>
+        <div class="direction-notes">
+          <div>Strength: strongest room-scale mood field</div>
+          <div>Risk: could feel less disciplined than Direction 01</div>
+        </div>
+      </article>
+    </section>
+  </div>
+
+  <script>
+    const body = document.body;
+    const stateSelect = document.getElementById('state');
+    const buttons = document.querySelectorAll('[data-mode]');
+    const directions = document.querySelectorAll('.direction');
+    const reset = document.getElementById('resetFilters');
+
+    function applyState(next) {
+      body.classList.remove('calm', 'strained', 'disrupted');
+      body.classList.add(next);
+    }
+
+    function applyMode(next) {
+      body.classList.remove('compare', 'focus');
+      body.classList.add(next);
+      directions.forEach((card, index) => {
+        if (next === 'focus' && index > 0) {
+          card.dataset.view = 'hidden';
+        } else {
+          card.dataset.view = 'visible';
+        }
+      });
+    }
+
+    stateSelect.addEventListener('change', (event) => applyState(event.target.value));
+    buttons.forEach((button) => button.addEventListener('click', () => applyMode(button.dataset.mode)));
+    reset.addEventListener('click', () => {
+      stateSelect.value = 'calm';
+      applyState('calm');
+      applyMode('compare');
+    });
+
+    directions.forEach((card) => {
+      card.addEventListener('click', () => {
+        if (!body.classList.contains('focus')) return;
+        directions.forEach((item) => { item.dataset.view = 'hidden'; });
+        card.dataset.view = 'visible';
+      });
+    });
+
+    applyState('calm');
+    applyMode('compare');
+  </script>
+</body>
+</html>
