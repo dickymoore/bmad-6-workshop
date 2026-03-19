@@ -16,7 +16,7 @@ development_status:
   2-1-keep-the-departure-picture-current-during-normal-operation: done
   2-2-show-trend-and-freshness-where-confidence-matters: done
   2-3-surface-serious-disruption-without-breaking-composure: done
-  2-4-preserve-honest-usefulness-during-provider-failure: backlog
+  2-4-preserve-honest-usefulness-during-provider-failure: done
   2-5-maintain-stable-live-reading-during-updates-and-motion-changes: backlog
   epic-2-retrospective: optional
   epic-3: backlog

@@ -67,6 +67,15 @@ function presentTrust(trust) {
   });
 }
 
+function presentSourceStatus(sourceStatus) {
+  return Object.freeze({
+    state: sourceStatus.state,
+    label: sourceStatus.label,
+    detail: sourceStatus.detail,
+    isLive: sourceStatus.state === "live",
+  });
+}
+
 export function presentDashboardSnapshot(snapshotInput) {
   const snapshot = createDashboardSnapshot(snapshotInput);
 
@@ -91,6 +100,8 @@ export function presentDashboardSnapshot(snapshotInput) {
     mobilitySummary: snapshot.mobilitySummary,
     weatherTrust: presentTrust(snapshot.headerTrust.weather),
     mobilityTrust: presentTrust(snapshot.headerTrust.mobility),
+    weatherStatus: presentSourceStatus(snapshot.headerStatus.weather),
+    mobilityStatus: presentSourceStatus(snapshot.headerStatus.mobility),
     supportLabel: snapshot.supportLabel,
     nearbyModeHeading: "Nearby modes",
     nearbyModeIntro: "From here, now: the nearby departure modes are reading as follows.",
@@ -98,6 +109,7 @@ export function presentDashboardSnapshot(snapshotInput) {
       snapshot.nearbyModes.map((mode) =>
         Object.freeze({
           ...mode,
+          sourceStatus: presentSourceStatus(mode.sourceStatus),
           trust: presentTrust(mode.trust),
           stateLabel: MODE_STATE_LABELS[mode.state],
           disruptionScope: mode.disruptionScope,
@@ -111,6 +123,7 @@ export function presentDashboardSnapshot(snapshotInput) {
       ariaLabel: "Fixed local map anchored to the Royal Institution",
       state: snapshot.localMap.state,
       stateLabel: LOCAL_MAP_STATE_LABELS[snapshot.localMap.state],
+      sourceStatus: presentSourceStatus(snapshot.localMap.sourceStatus),
       venueAnchor: Object.freeze({
         ...snapshot.localMap.venueAnchor,
         caption: "Anchor",

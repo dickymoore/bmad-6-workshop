@@ -11,6 +11,12 @@ type LocalMapViewModel = {
   ariaLabel: string;
   state: string;
   stateLabel: string;
+  sourceStatus: {
+    state: string;
+    label: string;
+    detail: string;
+    isLive: boolean;
+  };
   venueAnchor: LocalMapMarker;
   selectedNearbyNodes: readonly LocalMapMarker[];
   localityEmphasis: string | null;
@@ -42,6 +48,9 @@ export function LocalMapFrame({ viewModel }: { viewModel: LocalMapViewModel }) {
       </div>
 
       <p className="local-map-panel__intro">{narrative}</p>
+      <p className={`local-map-panel__fallback local-map-panel__fallback--${viewModel.sourceStatus.state}`}>
+        {viewModel.sourceStatus.detail}
+      </p>
 
       <div className={`local-map-panel__surface local-map-panel__surface--${viewModel.state}`}>
         <svg

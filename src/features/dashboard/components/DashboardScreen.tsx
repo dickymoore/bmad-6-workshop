@@ -18,6 +18,12 @@ type NearbyModeViewModel = {
     confidence: string;
     isNarrowed: boolean;
   };
+  sourceStatus: {
+    state: string;
+    label: string;
+    detail: string;
+    isLive: boolean;
+  };
 };
 
 type DashboardViewModel = {
@@ -44,10 +50,22 @@ type DashboardViewModel = {
     detail: string;
     confidence: string;
   };
+  weatherStatus: {
+    state: string;
+    label: string;
+    detail: string;
+    isLive: boolean;
+  };
   mobilityTrust: {
     label: string;
     detail: string;
     confidence: string;
+  };
+  mobilityStatus: {
+    state: string;
+    label: string;
+    detail: string;
+    isLive: boolean;
   };
   supportLabel: string;
   nearbyModeHeading: string;
@@ -58,6 +76,12 @@ type DashboardViewModel = {
     ariaLabel: string;
     state: string;
     stateLabel: string;
+    sourceStatus: {
+      state: string;
+      label: string;
+      detail: string;
+      isLive: boolean;
+    };
     venueAnchor: {
       key: string;
       label: string;

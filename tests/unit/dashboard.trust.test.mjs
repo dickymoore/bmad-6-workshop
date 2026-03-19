@@ -7,7 +7,7 @@ import {
 import { classifyOverallTrend } from "../../src/lib/server/dashboard/build-dashboard-snapshot.js";
 
 describe("freshness classification", () => {
-  it("classifies current, aging, stale, delayed, and reduced-confidence from timing evidence", () => {
+  it("classifies current, aging, stale, delayed, reduced-confidence, and unavailable from timing evidence", () => {
     const now = new Date("2026-03-19T08:15:00.000Z");
 
     expect(
@@ -41,6 +41,12 @@ describe("freshness classification", () => {
         reducedConfidence: true,
       }),
     ).toBe("reduced-confidence");
+    expect(
+      classifyFreshnessState({
+        now,
+        unavailable: true,
+      }),
+    ).toBe("unavailable");
   });
 
   it("creates plain-language trust signals", () => {

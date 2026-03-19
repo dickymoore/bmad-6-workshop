@@ -9,6 +9,11 @@ export type NearbyModeSnapshot = {
   state: string;
   summary: string;
   nuance: string | null;
+  sourceStatus: {
+    state: string;
+    label: string;
+    detail: string;
+  };
   trust: {
     state: string;
     label: string;
@@ -40,9 +45,26 @@ export type DashboardApiResponse = {
         confidence: string;
       };
     };
+    headerStatus: {
+      weather: {
+        state: string;
+        label: string;
+        detail: string;
+      };
+      mobility: {
+        state: string;
+        label: string;
+        detail: string;
+      };
+    };
     localMap: {
       title: string;
       state: string;
+      sourceStatus: {
+        state: string;
+        label: string;
+        detail: string;
+      };
       venueAnchor: {
         key: string;
         label: string;

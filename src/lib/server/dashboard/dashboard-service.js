@@ -1,6 +1,6 @@
 import { createFixtureDashboardSnapshot } from "../../../features/dashboard/data/overall-departure-snapshot.js";
 import { createDashboardApiResponse } from "../../contracts/api-response.js";
-import { createTrustSignal } from "../../contracts/freshness.js";
+import { createSourceStatus, createTrustSignal } from "../../contracts/freshness.js";
 import { createDashboardSnapshot } from "../../contracts/dashboard-snapshot.js";
 import { getMemoryCacheEntry, setMemoryCacheEntry } from "../cache/memory-cache.js";
 import { readStoredDashboardSnapshot } from "../cache/snapshot-store.js";
@@ -20,28 +20,104 @@ function createResponse(snapshot, snapshotState, refreshIntervalMs) {
   });
 }
 
+function createCarriedForwardSnapshot(snapshot) {
+  return createDashboardSnapshot({
+    ...snapshot,
+    headerTrust: {
+      weather: createTrustSignal({
+        state: "reduced-confidence",
+        detail: "Weather is carried forward while live weather detail narrows.",
+      }),
+      mobility: createTrustSignal({
+        state: "reduced-confidence",
+        detail: "Movement is carried forward while live movement detail narrows.",
+      }),
+    },
+    headerStatus: {
+      weather: createSourceStatus({
+        state: "carried-forward",
+        detail: "Weather is carried forward while live weather detail narrows.",
+      }),
+      mobility: createSourceStatus({
+        state: "carried-forward",
+        detail: "Movement is carried forward while live movement detail narrows.",
+      }),
+    },
+    localMap: {
+      ...snapshot.localMap,
+      state: "fallback",
+      sourceStatus: createSourceStatus({
+        state: "carried-forward",
+        detail: "The local frame stays simplified while richer locality detail narrows.",
+      }),
+      fallbackCopy: "The local frame stays simplified while richer locality detail narrows.",
+    },
+    supportLabel: "The shared picture is carried forward while live detail narrows.",
+    nearbyModes: snapshot.nearbyModes.map((mode) => ({
+      ...mode,
+      disruptionScope: "unaffected-readable",
+      sourceStatus: createSourceStatus({
+        state: "carried-forward",
+        detail: `${mode.label} is carried forward while live nearby detail narrows.`,
+      }),
+      trust: createTrustSignal({
+        state: "reduced-confidence",
+        detail: `${mode.label} is carried forward while live nearby detail narrows.`,
+      }),
+    })),
+  });
+}
+
 function createReducedConfidenceFallbackSnapshot(publishedAt) {
   const fallbackSnapshot = createFixtureDashboardSnapshot({ publishedAt });
 
   return createDashboardSnapshot({
     ...fallbackSnapshot,
+    overallState: "calm",
     overallTrend: null,
-    supportLabel: "The shared picture stays readable while live signals reconnect.",
+    supportLabel: "The Royal Institution picture stays readable while live detail reconnects.",
     headerTrust: {
       weather: createTrustSignal({
-        state: "reduced-confidence",
-        subject: "Weather",
+        state: "unavailable",
+        detail: "Weather is temporarily unavailable for the foyer.",
       }),
       mobility: createTrustSignal({
-        state: "reduced-confidence",
-        subject: "Movement",
+        state: "unavailable",
+        detail: "Movement is temporarily unavailable for the foyer.",
       }),
+    },
+    headerStatus: {
+      weather: createSourceStatus({
+        state: "unavailable",
+        detail: "Weather is temporarily unavailable for the foyer.",
+      }),
+      mobility: createSourceStatus({
+        state: "unavailable",
+        detail: "Movement is temporarily unavailable for the foyer.",
+      }),
+    },
+    localMap: {
+      ...fallbackSnapshot.localMap,
+      state: "fallback",
+      sourceStatus: createSourceStatus({
+        state: "unavailable",
+        detail: "The local frame stays simplified while richer locality detail is temporarily unavailable.",
+      }),
+      fallbackCopy: "The local frame stays simplified while richer locality detail is temporarily unavailable.",
     },
     nearbyModes: fallbackSnapshot.nearbyModes.map((mode) => ({
       ...mode,
+      state: "caution",
+      disruptionScope: "unaffected-readable",
+      summary: `${mode.label} is temporarily unavailable in this nearby read.`,
+      nuance: "The rest of the nearby picture remains readable.",
+      sourceStatus: createSourceStatus({
+        state: "unavailable",
+        detail: `${mode.label} is temporarily unavailable in this nearby read.`,
+      }),
       trust: createTrustSignal({
-        state: "reduced-confidence",
-        subject: mode.label,
+        state: "unavailable",
+        detail: `${mode.label} is temporarily unavailable in this nearby read.`,
       }),
     })),
   });
@@ -74,7 +150,7 @@ export async function getDashboardApiResponse({
   }
 
   try {
-    const built = await buildSnapshot({ now });
+    const built = await buildSnapshot({ now, lastSafeSnapshot: storedSnapshot });
     const published = await publishSnapshot({
       snapshot: built.snapshot,
       snapshotState: built.snapshotState,
@@ -84,13 +160,15 @@ export async function getDashboardApiResponse({
     return createResponse(published.snapshot, published.snapshotState, refreshIntervalMs);
   } catch {
     if (storedSnapshot) {
+      const carriedForwardSnapshot = createCarriedForwardSnapshot(storedSnapshot);
+
       cacheSet(CACHE_KEY, {
-        snapshot: storedSnapshot,
+        snapshot: carriedForwardSnapshot,
         snapshotState: "last-safe",
         cachedAt: nowMs,
       });
 
-      return createResponse(storedSnapshot, "last-safe", refreshIntervalMs);
+      return createResponse(carriedForwardSnapshot, "last-safe", refreshIntervalMs);
     }
 
     const fallbackSnapshot = createReducedConfidenceFallbackSnapshot(now.toISOString());

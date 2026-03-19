@@ -4,6 +4,7 @@ export const FRESHNESS_STATES = Object.freeze([
   "stale",
   "delayed",
   "reduced-confidence",
+  "unavailable",
 ]);
 
 export const TREND_STATES = Object.freeze([
@@ -17,12 +18,25 @@ export const TRUST_CONFIDENCE_STATES = Object.freeze([
   "narrowed",
 ]);
 
+export const SOURCE_STATUS_STATES = Object.freeze([
+  "live",
+  "carried-forward",
+  "unavailable",
+]);
+
 const FRESHNESS_LABELS = Object.freeze({
   current: "Current",
   aging: "Aging",
   stale: "Stale",
   delayed: "Delayed",
   "reduced-confidence": "Reduced confidence",
+  unavailable: "Unavailable",
+});
+
+const SOURCE_STATUS_LABELS = Object.freeze({
+  live: "Live",
+  "carried-forward": "Carried forward",
+  unavailable: "Unavailable",
 });
 
 const DEFAULT_DETAIL_BUILDERS = Object.freeze({
@@ -31,6 +45,13 @@ const DEFAULT_DETAIL_BUILDERS = Object.freeze({
   stale: (subject) => `${subject} is stale and may have shifted.`,
   delayed: (subject) => `${subject} is delayed and should be read with care.`,
   "reduced-confidence": (subject) => `${subject} is less certain just now.`,
+  unavailable: (subject) => `${subject} is temporarily unavailable.`,
+});
+
+const DEFAULT_SOURCE_STATUS_BUILDERS = Object.freeze({
+  live: (subject) => `${subject} is reading live for the foyer.`,
+  "carried-forward": (subject) => `${subject} is carried forward while live detail narrows.`,
+  unavailable: (subject) => `${subject} is temporarily unavailable for the foyer.`,
 });
 
 export function getFreshnessLabel(state) {
@@ -78,13 +99,49 @@ export function createTrustSignal({
   });
 }
 
+export function createSourceStatus({
+  state,
+  label = SOURCE_STATUS_LABELS[state],
+  detail,
+  subject = "This source",
+} = {}) {
+  if (!SOURCE_STATUS_STATES.includes(state)) {
+    throw new Error(`Unsupported source status state: ${state}`);
+  }
+
+  const normalizedLabel = typeof label === "string" ? label.trim() : "";
+  const normalizedDetail =
+    typeof detail === "string" && detail.trim().length > 0
+      ? detail.trim()
+      : DEFAULT_SOURCE_STATUS_BUILDERS[state](subject);
+
+  if (normalizedLabel.length === 0) {
+    throw new Error('Source status field "label" must be a non-empty string');
+  }
+
+  if (normalizedDetail.length === 0) {
+    throw new Error('Source status field "detail" must be a non-empty string');
+  }
+
+  return Object.freeze({
+    state,
+    label: normalizedLabel,
+    detail: normalizedDetail,
+  });
+}
+
 export function classifyFreshnessState({
   now,
   observedAt,
   fallbackAt,
   missedRefreshes = 0,
   reducedConfidence = false,
+  unavailable = false,
 } = {}) {
+  if (unavailable) {
+    return "unavailable";
+  }
+
   if (reducedConfidence) {
     return "reduced-confidence";
   }
@@ -121,6 +178,7 @@ export function buildTrustSignal({
   fallbackAt,
   missedRefreshes = 0,
   reducedConfidence = false,
+  unavailable = false,
   subject = "This signal",
 } = {}) {
   const state = classifyFreshnessState({
@@ -129,6 +187,7 @@ export function buildTrustSignal({
     fallbackAt,
     missedRefreshes,
     reducedConfidence,
+    unavailable,
   });
 
   return createTrustSignal({

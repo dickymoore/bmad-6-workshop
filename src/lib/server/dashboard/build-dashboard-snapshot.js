@@ -1,5 +1,9 @@
 import { createFixtureDashboardSnapshot } from "../../../features/dashboard/data/overall-departure-snapshot.js";
-import { buildTrustSignal } from "../../contracts/freshness.js";
+import {
+  createSourceStatus,
+  createTrustSignal,
+  buildTrustSignal,
+} from "../../contracts/freshness.js";
 import { createDashboardSnapshot } from "../../contracts/dashboard-snapshot.js";
 import { readStoredDashboardHistory } from "../cache/snapshot-store.js";
 import { fetchTflOverview } from "../providers/tfl/tfl-provider.js";
@@ -16,6 +20,10 @@ const STATE_WEIGHT = Object.freeze({
 
 function deriveOverallState(nearbyModes, weatherState) {
   const transportScore = nearbyModes.reduce((highest, mode) => {
+    if (mode.sourceStatus?.state === "unavailable") {
+      return highest;
+    }
+
     if (mode.state === "disrupted") {
       return Math.max(highest, STATE_WEIGHT.strained);
     }
@@ -29,7 +37,11 @@ function deriveOverallState(nearbyModes, weatherState) {
   const weatherScore = weatherState ? STATE_WEIGHT[weatherState] ?? STATE_WEIGHT.calm : STATE_WEIGHT.calm;
   const score = Math.max(transportScore, weatherScore);
 
-  return Object.keys(STATE_WEIGHT).find((key) => STATE_WEIGHT[key] === score && key in { calm: 1, watchful: 1, strained: 1, disrupted: 1 }) ?? "watchful";
+  return (
+    Object.keys(STATE_WEIGHT).find(
+      (key) => STATE_WEIGHT[key] === score && key in { calm: 1, watchful: 1, strained: 1, disrupted: 1 },
+    ) ?? "watchful"
+  );
 }
 
 function createModeLookup(modes) {
@@ -74,23 +86,60 @@ export function classifyOverallTrend({ history = [], currentSnapshot, now = new 
   return "steady";
 }
 
-function createHeaderTrust({ now, publishedAt, weatherOverview, tflOverview }) {
+function createUnavailableTrust(subject, detail) {
+  return createTrustSignal({
+    state: "unavailable",
+    detail,
+    subject,
+  });
+}
+
+function createCarriedForwardTrust(subject, detail) {
+  return createTrustSignal({
+    state: "reduced-confidence",
+    detail,
+    subject,
+  });
+}
+
+function createHeaderSegment({ segment, liveOverview, storedSummary, now, publishedAt }) {
+  if (liveOverview) {
+    return {
+      summary: liveOverview.summary,
+      trust: buildTrustSignal({
+        now,
+        observedAt: liveOverview.signalObservedAt,
+        fallbackAt: publishedAt,
+        missedRefreshes: liveOverview.missedRefreshes ?? 0,
+        subject: segment.subject,
+      }),
+      sourceStatus: createSourceStatus({
+        state: "live",
+        subject: segment.subject,
+      }),
+    };
+  }
+
+  if (typeof storedSummary === "string" && storedSummary.trim().length > 0) {
+    return {
+      summary: storedSummary,
+      trust: createCarriedForwardTrust(
+        segment.subject,
+        `${segment.subject} is carried forward while live ${segment.summaryNoun} narrows.`,
+      ),
+      sourceStatus: createSourceStatus({
+        state: "carried-forward",
+        detail: `${segment.subject} is carried forward while live ${segment.summaryNoun} narrows.`,
+      }),
+    };
+  }
+
   return {
-    weather: buildTrustSignal({
-      now,
-      observedAt: weatherOverview?.signalObservedAt,
-      fallbackAt: publishedAt,
-      missedRefreshes: weatherOverview?.missedRefreshes ?? 0,
-      reducedConfidence: weatherOverview == null,
-      subject: "Weather",
-    }),
-    mobility: buildTrustSignal({
-      now,
-      observedAt: tflOverview?.signalObservedAt,
-      fallbackAt: publishedAt,
-      missedRefreshes: tflOverview?.missedRefreshes ?? 0,
-      reducedConfidence: tflOverview == null,
-      subject: "Movement",
+    summary: `${segment.subject} is temporarily unavailable for the foyer.`,
+    trust: createUnavailableTrust(segment.subject, `${segment.subject} is temporarily unavailable for the foyer.`),
+    sourceStatus: createSourceStatus({
+      state: "unavailable",
+      detail: `${segment.subject} is temporarily unavailable for the foyer.`,
     }),
   };
 }
@@ -106,6 +155,36 @@ function deriveModeTrust({ now, publishedAt, baseMode, liveMode, tflOverview }) 
     reducedConfidence,
     subject: baseMode.label,
   });
+}
+
+function createCarriedForwardMode(mode, storedMode) {
+  return {
+    ...mode,
+    state: storedMode?.state ?? (mode.state === "disrupted" ? "caution" : mode.state),
+    disruptionScope: "unaffected-readable",
+    summary: storedMode?.summary ?? `${mode.label} is carried forward while live nearby detail narrows.`,
+    nuance: storedMode?.nuance ?? "The rest of the nearby picture remains readable.",
+    sourceStatus: createSourceStatus({
+      state: "carried-forward",
+      detail: `${mode.label} is carried forward while live nearby detail narrows.`,
+    }),
+    trust: createCarriedForwardTrust(mode.label, `${mode.label} is carried forward while live nearby detail narrows.`),
+  };
+}
+
+function createUnavailableMode(mode) {
+  return {
+    ...mode,
+    state: "caution",
+    disruptionScope: "unaffected-readable",
+    summary: `${mode.label} is temporarily unavailable in this nearby read.`,
+    nuance: "The rest of the nearby picture remains readable.",
+    sourceStatus: createSourceStatus({
+      state: "unavailable",
+      detail: `${mode.label} is temporarily unavailable in this nearby read.`,
+    }),
+    trust: createUnavailableTrust(mode.label, `${mode.label} is temporarily unavailable in this nearby read.`),
+  };
 }
 
 function formatAffectedModeLabels(modes) {
@@ -125,7 +204,9 @@ function formatAffectedModeLabels(modes) {
 }
 
 function deriveDisruptionEmphasis({ overallState, nearbyModes }) {
-  const affectedModes = nearbyModes.filter((mode) => mode.state === "disrupted");
+  const affectedModes = nearbyModes.filter(
+    (mode) => mode.state === "disrupted" && mode.sourceStatus.state === "live",
+  );
 
   if (overallState === "disrupted") {
     const affectedLabels = formatAffectedModeLabels(affectedModes);
@@ -163,8 +244,59 @@ function deriveDisruptionEmphasis({ overallState, nearbyModes }) {
   };
 }
 
+function createMixedSupportLabel({ weatherStatus, mobilityStatus }) {
+  if (weatherStatus.state === "live" && mobilityStatus.state === "live") {
+    return "Weather and movement still reinforce the same local read.";
+  }
+
+  if (weatherStatus.state === "live" && mobilityStatus.state !== "live") {
+    return "Weather remains live while movement detail narrows nearby.";
+  }
+
+  if (weatherStatus.state !== "live" && mobilityStatus.state === "live") {
+    return "Movement remains live while weather detail narrows nearby.";
+  }
+
+  return "The shared picture stays readable while live detail narrows.";
+}
+
+function createLocalMap({ baseSnapshot, storedSnapshot, tflOverview }) {
+  if (tflOverview) {
+    return {
+      ...baseSnapshot.localMap,
+      sourceStatus: createSourceStatus({
+        state: "live",
+        detail: "The local frame is reading live for this foyer.",
+      }),
+    };
+  }
+
+  if (storedSnapshot?.localMap) {
+    return {
+      ...storedSnapshot.localMap,
+      state: "fallback",
+      sourceStatus: createSourceStatus({
+        state: "carried-forward",
+        detail: "The local frame stays simplified while richer locality detail narrows.",
+      }),
+      fallbackCopy: "The local frame stays simplified while richer locality detail narrows.",
+    };
+  }
+
+  return {
+    ...baseSnapshot.localMap,
+    state: "fallback",
+    sourceStatus: createSourceStatus({
+      state: "unavailable",
+      detail: "The local frame stays simplified while richer locality detail is temporarily unavailable.",
+    }),
+    fallbackCopy: "The local frame stays simplified while richer locality detail is temporarily unavailable.",
+  };
+}
+
 export async function buildDashboardSnapshot({
   now = new Date(),
+  lastSafeSnapshot = null,
   getFallbackSnapshot = createFixtureDashboardSnapshot,
   tflProvider = fetchTflOverview,
   weatherProvider = fetchWeatherOverview,
@@ -172,37 +304,89 @@ export async function buildDashboardSnapshot({
 } = {}) {
   const publishedAt = now.toISOString();
   const baseSnapshot = getFallbackSnapshot({ publishedAt });
-  const [tflResult, weatherResult, history] = await Promise.all([
-    Promise.allSettled([
-      tflProvider({ now }),
-      weatherProvider({ now }),
-    ]),
+  const storedSnapshot = lastSafeSnapshot ? createDashboardSnapshot(lastSafeSnapshot) : null;
+  const [[tflResult, weatherResult], history] = await Promise.all([
+    Promise.allSettled([tflProvider({ now }), weatherProvider({ now })]),
     readHistory(),
-  ]).then(([[tflSettled, weatherSettled], loadedHistory]) => [tflSettled, weatherSettled, loadedHistory]);
+  ]);
+
   const tflOverview = tflResult.status === "fulfilled" ? tflResult.value : null;
   const weatherOverview = weatherResult.status === "fulfilled" ? weatherResult.value : null;
+
+  if (!tflOverview && !weatherOverview) {
+    throw new Error("No live providers available for an honest mixed snapshot");
+  }
+
+  const storedModes = createModeLookup(storedSnapshot?.nearbyModes ?? []);
   const liveModes = createModeLookup(tflOverview?.liveModes ?? []);
   const nearbyModes = baseSnapshot.nearbyModes.map((mode) => {
     const liveMode = liveModes.get(mode.key);
-    const nextState = liveMode?.state ?? mode.state;
+    const storedMode = storedModes.get(mode.key);
 
-    return {
-      ...mode,
-      state: nextState,
-      disruptionScope:
-        nextState === "disrupted"
-          ? "locally-disrupted"
-          : "unaffected-readable",
-      summary: liveMode?.summary ?? mode.summary,
-      nuance: liveMode?.nuance ?? mode.nuance,
-      trust: deriveModeTrust({
-        now,
-        publishedAt,
-        baseMode: mode,
-        liveMode,
-        tflOverview,
-      }),
-    };
+    if (liveMode) {
+      const nextState = liveMode.state ?? mode.state;
+
+      return {
+        ...mode,
+        state: nextState,
+        disruptionScope: nextState === "disrupted" ? "locally-disrupted" : "unaffected-readable",
+        summary: liveMode.summary ?? mode.summary,
+        nuance: liveMode.nuance ?? mode.nuance,
+        sourceStatus: createSourceStatus({
+          state: "live",
+          detail: `${mode.label} is reading live nearby.`,
+        }),
+        trust: deriveModeTrust({
+          now,
+          publishedAt,
+          baseMode: mode,
+          liveMode,
+          tflOverview,
+        }),
+      };
+    }
+
+    return storedMode ? createCarriedForwardMode(mode, storedMode) : createUnavailableMode(mode);
+  });
+
+  const weatherHeader = createHeaderSegment({
+    segment: {
+      subject: "Weather",
+      summaryNoun: "weather detail",
+    },
+    liveOverview:
+      weatherOverview == null
+        ? null
+        : {
+            summary: weatherOverview.weatherSummary,
+            signalObservedAt: weatherOverview.signalObservedAt,
+            missedRefreshes: weatherOverview.missedRefreshes ?? 0,
+          },
+    storedSummary: storedSnapshot?.weatherSummary ?? null,
+    now,
+    publishedAt,
+  });
+  const mobilityHeader = createHeaderSegment({
+    segment: {
+      subject: "Movement",
+      summaryNoun: "movement detail",
+    },
+    liveOverview:
+      tflOverview == null
+        ? null
+        : {
+            summary: tflOverview.mobilitySummary,
+            signalObservedAt: tflOverview.signalObservedAt,
+            missedRefreshes: tflOverview.missedRefreshes ?? 0,
+          },
+    storedSummary: storedSnapshot?.mobilitySummary ?? null,
+    now,
+    publishedAt,
+  });
+  const localMap = createLocalMap({
+    baseSnapshot,
+    storedSnapshot,
+    tflOverview,
   });
   const overallState = deriveOverallState(nearbyModes, weatherOverview?.overallState);
   const disruptionEmphasis = deriveDisruptionEmphasis({
@@ -214,23 +398,26 @@ export async function buildDashboardSnapshot({
     publishedAt,
     overallState,
     overallTrend: null,
-    weatherSummary: weatherOverview?.weatherSummary ?? baseSnapshot.weatherSummary,
-    mobilitySummary: tflOverview?.mobilitySummary ?? baseSnapshot.mobilitySummary,
-    supportLabel:
-      tflOverview && weatherOverview
-        ? "Weather and movement still reinforce the same local read."
-        : "The stronger live signals are carrying the shared picture.",
-    headerTrust: createHeaderTrust({
-      now,
-      publishedAt,
-      weatherOverview,
-      tflOverview,
+    weatherSummary: weatherHeader.summary,
+    mobilitySummary: mobilityHeader.summary,
+    supportLabel: createMixedSupportLabel({
+      weatherStatus: weatherHeader.sourceStatus,
+      mobilityStatus: mobilityHeader.sourceStatus,
     }),
+    headerTrust: {
+      weather: weatherHeader.trust,
+      mobility: mobilityHeader.trust,
+    },
+    headerStatus: {
+      weather: weatherHeader.sourceStatus,
+      mobility: mobilityHeader.sourceStatus,
+    },
+    localMap,
     disruptionEmphasis,
     nearbyModes: nearbyModes.map((mode) => ({
       ...mode,
       disruptionScope:
-        mode.state === "disrupted"
+        mode.state === "disrupted" && mode.sourceStatus.state === "live"
           ? overallState === "disrupted"
             ? "overall-disrupted"
             : "locally-disrupted"
@@ -249,6 +436,6 @@ export async function buildDashboardSnapshot({
 
   return {
     snapshot,
-    snapshotState: tflOverview || weatherOverview ? "live" : "fallback",
+    snapshotState: "live",
   };
 }

@@ -42,9 +42,26 @@ function buildSnapshot(overrides = {}) {
         subject: "Movement",
       }),
     },
+    headerStatus: {
+      weather: {
+        state: "live",
+        label: "Live",
+        detail: "Weather is reading live for the foyer.",
+      },
+      mobility: {
+        state: "carried-forward",
+        label: "Carried forward",
+        detail: "Movement is carried forward while live nearby detail narrows.",
+      },
+    },
     localMap: {
       title: "Local frame",
       state: "default",
+      sourceStatus: {
+        state: "live",
+        label: "Live",
+        detail: "The local frame is reading live for this foyer.",
+      },
       venueAnchor: {
         key: "royal-institution",
         label: "Royal Institution",
@@ -78,6 +95,11 @@ function buildSnapshot(overrides = {}) {
         disruptionScope: "unaffected-readable",
         summary: "Green Park and Piccadilly lines are still reading open nearby.",
         nuance: "Station approaches may bunch lightly after talks end.",
+        sourceStatus: {
+          state: "live",
+          label: "Live",
+          detail: "Tube and rail is reading live nearby.",
+        },
         trust: createTrustSignal({
           state: "current",
           subject: "Tube and rail",
@@ -90,6 +112,11 @@ function buildSnapshot(overrides = {}) {
         disruptionScope: "locally-disrupted",
         summary: "West End stops are moving, though spacing is a little uneven in the rain.",
         nuance: "Street queues are forming lightly under shelter.",
+        sourceStatus: {
+          state: "carried-forward",
+          label: "Carried forward",
+          detail: "Bus is carried forward while live nearby detail narrows.",
+        },
         trust: createTrustSignal({
           state: "delayed",
           subject: "Bus",
@@ -113,6 +140,9 @@ describe("dashboard snapshot contract", () => {
     expect(snapshot.disruptionEmphasis.level).toBe("local");
     expect(snapshot.nearbyModes[1].disruptionScope).toBe("locally-disrupted");
     expect(snapshot.headerTrust.weather.state).toBe("current");
+    expect(snapshot.headerStatus.mobility.state).toBe("carried-forward");
+    expect(snapshot.localMap.sourceStatus.state).toBe("live");
+    expect(snapshot.nearbyModes[1].sourceStatus.state).toBe("carried-forward");
     expect(snapshot.nearbyModes[1].trust.state).toBe("delayed");
     expect(Object.isFrozen(snapshot)).toBe(true);
     expect(Object.isFrozen(snapshot.headerTrust)).toBe(true);
@@ -130,6 +160,11 @@ describe("dashboard snapshot contract", () => {
           state: "available",
           summary: "Green Park and Piccadilly lines are still reading open nearby.",
           nuance: "Station approaches may bunch lightly after talks end.",
+          sourceStatus: {
+            state: "live",
+            label: "Live",
+            detail: "Tube and rail is reading live nearby.",
+          },
           trust: createTrustSignal({
             state: "current",
             subject: "Tube and rail",
@@ -141,6 +176,11 @@ describe("dashboard snapshot contract", () => {
           state: "disrupted",
           summary: "West End stops are disrupted nearby.",
           nuance: "Street queues are bunching while spacing breaks apart.",
+          sourceStatus: {
+            state: "live",
+            label: "Live",
+            detail: "Bus is reading live nearby.",
+          },
           trust: createTrustSignal({
             state: "delayed",
             subject: "Bus",
@@ -204,16 +244,21 @@ describe("dashboard presenter", () => {
     expect(viewModel.currentnessMessage).toBe("Current signals refresh inside the same calm shared view.");
     expect(viewModel.weatherTrust.isNarrowed).toBe(false);
     expect(viewModel.mobilityTrust.isNarrowed).toBe(true);
+    expect(viewModel.weatherStatus.state).toBe("live");
+    expect(viewModel.mobilityStatus.state).toBe("carried-forward");
     expect(viewModel.disruption.level).toBe("local");
     expect(viewModel.disruption.title).toBe("Bus is disrupted nearby");
     expect(viewModel.disruption.affectedModeKeys).toEqual(["bus"]);
     expect(viewModel.nearbyModes[0].trust.isNarrowed).toBe(false);
+    expect(viewModel.nearbyModes[0].sourceStatus.state).toBe("live");
     expect(viewModel.nearbyModes[0].disruptionScope).toBe("unaffected-readable");
     expect(viewModel.nearbyModes[0].emphasisLabel).toBe("Readable nearby");
     expect(viewModel.nearbyModes[1].trust.isNarrowed).toBe(true);
+    expect(viewModel.nearbyModes[1].sourceStatus.state).toBe("carried-forward");
     expect(viewModel.nearbyModes[1].disruptionScope).toBe("locally-disrupted");
     expect(viewModel.nearbyModes[1].emphasisLabel).toBe("Disrupted nearby");
     expect(viewModel.nearbyModes[1].trust.detail).toMatch(/should be read with care/i);
+    expect(viewModel.localMap.sourceStatus.state).toBe("live");
   });
 
   it("keeps metadata stable for the public route", () => {
@@ -312,10 +357,116 @@ describe("dashboard presenter", () => {
     expect(modeCardSource).toMatch(/mode\.isDisrupted/);
     expect(modeCardSource).toMatch(/mode\.emphasisLabel/);
     expect(modeCardSource).toMatch(/mode\.trust\.detail/);
+    expect(headerSource).toMatch(/viewModel\.weatherStatus/);
+    expect(headerSource).toMatch(/viewModel\.mobilityStatus/);
+    expect(modeCardSource).toMatch(/mode\.sourceStatus/);
     expect(
       /warning banner|alert overlay|control room|ops console|Route Planner|best option|recommended|switch to|take buses instead|reroute now/i.test(
         publicSources,
       ),
     ).toBe(false);
+  });
+
+  it("keeps provider failure calm, local, and unavailable without inventing disruption", () => {
+    const viewModel = presentDashboardSnapshot(
+      buildSnapshot({
+        disruptionEmphasis: {
+          level: "none",
+          headline: null,
+          detail: null,
+          affectedModeKeys: [],
+        },
+        headerStatus: {
+          weather: {
+            state: "unavailable",
+            label: "Unavailable",
+            detail: "Weather is temporarily unavailable for the foyer.",
+          },
+          mobility: {
+            state: "live",
+            label: "Live",
+            detail: "Movement is reading live for the foyer.",
+          },
+        },
+        headerTrust: {
+          weather: createTrustSignal({
+            state: "unavailable",
+            detail: "Weather is temporarily unavailable for the foyer.",
+          }),
+          mobility: createTrustSignal({
+            state: "current",
+            subject: "Movement",
+          }),
+        },
+        localMap: {
+          title: "Local frame",
+          state: "fallback",
+          sourceStatus: {
+            state: "unavailable",
+            label: "Unavailable",
+            detail: "The local frame stays simplified while richer locality detail is temporarily unavailable.",
+          },
+          venueAnchor: {
+            key: "royal-institution",
+            label: "Royal Institution",
+            x: 48,
+            y: 58,
+          },
+          selectedNearbyNodes: [
+            {
+              key: "green-park",
+              label: "Green Park",
+              x: 64,
+              y: 32,
+            },
+          ],
+          localityEmphasis: null,
+          fallbackCopy: "The local frame stays simplified while richer locality detail is temporarily unavailable.",
+        },
+        nearbyModes: [
+          {
+            key: "tube-rail",
+            label: "Tube and rail",
+            state: "available",
+            disruptionScope: "unaffected-readable",
+            summary: "Tube and rail remain readable nearby.",
+            nuance: "Station approaches remain clear enough to read.",
+            sourceStatus: {
+              state: "live",
+              label: "Live",
+              detail: "Tube and rail is reading live nearby.",
+            },
+            trust: createTrustSignal({
+              state: "current",
+              subject: "Tube and rail",
+            }),
+          },
+          {
+            key: "bus",
+            label: "Bus",
+            state: "caution",
+            disruptionScope: "unaffected-readable",
+            summary: "Bus is temporarily unavailable in this nearby read.",
+            nuance: "The rest of the nearby picture remains readable.",
+            sourceStatus: {
+              state: "unavailable",
+              label: "Unavailable",
+              detail: "Bus is temporarily unavailable in this nearby read.",
+            },
+            trust: createTrustSignal({
+              state: "unavailable",
+              detail: "Bus is temporarily unavailable in this nearby read.",
+            }),
+          },
+        ],
+      }),
+    );
+
+    expect(viewModel.disruption.hasSeriousDisruption).toBe(false);
+    expect(viewModel.weatherStatus.state).toBe("unavailable");
+    expect(viewModel.localMap.sourceStatus.state).toBe("unavailable");
+    expect(viewModel.nearbyModes[1].sourceStatus.state).toBe("unavailable");
+    expect(viewModel.nearbyModes[1].trust.detail).toBe("Bus is temporarily unavailable in this nearby read.");
+    expect(/api|http|timeout|retry|provider|weatherapi|tfl/i.test(JSON.stringify(viewModel))).toBe(false);
   });
 });

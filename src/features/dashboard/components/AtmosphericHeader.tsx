@@ -22,10 +22,22 @@ type DashboardViewModel = {
     detail: string;
     confidence: string;
   };
+  weatherStatus: {
+    state: string;
+    label: string;
+    detail: string;
+    isLive: boolean;
+  };
   mobilityTrust: {
     label: string;
     detail: string;
     confidence: string;
+  };
+  mobilityStatus: {
+    state: string;
+    label: string;
+    detail: string;
+    isLive: boolean;
   };
   supportLabel: string;
 };
@@ -65,9 +77,15 @@ export function AtmosphericHeader({ viewModel }: { viewModel: DashboardViewModel
         <p className="atmospheric-header__summary atmospheric-header__summary--weather">
           {viewModel.weatherSummary}
         </p>
+        <p className={`atmospheric-header__trust atmospheric-header__trust--weather atmospheric-header__trust--source-${viewModel.weatherStatus.state}`}>
+          {viewModel.weatherStatus.detail}
+        </p>
         <p className="atmospheric-header__trust atmospheric-header__trust--weather">{viewModel.weatherTrust.detail}</p>
         <p className="atmospheric-header__summary atmospheric-header__summary--mobility">
           {viewModel.mobilitySummary}
+        </p>
+        <p className={`atmospheric-header__trust atmospheric-header__trust--mobility atmospheric-header__trust--source-${viewModel.mobilityStatus.state}`}>
+          {viewModel.mobilityStatus.detail}
         </p>
         <p className="atmospheric-header__trust atmospheric-header__trust--mobility">{viewModel.mobilityTrust.detail}</p>
       </div>

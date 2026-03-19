@@ -1,5 +1,5 @@
 import { createDashboardSnapshot } from "../../../lib/contracts/dashboard-snapshot.js";
-import { createTrustSignal } from "../../../lib/contracts/freshness.js";
+import { createSourceStatus, createTrustSignal } from "../../../lib/contracts/freshness.js";
 
 const FIXTURE_PUBLISHED_AT = "2026-03-19T08:00:00.000Z";
 
@@ -32,9 +32,26 @@ function createBaseSnapshot({
         subject: "Movement",
       }),
     },
+    headerStatus: {
+      weather: createSourceStatus({
+        state: "live",
+        subject: "Weather",
+      }),
+      mobility: createSourceStatus({
+        state: "live",
+        subject: "Movement",
+      }),
+    },
     localMap: {
       title: "Local frame",
       state: mapState,
+      sourceStatus: createSourceStatus({
+        state: mapState === "fallback" ? "carried-forward" : "live",
+        detail:
+          mapState === "fallback"
+            ? "The local frame stays simplified while richer locality detail narrows."
+            : "The local frame is reading live for this foyer.",
+      }),
       venueAnchor: {
         key: "royal-institution",
         label: "Royal Institution",
@@ -98,6 +115,10 @@ function createBaseSnapshot({
         disruptionScope: "unaffected-readable",
         summary: "Green Park and Piccadilly lines are still reading open within the short walk from here.",
         nuance: "Platforms may feel a little fuller once the current lecture lets out.",
+        sourceStatus: createSourceStatus({
+          state: "live",
+          detail: "Tube and rail is reading live nearby.",
+        }),
         trust: createTrustSignal({
           state: "current",
           subject: "Tube and rail",
@@ -110,6 +131,10 @@ function createBaseSnapshot({
         disruptionScope: "unaffected-readable",
         summary: "West End stops nearby are moving, though spacing is a little uneven in the rain.",
         nuance: "Sheltered queues are beginning to gather along the wetter side streets.",
+        sourceStatus: createSourceStatus({
+          state: "live",
+          detail: "Bus is reading live nearby.",
+        }),
         trust: createTrustSignal({
           state: "aging",
           subject: "Bus",
@@ -122,6 +147,10 @@ function createBaseSnapshot({
         disruptionScope: "unaffected-readable",
         summary: "Mayfair traffic is still flowing, with slower turns around the wetter junctions.",
         nuance: "Street crossings remain readable, but the pace is not especially brisk.",
+        sourceStatus: createSourceStatus({
+          state: "live",
+          detail: "Roads are reading live nearby.",
+        }),
         trust: createTrustSignal({
           state: "stale",
           subject: "Roads",
@@ -134,6 +163,10 @@ function createBaseSnapshot({
         disruptionScope: "unaffected-readable",
         summary: "Open micromobility nearby is still moving, though vehicles are thinner under the rain.",
         nuance: "Availability remains patchier than the clearer corridors nearby.",
+        sourceStatus: createSourceStatus({
+          state: "live",
+          detail: "Cycles and scooters are reading live nearby.",
+        }),
         trust: createTrustSignal({
           state: "reduced-confidence",
           subject: "Cycles and scooters",

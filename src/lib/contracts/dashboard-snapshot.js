@@ -1,7 +1,9 @@
 import {
   FRESHNESS_STATES,
+  SOURCE_STATUS_STATES,
   TREND_STATES,
   TRUST_CONFIDENCE_STATES,
+  createSourceStatus,
   createTrustSignal,
 } from "./freshness.js";
 
@@ -88,6 +90,58 @@ function normalizeHeaderTrust(headerTrust) {
   });
 }
 
+function normalizeSourceStatus(sourceStatus, fieldName, fallbackState = "live") {
+  if (sourceStatus == null) {
+    return createSourceStatus({
+      state: fallbackState,
+    });
+  }
+
+  if (!sourceStatus || typeof sourceStatus !== "object") {
+    throw new Error(`Dashboard source status field "${fieldName}" must be an object`);
+  }
+
+  const { state, label, detail } = sourceStatus;
+
+  if (!SOURCE_STATUS_STATES.includes(state)) {
+    throw new Error(`Unsupported dashboard source status for "${fieldName}": ${state}`);
+  }
+
+  for (const [name, value] of Object.entries({ label, detail })) {
+    if (typeof value !== "string" || value.trim().length === 0) {
+      throw new Error(`Dashboard source status field "${fieldName}.${name}" must be a non-empty string`);
+    }
+
+    if (DASHBOARD_ADVISORY_LANGUAGE_PATTERN.test(value)) {
+      throw new Error(`Dashboard source status field "${fieldName}.${name}" must stay fact-only`);
+    }
+  }
+
+  return createSourceStatus({
+    state,
+    label: label.trim(),
+    detail: detail.trim(),
+  });
+}
+
+function normalizeHeaderStatus(headerStatus) {
+  if (headerStatus == null) {
+    return freezeSnapshot({
+      weather: createSourceStatus({ state: "live", subject: "Weather" }),
+      mobility: createSourceStatus({ state: "live", subject: "Movement" }),
+    });
+  }
+
+  if (!headerStatus || typeof headerStatus !== "object") {
+    throw new Error('Dashboard snapshot field "headerStatus" must be an object');
+  }
+
+  return freezeSnapshot({
+    weather: normalizeSourceStatus(headerStatus.weather, "headerStatus.weather"),
+    mobility: normalizeSourceStatus(headerStatus.mobility, "headerStatus.mobility"),
+  });
+}
+
 function normalizeMapPoint(point, fieldName) {
   if (!point || typeof point !== "object") {
     throw new Error(`Dashboard local map field "${fieldName}" must be an object`);
@@ -127,6 +181,7 @@ function normalizeLocalMap(localMap) {
   const {
     title,
     state,
+    sourceStatus,
     venueAnchor,
     selectedNearbyNodes,
     localityEmphasis,
@@ -199,6 +254,7 @@ function normalizeLocalMap(localMap) {
   return freezeSnapshot({
     title: title.trim(),
     state,
+    sourceStatus: normalizeSourceStatus(sourceStatus, "localMap.sourceStatus"),
     venueAnchor: normalizedVenueAnchor,
     selectedNearbyNodes: normalizedNearbyNodes,
     localityEmphasis:
@@ -222,7 +278,7 @@ function normalizeNearbyModes(nearbyModes, overallState) {
         throw new Error(`Dashboard nearby mode at index ${index} must be an object`);
       }
 
-      const { key, label, state, disruptionScope, summary, nuance, trust } = mode;
+      const { key, label, state, disruptionScope, summary, nuance, trust, sourceStatus } = mode;
 
       for (const [field, value] of Object.entries({ key, label, summary })) {
         if (typeof value !== "string" || value.trim().length === 0) {
@@ -273,6 +329,7 @@ function normalizeNearbyModes(nearbyModes, overallState) {
             : "unaffected-readable"),
         summary: summary.trim(),
         nuance: typeof nuance === "string" ? nuance.trim() : null,
+        sourceStatus: normalizeSourceStatus(sourceStatus, `nearbyModes[${index}].sourceStatus`),
         trust: normalizeTrustSignal(trust, `nearbyModes[${index}].trust`),
       });
     }),
@@ -402,6 +459,7 @@ export function createDashboardSnapshot(input) {
     supportLabel,
     disruptionEmphasis,
     headerTrust,
+    headerStatus,
     localMap,
     nearbyModes,
   } = input;
@@ -455,6 +513,7 @@ export function createDashboardSnapshot(input) {
     supportLabel: supportLabel.trim(),
     disruptionEmphasis: normalizedDisruptionEmphasis,
     headerTrust: normalizeHeaderTrust(headerTrust),
+    headerStatus: normalizeHeaderStatus(headerStatus),
     localMap: normalizeLocalMap(localMap),
     nearbyModes: normalizedNearbyModes,
   });
