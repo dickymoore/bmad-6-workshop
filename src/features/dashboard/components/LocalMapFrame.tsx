@@ -21,6 +21,7 @@ type LocalMapViewModel = {
   selectedNearbyNodes: readonly LocalMapMarker[];
   localityEmphasis: string | null;
   fallbackCopy: string | null;
+  changeSummary: string | null;
 };
 
 function markerClassName(marker: LocalMapMarker, isAnchor = false) {
@@ -51,6 +52,7 @@ export function LocalMapFrame({ viewModel }: { viewModel: LocalMapViewModel }) {
       <p className={`local-map-panel__fallback local-map-panel__fallback--${viewModel.sourceStatus.state}`}>
         {viewModel.sourceStatus.detail}
       </p>
+      {viewModel.changeSummary ? <p className="local-map-panel__update">{viewModel.changeSummary}</p> : null}
 
       <div className={`local-map-panel__surface local-map-panel__surface--${viewModel.state}`}>
         <svg

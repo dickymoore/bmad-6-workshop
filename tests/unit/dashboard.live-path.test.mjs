@@ -326,13 +326,30 @@ describe("dashboard live path", () => {
       join(root, "src", "features", "dashboard", "components", "DashboardLiveScreen.tsx"),
       "utf8",
     );
+    const screenSource = readFileSync(
+      join(root, "src", "features", "dashboard", "components", "DashboardScreen.tsx"),
+      "utf8",
+    );
     const pageSource = readFileSync(join(root, "src", "app", "(public)", "page.tsx"), "utf8");
 
     assert.match(hookSource, /queryKey:\s*\["dashboard"\]/);
     assert.match(hookSource, /headerTrust/);
+    assert.match(hookSource, /refetchIntervalInBackground:\s*true/);
+    assert.match(hookSource, /refetchOnWindowFocus:\s*false/);
+    assert.match(hookSource, /refetchOnReconnect:\s*true/);
     assert.match(liveScreenSource, /QueryClientProvider/);
+    assert.match(liveScreenSource, /const \{ data, previousData \} = useDashboardQuery/);
+    assert.match(liveScreenSource, /const previousSnapshot =/);
+    assert.match(liveScreenSource, /previousData\?\.data\.publishedAt && previousData\.data\.publishedAt !== response\.data\.publishedAt/);
+    assert.match(liveScreenSource, /const hasUpdatedSinceLoad = response\.data\.publishedAt !== initialResponse\.data\.publishedAt/);
+    assert.match(liveScreenSource, /presentDashboardSnapshot\(response\.data,\s*\{\s*[\r\n]+\s*previousSnapshot,\s*[\r\n]+\s*hasUpdatedSinceLoad,/);
     assert.match(liveScreenSource, /<DashboardScreen viewModel=\{viewModel\} \/>/);
+    assert.doesNotMatch(liveScreenSource, /if\s*\(\s*!data\s*\)|isLoading|isPending|loading takeover|full-screen reset/i);
     assert.doesNotMatch(liveScreenSource, /spinner|loading takeover|full-screen/i);
+    assert.match(screenSource, /data-live-shell="calm-fixed"/);
+    assert.match(screenSource, /data-reading-zone="header"/);
+    assert.match(screenSource, /data-reading-zone="modes"/);
+    assert.match(screenSource, /data-reading-zone="map"/);
     assert.match(pageSource, /getDashboardApiResponse/);
     assert.match(pageSource, /export const dynamic = "force-dynamic"/);
   });

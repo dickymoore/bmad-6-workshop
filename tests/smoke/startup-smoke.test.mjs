@@ -261,6 +261,41 @@ test("story 1.6 keeps the public display locked to venue-sized layout pillars an
   );
 });
 
+test("story 2.5 keeps live reading stable during refreshes and motion changes", () => {
+  const screenPath = join(root, "src", "features", "dashboard", "components", "DashboardScreen.tsx");
+  const liveScreenPath = join(root, "src", "features", "dashboard", "components", "DashboardLiveScreen.tsx");
+  const hookPath = join(root, "src", "features", "dashboard", "hooks", "useDashboardQuery.ts");
+  const headerPath = join(root, "src", "features", "dashboard", "components", "AtmosphericHeader.tsx");
+  const modeCardPath = join(root, "src", "features", "dashboard", "components", "ModeSummaryCard.tsx");
+  const localMapPath = join(root, "src", "features", "dashboard", "components", "LocalMapFrame.tsx");
+  const presenterPath = join(root, "src", "features", "dashboard", "presenters", "dashboard-presenter.js");
+  const globalCssPath = join(root, "src", "app", "globals.css");
+  const verificationNotesPath = join(root, "docs", "sprint-artifacts", "2-5-live-reading-verification-notes.md");
+
+  assert.equal(existsSync(verificationNotesPath), true, "expected explicit story 2.5 verification notes artifact");
+
+  const screen = readFileSync(screenPath, "utf8");
+  const liveScreen = readFileSync(liveScreenPath, "utf8");
+  const hook = readFileSync(hookPath, "utf8");
+  const header = readFileSync(headerPath, "utf8");
+  const modeCard = readFileSync(modeCardPath, "utf8");
+  const localMap = readFileSync(localMapPath, "utf8");
+  const presenter = readFileSync(presenterPath, "utf8");
+  const globalCss = readFileSync(globalCssPath, "utf8");
+  const verificationNotes = readFileSync(verificationNotesPath, "utf8");
+  const publicFeature = [screen, liveScreen, header, modeCard, localMap].join("\n");
+
+  assert.equal(/data-live-shell="calm-fixed"|data-reading-zone="header"|data-reading-zone="modes"|data-reading-zone="map"/.test(screen), true, "stable reading-order hooks should stay explicit in the public shell");
+  assert.equal(/const \{ data, previousData \} = useDashboardQuery|const previousSnapshot =|previousData\?\.data\.publishedAt && previousData\.data\.publishedAt !== response\.data\.publishedAt|const hasUpdatedSinceLoad = response\.data\.publishedAt !== initialResponse\.data\.publishedAt|presentDashboardSnapshot\(response\.data,\s*\{\s*[\r\n]+\s*previousSnapshot,\s*[\r\n]+\s*hasUpdatedSinceLoad,/.test(liveScreen), true, "live boundary should keep update meaning route-local without remounting the shell");
+  assert.equal(/refetchIntervalInBackground:\s*true|refetchOnReconnect:\s*true/.test(hook), true, "query hook should preserve the existing shell during background refresh");
+  assert.equal(/orderNearbyModesForReading|createUpdateSummary|changeSummary/.test(presenter), true, "presenter should own stable ordering and calm text-first change meaning");
+  assert.equal(/aria-live="polite"/.test(header), true, "header should keep a narrowly scoped polite live region");
+  assert.equal(/role="alert"|alert overlay|ops console|ticker|marquee/i.test(publicFeature), false, "public route should not devolve into an alert surface during updates");
+  assert.equal(/atmospheric-header__update|mode-summary-card__update|local-map-panel__update/.test(globalCss), true, "CSS should preserve update meaning through copy and structure");
+  assert.equal(/prefers-reduced-motion:\s*reduce|border-left:\s*3px solid currentColor/.test(globalCss), true, "reduced-motion mode should keep change meaning without relying on animation");
+  assert.equal(/target-device|supported desktop|reduced-motion|calm update|browser/i.test(verificationNotes), true, "verification notes should capture explicit live-reading review categories");
+});
+
 test("story 1.2 keeps CI focused on Node 24 build readiness for venue promotion", () => {
   const workflowPath = join(root, ".github", "workflows", "build-readiness.yml");
 

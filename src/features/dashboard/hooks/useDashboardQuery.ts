@@ -100,5 +100,8 @@ export function useDashboardQuery({
     queryFn: () => fetchJson<DashboardApiResponse>("/api/dashboard"),
     initialData,
     refetchInterval: initialData.meta.refreshIntervalMs,
+    refetchIntervalInBackground: true,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: true,
   });
 }

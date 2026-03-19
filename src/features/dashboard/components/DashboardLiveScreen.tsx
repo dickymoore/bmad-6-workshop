@@ -10,9 +10,17 @@ import { QueryClientProvider } from "@/lib/vendor/tanstack-react-query";
 import { DashboardScreen } from "./DashboardScreen";
 
 function DashboardLiveBoundary({ initialResponse }: { initialResponse: DashboardApiResponse }) {
-  const { data } = useDashboardQuery({ initialData: initialResponse });
+  const { data, previousData } = useDashboardQuery({ initialData: initialResponse });
   const response = data ?? initialResponse;
-  const viewModel = presentDashboardSnapshot(response.data);
+  const previousSnapshot =
+    previousData?.data.publishedAt && previousData.data.publishedAt !== response.data.publishedAt
+      ? previousData.data
+      : null;
+  const hasUpdatedSinceLoad = response.data.publishedAt !== initialResponse.data.publishedAt;
+  const viewModel = presentDashboardSnapshot(response.data, {
+    previousSnapshot,
+    hasUpdatedSinceLoad,
+  });
 
   return <DashboardScreen viewModel={viewModel} />;
 }

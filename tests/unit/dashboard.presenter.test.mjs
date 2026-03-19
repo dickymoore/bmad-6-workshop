@@ -259,6 +259,291 @@ describe("dashboard presenter", () => {
     expect(viewModel.nearbyModes[1].emphasisLabel).toBe("Disrupted nearby");
     expect(viewModel.nearbyModes[1].trust.detail).toMatch(/should be read with care/i);
     expect(viewModel.localMap.sourceStatus.state).toBe("live");
+    expect(viewModel.updateSummary).toBe(null);
+    expect(viewModel.liveAnnouncement).toBe(null);
+  });
+
+  it("keeps nearby modes in canonical order and derives calm text-first update cues", () => {
+    const previousSnapshot = buildSnapshot({
+      publishedAt: "2026-03-19T08:00:00.000Z",
+      overallTrend: "steady",
+      nearbyModes: [
+        {
+          key: "bus",
+          label: "Bus",
+          state: "available",
+          disruptionScope: "unaffected-readable",
+          summary: "West End stops are moving evenly nearby.",
+          nuance: "Street queues remain light.",
+          sourceStatus: {
+            state: "live",
+            label: "Live",
+            detail: "Bus is reading live nearby.",
+          },
+          trust: createTrustSignal({
+            state: "current",
+            subject: "Bus",
+          }),
+        },
+        {
+          key: "tube-rail",
+          label: "Tube and rail",
+          state: "available",
+          disruptionScope: "unaffected-readable",
+          summary: "Green Park and Piccadilly lines are still reading open nearby.",
+          nuance: "Station approaches remain readable.",
+          sourceStatus: {
+            state: "live",
+            label: "Live",
+            detail: "Tube and rail is reading live nearby.",
+          },
+          trust: createTrustSignal({
+            state: "current",
+            subject: "Tube and rail",
+          }),
+        },
+      ],
+    });
+    const nextSnapshot = buildSnapshot({
+      publishedAt: "2026-03-19T08:30:00.000Z",
+      overallTrend: "worsening",
+      headerTrust: {
+        weather: createTrustSignal({
+          state: "current",
+          subject: "Weather",
+        }),
+        mobility: createTrustSignal({
+          state: "delayed",
+          subject: "Movement",
+        }),
+      },
+      localMap: {
+        title: "Local frame",
+        state: "fallback",
+        sourceStatus: {
+          state: "carried-forward",
+          label: "Carried forward",
+          detail: "The local frame stays simplified while richer locality detail narrows.",
+        },
+        venueAnchor: {
+          key: "royal-institution",
+          label: "Royal Institution",
+          x: 48,
+          y: 58,
+        },
+        selectedNearbyNodes: [
+          {
+            key: "green-park",
+            label: "Green Park",
+            x: 64,
+            y: 32,
+          },
+          {
+            key: "piccadilly-arcade",
+            label: "Piccadilly Arcade",
+            x: 34,
+            y: 61,
+          },
+        ],
+        localityEmphasis: {
+          label: "Royal Institution, Green Park, and Piccadilly remain the core local read.",
+        },
+        fallbackCopy: "Simplified local frame while richer locality detail is unavailable.",
+      },
+      nearbyModes: [
+        {
+          key: "bus",
+          label: "Bus",
+          state: "caution",
+          disruptionScope: "locally-disrupted",
+          summary: "West End stops are moving, though spacing is a little uneven in the rain.",
+          nuance: "Street queues are forming lightly under shelter.",
+          sourceStatus: {
+            state: "carried-forward",
+            label: "Carried forward",
+            detail: "Bus is carried forward while live nearby detail narrows.",
+          },
+          trust: createTrustSignal({
+            state: "delayed",
+            subject: "Bus",
+          }),
+        },
+        {
+          key: "tube-rail",
+          label: "Tube and rail",
+          state: "available",
+          disruptionScope: "unaffected-readable",
+          summary: "Green Park and Piccadilly lines are still reading open nearby.",
+          nuance: "Station approaches may bunch lightly after talks end.",
+          sourceStatus: {
+            state: "live",
+            label: "Live",
+            detail: "Tube and rail is reading live nearby.",
+          },
+          trust: createTrustSignal({
+            state: "current",
+            subject: "Tube and rail",
+          }),
+        },
+      ],
+    });
+
+    const viewModel = presentDashboardSnapshot(nextSnapshot, { previousSnapshot });
+
+    expect(viewModel.nearbyModes.map((mode) => mode.key)).toEqual(["tube-rail", "bus"]);
+    expect(viewModel.currentnessMessage).toBe("Current signals refreshed in place and kept the shared read stable.");
+    expect(viewModel.updateSummary).toEqual({
+      label: "Latest change",
+      detail: "The departure picture is tightening. Movement is delayed and should be read with care.",
+    });
+    expect(viewModel.liveAnnouncement).toBe(
+      "Live update. Movement is delayed and should be read with care. Local frame stays fixed while richer locality detail narrows.",
+    );
+    expect(viewModel.nearbyModes[1].changeSummary).toBe(
+      "Bus now reads caution. Bus is now reading disrupted within the nearby picture.",
+    );
+    expect(viewModel.localMap.changeSummary).toBe("Local frame stays fixed while richer locality detail narrows.");
+  });
+
+  it("keeps later live updates tied to real snapshot deltas instead of repeating current-state summaries", () => {
+    const initialSnapshot = buildSnapshot({
+      publishedAt: "2026-03-19T08:00:00.000Z",
+      overallTrend: "steady",
+    });
+    const firstUpdatedSnapshot = buildSnapshot({
+      publishedAt: "2026-03-19T08:30:00.000Z",
+      overallTrend: "worsening",
+      headerTrust: {
+        weather: createTrustSignal({
+          state: "current",
+          subject: "Weather",
+        }),
+        mobility: createTrustSignal({
+          state: "delayed",
+          subject: "Movement",
+        }),
+      },
+    });
+    const secondUpdatedSnapshot = buildSnapshot({
+      publishedAt: "2026-03-19T08:45:00.000Z",
+      overallTrend: "worsening",
+      headerTrust: {
+        weather: createTrustSignal({
+          state: "current",
+          subject: "Weather",
+        }),
+        mobility: createTrustSignal({
+          state: "delayed",
+          subject: "Movement",
+        }),
+      },
+    });
+
+    const firstUpdateViewModel = presentDashboardSnapshot(firstUpdatedSnapshot, {
+      previousSnapshot: initialSnapshot,
+      hasUpdatedSinceLoad: true,
+    });
+    const secondUpdateViewModel = presentDashboardSnapshot(secondUpdatedSnapshot, {
+      previousSnapshot: firstUpdatedSnapshot,
+      hasUpdatedSinceLoad: true,
+    });
+
+    expect(firstUpdateViewModel.updateSummary).toEqual({
+      label: "Latest change",
+      detail: "The departure picture is tightening. Movement is delayed and should be read with care.",
+    });
+    expect(secondUpdateViewModel.updateSummary).toBe(null);
+    expect(secondUpdateViewModel.liveAnnouncement).toBe(null);
+    expect(secondUpdateViewModel.currentnessMessage).toBe(
+      "Current signals refreshed in place without moving the shared read.",
+    );
+  });
+
+  it("surfaces nearby recovery text when a disrupted mode becomes readable again", () => {
+    const previousSnapshot = buildSnapshot({
+      publishedAt: "2026-03-19T08:00:00.000Z",
+      nearbyModes: [
+        {
+          key: "bus",
+          label: "Bus",
+          state: "caution",
+          disruptionScope: "locally-disrupted",
+          summary: "West End stops are moving, though spacing is uneven nearby.",
+          nuance: "Shelter queues are still bunching lightly.",
+          sourceStatus: {
+            state: "carried-forward",
+            label: "Carried forward",
+            detail: "Bus is carried forward while live nearby detail narrows.",
+          },
+          trust: createTrustSignal({
+            state: "delayed",
+            subject: "Bus",
+          }),
+        },
+        {
+          key: "tube-rail",
+          label: "Tube and rail",
+          state: "available",
+          disruptionScope: "unaffected-readable",
+          summary: "Green Park and Piccadilly lines are still reading open nearby.",
+          nuance: "Station approaches remain readable.",
+          sourceStatus: {
+            state: "live",
+            label: "Live",
+            detail: "Tube and rail is reading live nearby.",
+          },
+          trust: createTrustSignal({
+            state: "current",
+            subject: "Tube and rail",
+          }),
+        },
+      ],
+    });
+    const nextSnapshot = buildSnapshot({
+      publishedAt: "2026-03-19T08:30:00.000Z",
+      nearbyModes: [
+        {
+          key: "bus",
+          label: "Bus",
+          state: "available",
+          disruptionScope: "unaffected-readable",
+          summary: "West End stops are moving evenly nearby.",
+          nuance: "Street queues have eased back into a readable rhythm.",
+          sourceStatus: {
+            state: "live",
+            label: "Live",
+            detail: "Bus is reading live nearby.",
+          },
+          trust: createTrustSignal({
+            state: "current",
+            subject: "Bus",
+          }),
+        },
+        {
+          key: "tube-rail",
+          label: "Tube and rail",
+          state: "available",
+          disruptionScope: "unaffected-readable",
+          summary: "Green Park and Piccadilly lines are still reading open nearby.",
+          nuance: "Station approaches remain readable.",
+          sourceStatus: {
+            state: "live",
+            label: "Live",
+            detail: "Tube and rail is reading live nearby.",
+          },
+          trust: createTrustSignal({
+            state: "current",
+            subject: "Tube and rail",
+          }),
+        },
+      ],
+    });
+
+    const viewModel = presentDashboardSnapshot(nextSnapshot, { previousSnapshot });
+
+    expect(viewModel.nearbyModes.find((mode) => mode.key === "bus")?.changeSummary).toBe(
+      "Bus now reads available. Bus returns to a readable nearby state.",
+    );
   });
 
   it("keeps metadata stable for the public route", () => {

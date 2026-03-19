@@ -5,6 +5,11 @@ type DashboardViewModel = {
   overallTrendLabel: string | null;
   trendMessage: string | null;
   currentnessMessage: string;
+  updateSummary: {
+    label: string;
+    detail: string;
+  } | null;
+  liveAnnouncement: string | null;
   stateKicker: string;
   stateHeadline: string;
   disruption: {
@@ -91,10 +96,21 @@ export function AtmosphericHeader({ viewModel }: { viewModel: DashboardViewModel
       </div>
 
       <div className="atmospheric-header__footer" aria-label="trust cues">
-        <p className="atmospheric-header__currentness" aria-live="polite">
-          {viewModel.currentnessMessage}
-        </p>
-        <p>{viewModel.supportLabel}</p>
+        <div className="atmospheric-header__footer-copy">
+          <p className="atmospheric-header__currentness">{viewModel.currentnessMessage}</p>
+          {viewModel.updateSummary ? (
+            <p className="atmospheric-header__update">
+              <span className="atmospheric-header__update-label">{viewModel.updateSummary.label}</span>
+              <span>{viewModel.updateSummary.detail}</span>
+            </p>
+          ) : null}
+          {viewModel.liveAnnouncement ? (
+            <p className="sr-only" aria-live="polite">
+              {viewModel.liveAnnouncement}
+            </p>
+          ) : null}
+        </div>
+        <p className="atmospheric-header__support">{viewModel.supportLabel}</p>
       </div>
     </header>
   );

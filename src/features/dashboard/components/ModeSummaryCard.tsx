@@ -20,6 +20,7 @@ type NearbyModeViewModel = {
     detail: string;
     isLive: boolean;
   };
+  changeSummary: string | null;
 };
 
 export function ModeSummaryCard({ mode }: { mode: NearbyModeViewModel }) {
@@ -37,6 +38,7 @@ export function ModeSummaryCard({ mode }: { mode: NearbyModeViewModel }) {
     <article
       className={`mode-summary-card mode-summary-card--${mode.state} mode-summary-card--${mode.disruptionScope}`}
       aria-label={mode.label}
+      data-mode-key={mode.key}
     >
       <div className="mode-summary-card__header">
         <div>
@@ -56,6 +58,7 @@ export function ModeSummaryCard({ mode }: { mode: NearbyModeViewModel }) {
         {mode.sourceStatus.detail}
       </p>
       <p className={`mode-summary-card__trust mode-summary-card__trust--${mode.trust.confidence}`}>{mode.trust.detail}</p>
+      {mode.changeSummary ? <p className="mode-summary-card__update">{mode.changeSummary}</p> : null}
     </article>
   );
 }

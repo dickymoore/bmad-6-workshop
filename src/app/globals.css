@@ -14,6 +14,8 @@
   --strained: #98592f;
   --disrupted: #7c3531;
   --ops-accent: #7a5b2f;
+  --calm-transition-duration: 180ms;
+  --calm-transition-easing: ease;
 }
 
 * {
@@ -33,6 +35,18 @@ body {
     linear-gradient(180deg, #f7f4ec 0%, var(--page-bg) 58%, var(--page-bg-deep) 100%);
   color: var(--text);
   font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 a {
@@ -89,6 +103,23 @@ a {
   backdrop-filter: blur(14px);
 }
 
+.atmospheric-header,
+.disruption-callout,
+.status-chip,
+.trust-chip,
+.mode-summary-card,
+.mode-summary-card__emphasis,
+.local-map-panel__graphic,
+.local-map-panel__state,
+.local-map-panel__legend {
+  transition:
+    background-color var(--calm-transition-duration) var(--calm-transition-easing),
+    border-color var(--calm-transition-duration) var(--calm-transition-easing),
+    box-shadow var(--calm-transition-duration) var(--calm-transition-easing),
+    color 160ms var(--calm-transition-easing),
+    opacity 160ms var(--calm-transition-easing);
+}
+
 .atmospheric-header--local {
   box-shadow:
     0 28px 90px rgba(23, 30, 27, 0.08),
@@ -109,9 +140,15 @@ a {
   gap: 20px;
 }
 
+.atmospheric-header__footer-copy {
+  display: grid;
+  gap: 6px;
+}
+
 .atmospheric-header__place,
 .atmospheric-header__kicker,
-.atmospheric-header__footer p,
+.atmospheric-header__currentness,
+.atmospheric-header__support,
 .dashboard-reserved__label {
   margin: 0;
   letter-spacing: 0.08em;
@@ -119,7 +156,8 @@ a {
 }
 
 .atmospheric-header__place,
-.atmospheric-header__footer p,
+.atmospheric-header__currentness,
+.atmospheric-header__support,
 .dashboard-reserved__label {
   color: var(--muted);
   font-size: 0.84rem;
@@ -128,6 +166,21 @@ a {
 
 .atmospheric-header__currentness {
   color: var(--accent);
+}
+
+.atmospheric-header__update,
+.mode-summary-card__update,
+.local-map-panel__update {
+  color: var(--text);
+}
+
+.atmospheric-header__update-label {
+  margin-right: 8px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .atmospheric-header__kicker {
@@ -154,7 +207,10 @@ a {
 
 .atmospheric-header__trend,
 .atmospheric-header__trust,
-.mode-summary-card__trust {
+.mode-summary-card__trust,
+.atmospheric-header__update,
+.mode-summary-card__update,
+.local-map-panel__update {
   margin: 0;
   font-size: 0.92rem;
   line-height: 1.45;
@@ -462,6 +518,11 @@ a {
   color: var(--text);
 }
 
+.mode-summary-card__update {
+  margin-top: 12px;
+  color: var(--muted);
+}
+
 .local-map-panel {
   min-height: 240px;
   padding: 26px 28px;
@@ -640,6 +701,11 @@ a {
   color: var(--muted);
   font-size: 0.9rem;
   line-height: 1.45;
+}
+
+.local-map-panel__update {
+  margin-top: 10px;
+  color: var(--muted);
 }
 
 .ops-card .shell-kicker {
@@ -828,5 +894,14 @@ a {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+
+  .disruption-callout,
+  .mode-summary-card__emphasis,
+  .atmospheric-header__update,
+  .mode-summary-card__update,
+  .local-map-panel__update {
+    border-left: 3px solid currentColor;
+    padding-left: 10px;
   }
 }

@@ -24,6 +24,7 @@ type NearbyModeViewModel = {
     detail: string;
     isLive: boolean;
   };
+  changeSummary: string | null;
 };
 
 type DashboardViewModel = {
@@ -33,6 +34,11 @@ type DashboardViewModel = {
   overallTrendLabel: string | null;
   trendMessage: string | null;
   currentnessMessage: string;
+  updateSummary: {
+    label: string;
+    detail: string;
+  } | null;
+  liveAnnouncement: string | null;
   stateKicker: string;
   stateHeadline: string;
   disruption: {
@@ -98,6 +104,7 @@ type DashboardViewModel = {
     }[];
     localityEmphasis: string | null;
     fallbackCopy: string | null;
+    changeSummary: string | null;
   };
 };
 
@@ -108,17 +115,18 @@ export function DashboardScreen({ viewModel }: { viewModel: DashboardViewModel }
       <section
         className="dashboard-shell dashboard-shell--venue dashboard-shell--desktop"
         aria-label="Royal Institution departure picture"
+        data-live-shell="calm-fixed"
       >
-        <div className="dashboard-shell__header">
+        <div className="dashboard-shell__header" data-reading-zone="header">
           <AtmosphericHeader viewModel={viewModel} />
         </div>
 
         <div className="dashboard-shell__body">
           <div className="dashboard-lower-grid" aria-label="Shared nearby departure structure">
-            <div className="dashboard-lower-grid__modes">
+            <div className="dashboard-lower-grid__modes" data-reading-zone="modes">
               <ModeSummaryGrid viewModel={viewModel} />
             </div>
-            <div className="dashboard-lower-grid__map">
+            <div className="dashboard-lower-grid__map" data-reading-zone="map">
               <LocalMapFrame viewModel={viewModel.localMap} />
             </div>
           </div>

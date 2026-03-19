@@ -22,6 +22,7 @@ type NearbyModeViewModel = {
     detail: string;
     isLive: boolean;
   };
+  changeSummary: string | null;
 };
 
 type ModeSummaryGridViewModel = {
