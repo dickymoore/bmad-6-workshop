@@ -69,7 +69,11 @@ test("story 1.1 separates public and non-public ops routes", () => {
   const opsAccess = readFileSync(opsAccessPath, "utf8");
 
   assert.equal(/assertOpsAccess|isOpsAccessDeniedError|headers\(\)/.test(opsPage), true, "ops route should gate access on the server before rendering");
-  assert.equal(/return <OpsShell \/>;/.test(opsPage), true, "ops route should delegate rendering to the ops feature shell");
+  assert.equal(
+    /getOpsHealthPayload|return <OpsShell status=\{status\} \/>;/.test(opsPage),
+    true,
+    "ops route should delegate rendering to the ops feature shell with server-derived readiness",
+  );
   assert.equal(/notFound\(\)/.test(opsPage), true, "denied ops access should fail closed with a non-leaky response");
   assert.equal(/OPS_ALLOWED_HOSTS|localhost|127\.0\.0\.1/.test(opsAccess), true, "ops helper should document one repo-wide local-only allowlist rule");
   assert.equal(/Venue operations|System checks|Recovery steps|Skip to system checks/.test(opsFeature + opsContent), true, "ops shell should expose clear keyboard-safe maintenance structure");

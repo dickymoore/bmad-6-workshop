@@ -17,13 +17,14 @@ export const OPS_SHELL_SECTIONS = Object.freeze([
   }),
 ]);
 
-export const OPS_ACTION_GROUPS = Object.freeze([
-  Object.freeze({
-    heading: "Current maintenance view",
-    actions: Object.freeze(["Open readiness status", "Review data freshness"]),
-  }),
-  Object.freeze({
-    heading: "Next recovery tools",
-    actions: Object.freeze(["Review fallback state", "Prepare manual refresh"]),
-  }),
+export const OPS_RECOVERY_STEPS = Object.freeze([
+  "Confirm the public display remains unchanged before any maintenance action.",
+  "Review readiness and calm issue wording in this local surface.",
+  "Use later Epic 3 recovery actions here when they are implemented.",
 ]);
+
+export const OPS_READINESS_STATES = Object.freeze({
+  current: "Current",
+  "reduced-confidence": "Reduced confidence",
+  unavailable: "Unavailable",
+});

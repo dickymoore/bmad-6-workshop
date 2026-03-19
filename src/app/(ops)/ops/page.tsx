@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { OpsShell } from "@/features/ops/components/OpsShell";
+import { getOpsHealthPayload } from "@/lib/server/ops/get-ops-health";
 import { assertOpsAccess, isOpsAccessDeniedError } from "@/lib/server/security/assert-ops-access";
 
 export const dynamic = "force-dynamic";
@@ -19,5 +20,7 @@ export default async function OpsPage() {
     throw error;
   }
 
-  return <OpsShell />;
+  const status = await getOpsHealthPayload();
+
+  return <OpsShell status={status} />;
 }

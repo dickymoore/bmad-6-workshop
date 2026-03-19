@@ -1,6 +1,28 @@
-import { OPS_ACTION_GROUPS, OPS_SHELL_SECTIONS } from "@/features/ops/ops-shell-content";
+import { OPS_RECOVERY_STEPS, OPS_SHELL_SECTIONS } from "@/features/ops/ops-shell-content";
+import { createOpsShellViewModel } from "@/features/ops/ops-shell-view";
 
-export function OpsShell() {
+type OpsHealthStatus = {
+  readiness: {
+    state: string;
+    label: string;
+    summary: string;
+  };
+  checks: readonly {
+    id: string;
+    label: string;
+    status: string;
+    detail: string;
+  }[];
+  issues: readonly string[];
+  evidence: {
+    snapshotState: string;
+    publishedAt: string | null;
+  };
+};
+
+export function OpsShell({ status }: { status: OpsHealthStatus }) {
+  const viewModel = createOpsShellViewModel(status);
+
   return (
     <main className="ops-page">
       <div className="ops-backdrop" aria-hidden="true" />
@@ -24,22 +46,59 @@ export function OpsShell() {
             </h2>
             <p className="ops-panel__intro">{OPS_SHELL_SECTIONS[1].intro}</p>
 
-            <div className="ops-action-grid">
-              {OPS_ACTION_GROUPS.map((group) => (
-                <section className="ops-action-group" key={group.heading} aria-label={group.heading}>
-                  <h3 className="ops-action-group__title">{group.heading}</h3>
-                  <ul className="ops-action-group__list">
-                    {group.actions.map((action) => (
-                      <li className="ops-action-group__item" key={action}>
-                        <button className="ops-action-group__button" type="button">
-                          {action}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              ))}
-            </div>
+            <section className="ops-readiness" aria-labelledby="ops-readiness-heading">
+              <div className="ops-readiness__header">
+                <div>
+                  <p className="ops-readiness__label">Public readiness</p>
+                  <h3 className="ops-readiness__title" id="ops-readiness-heading">
+                    {viewModel.readinessLabel}
+                  </h3>
+                </div>
+                <dl className="ops-readiness__meta">
+                  <div>
+                    <dt>Snapshot</dt>
+                    <dd>{viewModel.snapshotLabel}</dd>
+                  </div>
+                  <div>
+                    <dt>Published</dt>
+                    <dd>{viewModel.publishedAt}</dd>
+                  </div>
+                </dl>
+              </div>
+
+              <p className="ops-readiness__summary">{viewModel.readinessSummary}</p>
+
+              <ul className="ops-readiness__checks" aria-label="Public readiness checks">
+                {viewModel.checks.map(
+                  (check: OpsHealthStatus["checks"][number] & { cue: string; cueLabel: string }) => (
+                  <li className="ops-readiness__check" key={check.id}>
+                    <p className="ops-readiness__check-line">
+                      <span
+                        className={`ops-readiness__check-status ops-readiness__check-status--${check.status}`}
+                        aria-hidden="true"
+                      >
+                        {check.cue}
+                      </span>
+                      <span className="sr-only">{`${check.cueLabel}: `}</span>
+                      <span>{check.label}</span>
+                    </p>
+                    <p className="ops-readiness__check-detail">{check.detail}</p>
+                  </li>
+                  ),
+                )}
+              </ul>
+
+              <div className="ops-readiness__issues" aria-live="polite">
+                <p className="ops-readiness__label">{viewModel.issuesHeading}</p>
+                <ul className="ops-readiness__issue-list">
+                  {viewModel.issues.map((issue: string) => (
+                    <li className="ops-readiness__issue" key={issue}>
+                      {issue}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </section>
           </section>
 
           <section className="ops-panel" aria-labelledby="ops-recovery-steps">
@@ -48,9 +107,9 @@ export function OpsShell() {
             </h2>
             <p className="ops-panel__intro">{OPS_SHELL_SECTIONS[2].intro}</p>
             <ol className="ops-checklist">
-              <li>Confirm the public display remains unchanged before any maintenance action.</li>
-              <li>Review readiness and fallback notes in this local surface.</li>
-              <li>Use later Epic 3 recovery actions here when they are implemented.</li>
+              {OPS_RECOVERY_STEPS.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
             </ol>
           </section>
         </div>
