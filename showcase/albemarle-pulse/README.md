@@ -9,6 +9,7 @@ authoring/albemarle-pulse branch. This showcase lives on main only.
 
 ## Stage snapshots
 
+- installation -> workshop/albemarle-pulse/10-analysis (6d7af6c)
 - 10-analysis -> workshop/albemarle-pulse/10-analysis (6d7af6c)
 - 20-planning -> workshop/albemarle-pulse/20-planning (7df8ee6)
 - 30-solutioning -> workshop/albemarle-pulse/30-solutioning (40e3087)

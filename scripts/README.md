@@ -148,6 +148,7 @@ Current default track: `desk-booking`
 
 - Notes:
   - destination must be outside the repo
+  - `files/installation/` shows the BMAD install payload from `main`, including `.agents/skills` and selected `_bmad` config files
   - `files/` contains phase folders like `phase-1-analysis/` and `phase-6-implementation/`
   - phases without a frozen branch yet still get placeholder folders
   - clones `https://github.com/dickymoore/agent-replay` into `agent-replay/`

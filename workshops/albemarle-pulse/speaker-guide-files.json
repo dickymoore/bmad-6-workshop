@@ -1,4 +1,25 @@
 {
+  "installation": {
+    "note": "Use this folder for the install slide when showing what BMAD places into the repo before the workshop starts.",
+    "items": [
+      {
+        "label": ".agents skills",
+        "patterns": ["installation/snapshot/.agents/skills/*/SKILL.md"]
+      },
+      {
+        "label": "BMAD manifest",
+        "patterns": ["installation/snapshot/_bmad/_config/manifest.yaml"]
+      },
+      {
+        "label": "BMM config",
+        "patterns": ["installation/snapshot/_bmad/bmm/config.yaml"]
+      },
+      {
+        "label": "Core config",
+        "patterns": ["installation/snapshot/_bmad/core/config.yaml"]
+      }
+    ]
+  },
   "phase-1-analysis": {
     "note": "Phase 1 outputs are shown from the next frozen snapshot because `phase-1-analysis/` mirrors the pre-analysis workshop branch.",
     "items": [

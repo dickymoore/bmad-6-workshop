@@ -24,7 +24,7 @@ def load_config(track: str, config_path: str | None) -> Dict[str, Any]:
 
 def iter_target_dirs(files_root: Path):
     for child in sorted(files_root.iterdir()):
-        if child.is_dir() and (child.name.startswith("phase-") or child.name == "bmb"):
+        if child.is_dir() and (child.name.startswith("phase-") or child.name in {"bmb", "installation"}):
             yield child
             if child.name == "bmb":
                 for grandchild in sorted(child.iterdir()):
@@ -61,7 +61,10 @@ def write_links_file(target_dir: Path, rel_key: str, entry: Dict[str, Any], file
         if matches:
             for match in matches:
                 rel = os.path.relpath(match, target_dir)
-                lines.append(f"- [{match.name}]({Path(rel).as_posix()})")
+                display = match.name
+                if display in {"SKILL.md", "config.yaml", "README.md", "TODO.md", "installer.js"}:
+                    display = match.relative_to(files_root).as_posix()
+                lines.append(f"- [{display}]({Path(rel).as_posix()})")
         else:
             lines.append("- Missing")
         lines.append("")

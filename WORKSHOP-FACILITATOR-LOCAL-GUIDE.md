@@ -96,6 +96,7 @@ Create a clean external facilitator workspace:
 ```
 
 Each generated phase folder includes `SPEAKER-GUIDE-LINKS.md` with relative links to the files called out in the speaker guide.
+The generated workspace also includes `files/installation/` so you can show the BMAD install payload itself.
 
 ## Operator Rules
 

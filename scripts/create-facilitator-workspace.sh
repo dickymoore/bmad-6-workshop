@@ -175,6 +175,34 @@ no frozen branch for this stage yet.
 EOF
 }
 
+write_installation_readme() {
+  local path="$1"
+  local branch="$2"
+  local ref="$3"
+  local commit_sha="$4"
+  local subject="$5"
+  local guidance="$6"
+  local exported_list="$7"
+
+  cat > "$path" <<EOF
+# installation - BMAD install view
+
+- Branch: ${branch}
+- Source ref: ${ref}
+- Commit: ${commit_sha}
+- Commit subject: ${subject}
+- Snapshot path: snapshot/
+
+## Guidance
+
+${guidance}
+
+## Exported roots
+
+${exported_list}
+EOF
+}
+
 copy_bmb_module() {
   local files_root="$1"
   local repo_root="$2"
@@ -304,6 +332,36 @@ fi
 
 write_workspace_readme "$dest_real/README.md" "files/"
 write_files_index "$files_root/README.md"
+
+installation_branch=$(workshop_stage_branch "$TRACK" 10-analysis)
+installation_guidance="BMAD install payload snapshot taken from ${installation_branch}, which is the first committed branch that contains the installed .agents and _bmad files."
+installation_dir="$files_root/installation"
+mkdir -p "$installation_dir/snapshot"
+installation_paths=(
+  .agents/skills
+  _bmad/_config
+  _bmad/bmm/config.yaml
+  _bmad/core/config.yaml
+)
+
+if installation_ref=$(resolve_ref "$installation_branch"); then
+  installation_sha=$(git -C "$ROOT_DIR" rev-parse --short "$installation_ref")
+  installation_subject=$(git -C "$ROOT_DIR" log -1 --format=%s "$installation_ref")
+  exported_installation=()
+  for path in "${installation_paths[@]}"; do
+    if git -C "$ROOT_DIR" cat-file -e "$installation_ref:$path" 2>/dev/null; then
+      exported_installation+=("$path")
+    fi
+  done
+  if ((${#exported_installation[@]} > 0)); then
+    git -C "$ROOT_DIR" archive "$installation_ref" "${exported_installation[@]}" | tar -x -C "$installation_dir/snapshot"
+    installation_list=$(printf -- '- %s\n' "${exported_installation[@]}")
+  else
+    installation_list='- none'
+  fi
+  write_installation_readme "$installation_dir/README.md" "$installation_branch" "$installation_ref" "$installation_sha" "$installation_subject" "$installation_guidance" "$installation_list"
+  printf -- '- `installation/` -> `%s` (`%s`)\n' "$installation_branch" "$installation_sha" >> "$files_root/README.md"
+fi
 
 candidate_paths=(
   README.md
