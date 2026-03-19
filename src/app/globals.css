@@ -114,6 +114,10 @@ a {
   line-height: 1.4;
 }
 
+.atmospheric-header__currentness {
+  color: var(--accent);
+}
+
 .atmospheric-header__kicker {
   margin-bottom: 14px;
   color: var(--accent);

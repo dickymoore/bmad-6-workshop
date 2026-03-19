@@ -204,6 +204,7 @@ function normalizeNearbyModes(nearbyModes) {
 
 export function createDashboardSnapshot(input) {
   const {
+    publishedAt,
     overallState,
     weatherSummary,
     mobilitySummary,
@@ -213,6 +214,10 @@ export function createDashboardSnapshot(input) {
     localMap,
     nearbyModes,
   } = input;
+
+  if (typeof publishedAt !== "string" || Number.isNaN(Date.parse(publishedAt))) {
+    throw new Error('Dashboard snapshot field "publishedAt" must be a valid ISO timestamp');
+  }
 
   if (!OVERALL_DEPARTURE_STATES.includes(overallState)) {
     throw new Error(`Unsupported overall departure state: ${overallState}`);
@@ -242,6 +247,7 @@ export function createDashboardSnapshot(input) {
   }
 
   return freezeSnapshot({
+    publishedAt,
     overallState,
     weatherSummary: weatherSummary.trim(),
     mobilitySummary: mobilitySummary.trim(),

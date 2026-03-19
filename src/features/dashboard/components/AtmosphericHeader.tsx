@@ -34,7 +34,9 @@ export function AtmosphericHeader({ viewModel }: { viewModel: DashboardViewModel
       </div>
 
       <div className="atmospheric-header__footer" aria-label="trust cues">
-        <p>{viewModel.freshnessLabel}</p>
+        <p className="atmospheric-header__currentness" aria-live="polite">
+          {viewModel.freshnessLabel}
+        </p>
         <p>{viewModel.supportLabel}</p>
       </div>
     </header>

@@ -1,15 +1,12 @@
-import { DashboardScreen } from "@/features/dashboard/components/DashboardScreen";
-import { getOverallDepartureSnapshot } from "@/features/dashboard/data/overall-departure-snapshot";
-import {
-  getDashboardMetadata,
-  presentDashboardSnapshot,
-} from "@/features/dashboard/presenters/dashboard-presenter";
+import { DashboardLiveScreen } from "@/features/dashboard/components/DashboardLiveScreen";
+import { getDashboardMetadata } from "@/features/dashboard/presenters/dashboard-presenter";
+import { getDashboardApiResponse } from "@/lib/server/dashboard/dashboard-service";
 
 export const metadata = getDashboardMetadata();
+export const dynamic = "force-dynamic";
 
-export default function PublicDisplayPage() {
-  const snapshot = getOverallDepartureSnapshot();
-  const viewModel = presentDashboardSnapshot(snapshot);
+export default async function PublicDisplayPage() {
+  const initialResponse = await getDashboardApiResponse();
 
-  return <DashboardScreen viewModel={viewModel} />;
+  return <DashboardLiveScreen initialResponse={initialResponse} />;
 }

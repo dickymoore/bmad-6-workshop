@@ -23,6 +23,14 @@ const DASHBOARD_METADATA = Object.freeze({
   description: "Overall departure picture for the Royal Institution foyer.",
 });
 
+export function createCurrentnessLabel(snapshotFreshnessLabel) {
+  if (typeof snapshotFreshnessLabel !== "string" || snapshotFreshnessLabel.trim().length === 0) {
+    return "Holding a calm shared picture for the foyer.";
+  }
+
+  return snapshotFreshnessLabel.trim();
+}
+
 export function presentDashboardSnapshot(snapshotInput) {
   const snapshot = createDashboardSnapshot(snapshotInput);
 
@@ -33,7 +41,7 @@ export function presentDashboardSnapshot(snapshotInput) {
     stateHeadline: HEADLINES[snapshot.overallState],
     weatherSummary: snapshot.weatherSummary,
     mobilitySummary: snapshot.mobilitySummary,
-    freshnessLabel: snapshot.freshnessLabel,
+    freshnessLabel: createCurrentnessLabel(snapshot.freshnessLabel),
     supportLabel: snapshot.supportLabel,
     nearbyModeHeading: "Nearby modes",
     nearbyModeIntro: "From here, now: the nearby departure modes are reading as follows.",

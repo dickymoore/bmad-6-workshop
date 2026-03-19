@@ -62,35 +62,60 @@ test("story 1.1 separates public and non-public ops routes", () => {
 
 test("story 1.5 public route composes the Royal Institution dashboard feature with a fixed passive local map", () => {
   const pagePath = join(root, "src", "app", "(public)", "page.tsx");
+  const apiRoutePath = join(root, "src", "app", "api", "dashboard", "route.ts");
   const contractPath = join(root, "src", "lib", "contracts", "dashboard-snapshot.js");
+  const apiContractPath = join(root, "src", "lib", "contracts", "api-response.js");
   const snapshotPath = join(root, "src", "features", "dashboard", "data", "overall-departure-snapshot.js");
   const presenterPath = join(root, "src", "features", "dashboard", "presenters", "dashboard-presenter.js");
   const screenPath = join(root, "src", "features", "dashboard", "components", "DashboardScreen.tsx");
+  const liveScreenPath = join(root, "src", "features", "dashboard", "components", "DashboardLiveScreen.tsx");
   const headerPath = join(root, "src", "features", "dashboard", "components", "AtmosphericHeader.tsx");
   const modeGridPath = join(root, "src", "features", "dashboard", "components", "ModeSummaryGrid.tsx");
   const modeCardPath = join(root, "src", "features", "dashboard", "components", "ModeSummaryCard.tsx");
   const localMapPath = join(root, "src", "features", "dashboard", "components", "LocalMapFrame.tsx");
+  const hookPath = join(root, "src", "features", "dashboard", "hooks", "useDashboardQuery.ts");
+  const servicePath = join(root, "src", "lib", "server", "dashboard", "dashboard-service.js");
+  const publishPath = join(root, "src", "lib", "server", "dashboard", "publish-dashboard-snapshot.js");
+  const storePath = join(root, "src", "lib", "server", "cache", "snapshot-store.js");
+  const queryCompatPath = join(root, "src", "lib", "vendor", "tanstack-react-query.tsx");
   assert.equal(existsSync(pagePath), true, "expected public route page");
+  assert.equal(existsSync(apiRoutePath), true, "expected dashboard API route");
   assert.equal(existsSync(contractPath), true, "expected dashboard snapshot contract");
+  assert.equal(existsSync(apiContractPath), true, "expected dashboard API response contract");
   assert.equal(existsSync(snapshotPath), true, "expected fixture-backed dashboard snapshot");
   assert.equal(existsSync(presenterPath), true, "expected public display presenter");
   assert.equal(existsSync(screenPath), true, "expected dashboard screen component");
+  assert.equal(existsSync(liveScreenPath), true, "expected client live dashboard boundary");
   assert.equal(existsSync(headerPath), true, "expected atmospheric header component");
   assert.equal(existsSync(modeGridPath), true, "expected nearby mode summary grid component");
   assert.equal(existsSync(modeCardPath), true, "expected nearby mode summary card component");
   assert.equal(existsSync(localMapPath), true, "expected fixed local map component");
+  assert.equal(existsSync(hookPath), true, "expected dashboard query hook");
+  assert.equal(existsSync(servicePath), true, "expected dashboard service");
+  assert.equal(existsSync(publishPath), true, "expected snapshot publication module");
+  assert.equal(existsSync(storePath), true, "expected snapshot persistence module");
+  assert.equal(existsSync(queryCompatPath), true, "expected local query compatibility module");
 
   const page = readFileSync(pagePath, "utf8");
+  const apiRoute = readFileSync(apiRoutePath, "utf8");
   const contract = readFileSync(contractPath, "utf8");
+  const apiContract = readFileSync(apiContractPath, "utf8");
   const snapshot = readFileSync(snapshotPath, "utf8");
   const presenter = readFileSync(presenterPath, "utf8");
   const screen = readFileSync(screenPath, "utf8");
+  const liveScreen = readFileSync(liveScreenPath, "utf8");
   const header = readFileSync(headerPath, "utf8");
   const modeGrid = readFileSync(modeGridPath, "utf8");
   const modeCard = readFileSync(modeCardPath, "utf8");
   const localMap = readFileSync(localMapPath, "utf8");
-  const publicFeature = [page, contract, snapshot, presenter, screen, header, modeGrid, modeCard, localMap].join("\n");
-  const publicCopySources = [page, snapshot, presenter, screen, header, modeGrid, modeCard, localMap].join("\n");
+  const hook = readFileSync(hookPath, "utf8");
+  const service = readFileSync(servicePath, "utf8");
+  const publish = readFileSync(publishPath, "utf8");
+  const store = readFileSync(storePath, "utf8");
+  const queryCompat = readFileSync(queryCompatPath, "utf8");
+  const tsconfig = readFileSync(join(root, "tsconfig.json"), "utf8");
+  const publicFeature = [page, apiRoute, contract, apiContract, snapshot, presenter, screen, liveScreen, header, modeGrid, modeCard, localMap, hook, service, publish, store, queryCompat].join("\n");
+  const publicCopySources = [page, snapshot, presenter, screen, liveScreen, header, modeGrid, modeCard, localMap].join("\n");
 
   assert.equal(/Create Next App/i.test(page), false, "public route should not contain generic starter content");
   assert.equal(/display-shell/i.test(publicFeature), false, "story 1.3 should retire the temporary display-shell presenter");
@@ -100,15 +125,22 @@ test("story 1.5 public route composes the Royal Institution dashboard feature wi
     "public route should stay fact-only",
   );
   assert.equal(/overallState|weatherSummary|placeLabel|freshnessLabel/i.test(contract), true, "dashboard contract should cover overall picture fields");
+  assert.equal(/publishedAt/i.test(contract + apiContract), true, "live dashboard path should carry a publication timestamp through contract boundaries");
   assert.equal(/nearbyModes|summary|state/i.test(contract), true, "dashboard contract should cover nearby mode summaries");
   assert.equal(/localMap|selectedNearbyNodes|fallbackCopy/.test(contract), true, "dashboard contract should cover fixed local-map data");
   assert.equal(/calm|watchful|strained|disrupted/i.test(contract), true, "dashboard contract should encode approved overall-state vocabulary");
   assert.equal(/available|caution|disrupted/i.test(contract), true, "dashboard contract should encode approved nearby-mode vocabulary");
   assert.equal(/must be unique/i.test(contract), true, "dashboard contract should require stable unique keys");
   assert.equal(/Royal Institution|Albemarle Street/i.test(publicFeature), true, "public route should remain venue-specific");
-  assert.equal(/AtmosphericHeader|DashboardScreen/.test(page), true, "public route should compose dashboard feature components");
+  assert.equal(/DashboardLiveScreen|getDashboardApiResponse/.test(page), true, "public route should use the live dashboard boundary and service");
+  assert.equal(/export const dynamic = "force-dynamic"/.test(page), true, "public route should stay server-rendered at request time");
+  assert.equal(/getDashboardApiResponse|Cache-Control|Response\.json/.test(apiRoute), true, "dashboard API route should expose same-origin JSON without provider internals");
   assert.equal(/ModeSummaryGrid|ModeSummaryCard/.test(screen + modeGrid), true, "public route should include shared-reading mode summaries");
   assert.equal(/LocalMapFrame|Green Park|Piccadilly Arcade|Local frame/i.test(publicFeature), true, "public route should include fixed local-map locality cues");
+  assert.equal(/QueryClientProvider|useDashboardQuery|refetchInterval/.test(liveScreen + hook), true, "live path should poll through a dedicated query boundary");
+  assert.equal(/"@tanstack\/react-query"\s*:/.test(tsconfig), false, "tsconfig should not alias react-query away from the installed package");
+  assert.equal(/@\/lib\/vendor\/tanstack-react-query/.test(liveScreen + hook), true, "query compatibility wiring should be explicit in source");
+  assert.equal(/runtime\/snapshots|last-safe|fallback/.test(service + publish + store), true, "live path should publish and reuse safe snapshots");
   assert.equal(
     /const isFallback = viewModel\.state === "fallback";/.test(localMap),
     true,
@@ -130,6 +162,7 @@ test("story 1.5 public route composes the Royal Institution dashboard feature wi
     false,
     "public route should remain passive and non-interactive",
   );
+  assert.equal(/spinner|loading takeover|manual refresh/i.test(publicFeature), false, "public route should avoid full-screen loading or manual refresh controls");
   assert.equal(/<svg|role="img"|aria-label="Fixed local map anchored to the Royal Institution"/.test(localMap), true, "local map should render as a passive framed graphic");
 });
 

@@ -7,17 +7,19 @@ import {
   createDashboardSnapshot,
 } from "../../src/lib/contracts/dashboard-snapshot.js";
 import {
+  createCurrentnessLabel,
   getDashboardMetadata,
   presentDashboardSnapshot,
 } from "../../src/features/dashboard/presenters/dashboard-presenter.js";
 
 function buildSnapshot(overrides = {}) {
   return createDashboardSnapshot({
+    publishedAt: "2026-03-19T08:00:00.000Z",
     overallState: "watchful",
     weatherSummary: "Cold rain is moving across Mayfair and the street is reading a little slower.",
     mobilitySummary: "Nearby departures are still moving, with a tighter rhythm under the rain.",
     placeLabel: "Royal Institution, Albemarle Street",
-    freshnessLabel: "Updated moments ago from the current local snapshot.",
+    freshnessLabel: "Now refreshed for the foyer.",
     supportLabel: "Weather and mobility reinforce the same local read.",
     localMap: {
       title: "Local frame",
@@ -79,11 +81,12 @@ describe("dashboard snapshot contract", () => {
     const snapshot = buildSnapshot();
 
     expect(snapshot).toEqual({
+      publishedAt: "2026-03-19T08:00:00.000Z",
       overallState: "watchful",
       weatherSummary: "Cold rain is moving across Mayfair and the street is reading a little slower.",
       mobilitySummary: "Nearby departures are still moving, with a tighter rhythm under the rain.",
       placeLabel: "Royal Institution, Albemarle Street",
-      freshnessLabel: "Updated moments ago from the current local snapshot.",
+      freshnessLabel: "Now refreshed for the foyer.",
       supportLabel: "Weather and mobility reinforce the same local read.",
       localMap: {
         title: "Local frame",
@@ -435,7 +438,7 @@ describe("dashboard presenter", () => {
       stateHeadline: "Watchful across the Royal Institution threshold",
       weatherSummary: "Cold rain is moving across Mayfair and the street is reading a little slower.",
       mobilitySummary: "Nearby departures are still moving, with a tighter rhythm under the rain.",
-      freshnessLabel: "Updated moments ago from the current local snapshot.",
+      freshnessLabel: "Now refreshed for the foyer.",
       supportLabel: "Weather and mobility reinforce the same local read.",
       nearbyModeHeading: "Nearby modes",
       nearbyModeIntro: "From here, now: the nearby departure modes are reading as follows.",
@@ -534,7 +537,7 @@ describe("dashboard presenter", () => {
         overallState: "calm",
         weatherSummary: "A bright, dry spell is keeping the local departure picture easy to read.",
         mobilitySummary: "Nearby movement is settling into an even public rhythm.",
-        freshnessLabel: "Fresh enough for a shared foyer read.",
+        freshnessLabel: "Freshly settled across the foyer.",
         supportLabel: "Conditions remain calm without narrowing anyone toward a single choice.",
         nearbyModes: [
           {
@@ -559,5 +562,12 @@ describe("dashboard presenter", () => {
       title: "Albemarle Pulse | Royal Institution departures",
       description: "Overall departure picture for the Royal Institution foyer.",
     });
+  });
+
+  it("keeps the visible currentness cue calm and snapshot-driven", () => {
+    expect(createCurrentnessLabel(" Freshly settled across the foyer. ")).toBe(
+      "Freshly settled across the foyer.",
+    );
+    expect(createCurrentnessLabel("")).toBe("Holding a calm shared picture for the foyer.");
   });
 });
