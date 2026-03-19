@@ -13,4 +13,5 @@ Stage 4 (Implementation setup): complete architecture, epics, and readiness outp
 ## Exported roots
 
 - README.md
+- _bmad-output
 - docs

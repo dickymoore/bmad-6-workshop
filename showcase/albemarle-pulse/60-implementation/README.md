@@ -13,6 +13,7 @@ Implementation stage: partial build state. When the MVP is not yet complete but 
 ## Exported roots
 
 - README.md
+- _bmad-output
 - docs
 - src
 - tests

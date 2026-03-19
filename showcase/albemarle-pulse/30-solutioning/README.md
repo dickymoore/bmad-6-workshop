@@ -13,4 +13,5 @@ Stage 3 (Solutioning): produce PRD and UX outputs for Albemarle Pulse, then cut 
 ## Exported roots
 
 - README.md
+- _bmad-output
 - docs

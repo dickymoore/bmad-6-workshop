@@ -89,6 +89,12 @@ Refresh a facilitator showcase:
 ./scripts/export-workshop-showcase.sh --track albemarle-pulse
 ```
 
+Create a clean external facilitator workspace:
+
+```bash
+./scripts/create-facilitator-workspace.sh --track albemarle-pulse --destination ../albemarle-pulse-facilitator --reset
+```
+
 ## Operator Rules
 
 - Prefer the namespaced `workshop/desk-booking/*` branches in all live guidance.

@@ -135,3 +135,29 @@ Current default track: `desk-booking`
   - writes to `showcase/<track>/` on the current branch
   - exports each stage into `showcase/<track>/<stage>/snapshot/`
   - leaves a placeholder folder for stages that have not been cut yet
+
+## `scripts/create-facilitator-workspace.sh`
+
+- Purpose: create a clean facilitator workspace outside this repo with `files/`, an empty `.codex/`, and a checkout of `agent-replay/`.
+- When to run: when you want a no-branch-switch delivery folder on another machine.
+- Example:
+
+```bash
+./scripts/create-facilitator-workspace.sh --track albemarle-pulse --destination ../albemarle-pulse-facilitator --reset
+```
+
+- Notes:
+  - destination must be outside the repo
+  - `files/` contains phase folders like `phase-1-analysis/` and `phase-6-implementation/`
+  - phases without a frozen branch yet still get placeholder folders
+  - clones `https://github.com/dickymoore/agent-replay` into `agent-replay/`
+  - optional BMB export support:
+
+```bash
+./scripts/create-facilitator-workspace.sh \
+  --track albemarle-pulse \
+  --destination ../albemarle-pulse-facilitator \
+  --bmb-repo /home/codexuser/transforming_for_success \
+  --bmb-module evidence-blueprint \
+  --reset
+```

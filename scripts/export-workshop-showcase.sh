@@ -140,6 +140,7 @@ EOF2
 
 candidate_paths=(
   README.md
+  _bmad-output
   docs
   src
   tests
