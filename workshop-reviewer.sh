@@ -353,13 +353,14 @@ if $run_all; then
       echo "Branch not found: $b" >&2
       exit 2
     }
-    ensure_local_branch "$b"
-    git checkout "$b" >/dev/null
 
     if [[ "$mode" == "check" ]]; then
       check_branch "$b"
       continue
     fi
+
+    ensure_local_branch "$b"
+    git checkout "$b" >/dev/null
 
     echo "==> $b"
 
@@ -399,16 +400,13 @@ branch_exists "$branch" || {
   exit 2
 }
 
-if [[ "$branch" != "$start_branch" ]]; then
+if [[ "$mode" != "check" && "$branch" != "$start_branch" ]]; then
   ensure_local_branch "$branch"
   git checkout "$branch" >/dev/null
 fi
 
 if [[ "$mode" == "check" ]]; then
   check_branch "$branch"
-  if [[ "$branch" != "$start_branch" ]]; then
-    git checkout "$start_branch" >/dev/null
-  fi
   exit 0
 fi
 
