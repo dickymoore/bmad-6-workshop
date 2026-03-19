@@ -1,5 +1,7 @@
 import { createFixtureDashboardSnapshot } from "../../../features/dashboard/data/overall-departure-snapshot.js";
+import { buildTrustSignal } from "../../contracts/freshness.js";
 import { createDashboardSnapshot } from "../../contracts/dashboard-snapshot.js";
+import { readStoredDashboardHistory } from "../cache/snapshot-store.js";
 import { fetchTflOverview } from "../providers/tfl/tfl-provider.js";
 import { fetchWeatherOverview } from "../providers/weather/weatherapi-provider.js";
 
@@ -8,6 +10,8 @@ const STATE_WEIGHT = Object.freeze({
   watchful: 1,
   strained: 2,
   disrupted: 3,
+  available: 0,
+  caution: 1,
 });
 
 function deriveOverallState(nearbyModes, weatherState) {
@@ -25,19 +29,83 @@ function deriveOverallState(nearbyModes, weatherState) {
   const weatherScore = weatherState ? STATE_WEIGHT[weatherState] ?? STATE_WEIGHT.calm : STATE_WEIGHT.calm;
   const score = Math.max(transportScore, weatherScore);
 
-  return Object.keys(STATE_WEIGHT).find((key) => STATE_WEIGHT[key] === score) ?? "watchful";
+  return Object.keys(STATE_WEIGHT).find((key) => STATE_WEIGHT[key] === score && key in { calm: 1, watchful: 1, strained: 1, disrupted: 1 }) ?? "watchful";
 }
 
-function createSnapshotFreshnessLabel(publishedAt) {
-  const publishedAtMs = Date.parse(publishedAt);
+function createModeLookup(modes) {
+  return new Map((modes ?? []).map((mode) => [mode.key, mode]));
+}
 
-  if (Number.isNaN(publishedAtMs)) {
-    return "Holding current across the foyer.";
+function scoreSnapshotSummary(snapshot) {
+  const baseScore = (STATE_WEIGHT[snapshot.overallState] ?? 0) * 10;
+  const modeScore = (snapshot.nearbyModes ?? []).reduce(
+    (total, mode) => total + (STATE_WEIGHT[mode.state] ?? STATE_WEIGHT.disrupted),
+    0,
+  );
+
+  return baseScore + modeScore;
+}
+
+export function classifyOverallTrend({ history = [], currentSnapshot, now = new Date() } = {}) {
+  const nowMs = now.getTime();
+  const relevantHistory = history
+    .filter((entry) => entry?.publishedAt && entry.publishedAt !== currentSnapshot.publishedAt)
+    .filter((entry) => {
+      const publishedAtMs = Date.parse(entry.publishedAt);
+      return !Number.isNaN(publishedAtMs) && nowMs - publishedAtMs <= 15 * 60_000;
+    })
+    .sort((left, right) => Date.parse(left.publishedAt) - Date.parse(right.publishedAt));
+
+  if (relevantHistory.length === 0) {
+    return null;
   }
 
-  return Math.floor(publishedAtMs / 30_000) % 2 === 0
-    ? "Now refreshed for the foyer."
-    : "Freshly settled across the foyer.";
+  const baseline = relevantHistory[0];
+  const scoreDelta = scoreSnapshotSummary(currentSnapshot) - scoreSnapshotSummary(baseline);
+
+  if (scoreDelta < 0) {
+    return "improving";
+  }
+
+  if (scoreDelta > 0) {
+    return "worsening";
+  }
+
+  return "steady";
+}
+
+function createHeaderTrust({ now, publishedAt, weatherOverview, tflOverview }) {
+  return {
+    weather: buildTrustSignal({
+      now,
+      observedAt: weatherOverview?.signalObservedAt,
+      fallbackAt: publishedAt,
+      missedRefreshes: weatherOverview?.missedRefreshes ?? 0,
+      reducedConfidence: weatherOverview == null,
+      subject: "Weather",
+    }),
+    mobility: buildTrustSignal({
+      now,
+      observedAt: tflOverview?.signalObservedAt,
+      fallbackAt: publishedAt,
+      missedRefreshes: tflOverview?.missedRefreshes ?? 0,
+      reducedConfidence: tflOverview == null,
+      subject: "Movement",
+    }),
+  };
+}
+
+function deriveModeTrust({ now, publishedAt, baseMode, liveMode, tflOverview }) {
+  const reducedConfidence = tflOverview == null || liveMode == null;
+
+  return buildTrustSignal({
+    now,
+    observedAt: liveMode?.signalObservedAt ?? tflOverview?.signalObservedAt,
+    fallbackAt: publishedAt,
+    missedRefreshes: liveMode?.missedRefreshes ?? tflOverview?.missedRefreshes ?? 0,
+    reducedConfidence,
+    subject: baseMode.label,
+  });
 }
 
 export async function buildDashboardSnapshot({
@@ -45,40 +113,65 @@ export async function buildDashboardSnapshot({
   getFallbackSnapshot = createFixtureDashboardSnapshot,
   tflProvider = fetchTflOverview,
   weatherProvider = fetchWeatherOverview,
+  readHistory = readStoredDashboardHistory,
 } = {}) {
   const publishedAt = now.toISOString();
   const baseSnapshot = getFallbackSnapshot({ publishedAt });
-  const [tflResult, weatherResult] = await Promise.allSettled([tflProvider(), weatherProvider()]);
+  const [tflResult, weatherResult, history] = await Promise.all([
+    Promise.allSettled([
+      tflProvider({ now }),
+      weatherProvider({ now }),
+    ]),
+    readHistory(),
+  ]).then(([[tflSettled, weatherSettled], loadedHistory]) => [tflSettled, weatherSettled, loadedHistory]);
   const tflOverview = tflResult.status === "fulfilled" ? tflResult.value : null;
   const weatherOverview = weatherResult.status === "fulfilled" ? weatherResult.value : null;
-  const liveModes = new Map((tflOverview?.liveModes ?? []).map((mode) => [mode.key, mode]));
+  const liveModes = createModeLookup(tflOverview?.liveModes ?? []);
   const nearbyModes = baseSnapshot.nearbyModes.map((mode) => {
     const liveMode = liveModes.get(mode.key);
 
-    if (!liveMode) {
-      return mode;
-    }
-
     return {
       ...mode,
-      state: liveMode.state,
-      summary: liveMode.summary,
-      nuance: liveMode.nuance,
+      state: liveMode?.state ?? mode.state,
+      summary: liveMode?.summary ?? mode.summary,
+      nuance: liveMode?.nuance ?? mode.nuance,
+      trust: deriveModeTrust({
+        now,
+        publishedAt,
+        baseMode: mode,
+        liveMode,
+        tflOverview,
+      }),
     };
   });
   const overallState = deriveOverallState(nearbyModes, weatherOverview?.overallState);
-  const snapshot = createDashboardSnapshot({
+  const draftSnapshot = {
     ...baseSnapshot,
     publishedAt,
     overallState,
+    overallTrend: null,
     weatherSummary: weatherOverview?.weatherSummary ?? baseSnapshot.weatherSummary,
     mobilitySummary: tflOverview?.mobilitySummary ?? baseSnapshot.mobilitySummary,
-    freshnessLabel: createSnapshotFreshnessLabel(publishedAt),
     supportLabel:
-      tflOverview || weatherOverview
-        ? "Fresh weather and movement are reinforcing the same local read."
-        : baseSnapshot.supportLabel,
+      tflOverview && weatherOverview
+        ? "Weather and movement still reinforce the same local read."
+        : "The stronger live signals are carrying the shared picture.",
+    headerTrust: createHeaderTrust({
+      now,
+      publishedAt,
+      weatherOverview,
+      tflOverview,
+    }),
     nearbyModes,
+  };
+  const overallTrend = classifyOverallTrend({
+    history,
+    currentSnapshot: draftSnapshot,
+    now,
+  });
+  const snapshot = createDashboardSnapshot({
+    ...draftSnapshot,
+    overallTrend,
   });
 
   return {

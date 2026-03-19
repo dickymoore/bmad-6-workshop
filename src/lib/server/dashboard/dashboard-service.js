@@ -1,5 +1,7 @@
 import { createFixtureDashboardSnapshot } from "../../../features/dashboard/data/overall-departure-snapshot.js";
 import { createDashboardApiResponse } from "../../contracts/api-response.js";
+import { createTrustSignal } from "../../contracts/freshness.js";
+import { createDashboardSnapshot } from "../../contracts/dashboard-snapshot.js";
 import { getMemoryCacheEntry, setMemoryCacheEntry } from "../cache/memory-cache.js";
 import { readStoredDashboardSnapshot } from "../cache/snapshot-store.js";
 import { buildDashboardSnapshot } from "./build-dashboard-snapshot.js";
@@ -15,6 +17,33 @@ function createResponse(snapshot, snapshotState, refreshIntervalMs) {
     publishedAt: snapshot.publishedAt,
     refreshIntervalMs,
     snapshotState,
+  });
+}
+
+function createReducedConfidenceFallbackSnapshot(publishedAt) {
+  const fallbackSnapshot = createFixtureDashboardSnapshot({ publishedAt });
+
+  return createDashboardSnapshot({
+    ...fallbackSnapshot,
+    overallTrend: null,
+    supportLabel: "The shared picture stays readable while live signals reconnect.",
+    headerTrust: {
+      weather: createTrustSignal({
+        state: "reduced-confidence",
+        subject: "Weather",
+      }),
+      mobility: createTrustSignal({
+        state: "reduced-confidence",
+        subject: "Movement",
+      }),
+    },
+    nearbyModes: fallbackSnapshot.nearbyModes.map((mode) => ({
+      ...mode,
+      trust: createTrustSignal({
+        state: "reduced-confidence",
+        subject: mode.label,
+      }),
+    })),
   });
 }
 
@@ -64,9 +93,7 @@ export async function getDashboardApiResponse({
       return createResponse(storedSnapshot, "last-safe", refreshIntervalMs);
     }
 
-    const fallbackSnapshot = createFixtureDashboardSnapshot({
-      publishedAt: now.toISOString(),
-    });
+    const fallbackSnapshot = createReducedConfidenceFallbackSnapshot(now.toISOString());
 
     cacheSet(CACHE_KEY, {
       snapshot: fallbackSnapshot,

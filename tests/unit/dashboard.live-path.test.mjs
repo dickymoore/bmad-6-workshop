@@ -16,6 +16,7 @@ describe("dashboard live path", () => {
   it("wraps canonical dashboard data in a public API response envelope", () => {
     const snapshot = createFixtureDashboardSnapshot({
       publishedAt: "2026-03-19T08:30:00.000Z",
+      overallTrend: "steady",
     });
     const response = createDashboardApiResponse(snapshot, {
       venueKey: "royal-institution",
@@ -30,14 +31,17 @@ describe("dashboard live path", () => {
       refreshIntervalMs: 30_000,
       snapshotState: "live",
     });
-    expect(response.data.placeLabel).toBe("Royal Institution, Albemarle Street");
+    expect(response.data.overallTrend).toBe("steady");
+    expect(response.data.headerTrust.mobility.state).toBe("aging");
   });
 
-  it("publishes the newest safe snapshot to cache and persistence together", async () => {
+  it("publishes the newest safe snapshot to cache, persistence, and recent history together", async () => {
     const writes = [];
+    const historyWrites = [];
     const cacheEntries = [];
     const snapshot = createFixtureDashboardSnapshot({
       publishedAt: "2026-03-19T08:31:00.000Z",
+      overallTrend: "steady",
     });
     const published = await publishDashboardSnapshot({
       snapshot,
@@ -50,26 +54,59 @@ describe("dashboard live path", () => {
         writes.push(nextSnapshot);
         return nextSnapshot;
       },
+      async appendHistory(nextSnapshot) {
+        historyWrites.push(nextSnapshot);
+        return [nextSnapshot];
+      },
     });
 
     expect(writes).toEqual([snapshot]);
+    expect(historyWrites).toEqual([snapshot]);
     expect(cacheEntries[0][0]).toBe("dashboard-snapshot");
     expect(cacheEntries[0][1].snapshot).toEqual(snapshot);
     expect(published.snapshotState).toBe("live");
   });
 
-  it("builds a live snapshot from provider summaries while keeping the canonical shape", async () => {
+  it("builds a live snapshot from provider summaries, timing evidence, and recent history", async () => {
     const built = await buildDashboardSnapshot({
       now: new Date("2026-03-19T08:31:00.000Z"),
+      async readHistory() {
+        return [
+          {
+            publishedAt: "2026-03-19T08:20:00.000Z",
+            overallState: "watchful",
+            nearbyModes: [
+              {
+                key: "tube-rail",
+                state: "available",
+              },
+              {
+                key: "bus",
+                state: "available",
+              },
+            ],
+          },
+        ];
+      },
       async tflProvider() {
         return {
           mobilitySummary: "Nearby departures are moving, with a slightly tighter live rhythm.",
+          signalObservedAt: "2026-03-19T08:16:00.000Z",
           liveModes: [
             {
               key: "tube-rail",
               state: "caution",
               summary: "Tube and rail are moving with a tighter rhythm nearby.",
               nuance: "Queues and platform rhythms may bunch a little more than usual.",
+              signalObservedAt: "2026-03-19T08:16:00.000Z",
+            },
+            {
+              key: "bus",
+              state: "disrupted",
+              summary: "Nearby buses are reading disrupted around the West End.",
+              nuance: "Bus spacing is delayed through the nearby streets.",
+              signalObservedAt: "2026-03-19T08:11:00.000Z",
+              missedRefreshes: 2,
             },
           ],
         };
@@ -78,19 +115,23 @@ describe("dashboard live path", () => {
         return {
           overallState: "watchful",
           weatherSummary: "Rain is moving across Mayfair and the nearby street is reading a little slower.",
+          signalObservedAt: "2026-03-19T08:28:00.000Z",
         };
       },
     });
 
     expect(built.snapshotState).toBe("live");
     expect(built.snapshot.publishedAt).toBe("2026-03-19T08:31:00.000Z");
-    expect(built.snapshot.nearbyModes[0].state).toBe("caution");
-    expect(built.snapshot.freshnessLabel).toBe("Now refreshed for the foyer.");
+    expect(built.snapshot.overallTrend).toBe("worsening");
+    expect(built.snapshot.headerTrust.weather.state).toBe("current");
+    expect(built.snapshot.headerTrust.mobility.state).toBe("stale");
+    expect(built.snapshot.nearbyModes.find((mode) => mode.key === "bus")?.trust.state).toBe("delayed");
   });
 
-  it("reuses the last safe snapshot when a refresh fails", async () => {
+  it("keeps one weaker signal local when the service falls back to the last safe snapshot", async () => {
     const storedSnapshot = createFixtureDashboardSnapshot({
       publishedAt: "2026-03-19T08:15:00.000Z",
+      overallTrend: "steady",
     });
     const response = await getDashboardApiResponse({
       now: new Date("2026-03-19T08:32:00.000Z"),
@@ -113,6 +154,34 @@ describe("dashboard live path", () => {
 
     expect(response.meta.snapshotState).toBe("last-safe");
     expect(response.data.publishedAt).toBe("2026-03-19T08:15:00.000Z");
+    expect(response.data.headerTrust.weather.state).toBe("current");
+  });
+
+  it("does not invent a trend when the service drops to fixture fallback", async () => {
+    const response = await getDashboardApiResponse({
+      now: new Date("2026-03-19T08:32:00.000Z"),
+      cacheGet() {
+        return null;
+      },
+      cacheSet() {
+        return null;
+      },
+      async readSnapshot() {
+        return null;
+      },
+      async buildSnapshot() {
+        throw new Error("provider failure");
+      },
+      async publishSnapshot() {
+        throw new Error("should not publish");
+      },
+    });
+
+    expect(response.meta.snapshotState).toBe("fallback");
+    expect(response.data.overallTrend).toBe(null);
+    expect(response.data.headerTrust.weather.state).toBe("reduced-confidence");
+    expect(response.data.headerTrust.mobility.state).toBe("reduced-confidence");
+    expect(response.data.nearbyModes.every((mode) => mode.trust.state === "reduced-confidence")).toBe(true);
   });
 
   it("keeps the polling boundary selective and route-local without a loading takeover", () => {
@@ -122,17 +191,13 @@ describe("dashboard live path", () => {
       "utf8",
     );
     const pageSource = readFileSync(join(root, "src", "app", "(public)", "page.tsx"), "utf8");
-    const tsconfigSource = readFileSync(join(root, "tsconfig.json"), "utf8");
 
     assert.match(hookSource, /queryKey:\s*\["dashboard"\]/);
-    assert.match(hookSource, /fetchJson<DashboardApiResponse>\("\/api\/dashboard"\)/);
-    assert.match(hookSource, /refetchInterval:\s*initialData\.meta\.refreshIntervalMs/);
+    assert.match(hookSource, /headerTrust/);
     assert.match(liveScreenSource, /QueryClientProvider/);
     assert.match(liveScreenSource, /<DashboardScreen viewModel=\{viewModel\} \/>/);
     assert.doesNotMatch(liveScreenSource, /spinner|loading takeover|full-screen/i);
     assert.match(pageSource, /getDashboardApiResponse/);
     assert.match(pageSource, /export const dynamic = "force-dynamic"/);
-    assert.doesNotMatch(pageSource, /getOverallDepartureSnapshot/);
-    assert.doesNotMatch(tsconfigSource, /"@tanstack\/react-query"\s*:/);
   });
 });

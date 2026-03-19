@@ -1,16 +1,31 @@
 import { createDashboardSnapshot } from "../../../lib/contracts/dashboard-snapshot.js";
+import { createTrustSignal } from "../../../lib/contracts/freshness.js";
 
 const FIXTURE_PUBLISHED_AT = "2026-03-19T08:00:00.000Z";
 
-function createBaseSnapshot({ publishedAt = FIXTURE_PUBLISHED_AT, mapState = "default" } = {}) {
+function createBaseSnapshot({
+  publishedAt = FIXTURE_PUBLISHED_AT,
+  mapState = "default",
+  overallTrend = null,
+} = {}) {
   return createDashboardSnapshot({
     publishedAt,
     overallState: "watchful",
+    overallTrend,
     weatherSummary: "Cold rain is moving across Mayfair and the street is reading a little slower.",
     mobilitySummary: "Nearby departures are still moving, with a tighter rhythm under the rain.",
     placeLabel: "Royal Institution, Albemarle Street",
-    freshnessLabel: "Live picture refreshed for the foyer.",
     supportLabel: "Weather and mobility reinforce the same local read.",
+    headerTrust: {
+      weather: createTrustSignal({
+        state: "current",
+        subject: "Weather",
+      }),
+      mobility: createTrustSignal({
+        state: "aging",
+        subject: "Movement",
+      }),
+    },
     localMap: {
       title: "Local frame",
       state: mapState,
@@ -76,6 +91,10 @@ function createBaseSnapshot({ publishedAt = FIXTURE_PUBLISHED_AT, mapState = "de
         state: "available",
         summary: "Green Park and Piccadilly lines are still reading open within the short walk from here.",
         nuance: "Platforms may feel a little fuller once the current lecture lets out.",
+        trust: createTrustSignal({
+          state: "current",
+          subject: "Tube and rail",
+        }),
       },
       {
         key: "bus",
@@ -83,6 +102,10 @@ function createBaseSnapshot({ publishedAt = FIXTURE_PUBLISHED_AT, mapState = "de
         state: "caution",
         summary: "West End stops nearby are moving, though spacing is a little uneven in the rain.",
         nuance: "Sheltered queues are beginning to gather along the wetter side streets.",
+        trust: createTrustSignal({
+          state: "aging",
+          subject: "Bus",
+        }),
       },
       {
         key: "roads",
@@ -90,6 +113,10 @@ function createBaseSnapshot({ publishedAt = FIXTURE_PUBLISHED_AT, mapState = "de
         state: "caution",
         summary: "Mayfair traffic is still flowing, with slower turns around the wetter junctions.",
         nuance: "Street crossings remain readable, but the pace is not especially brisk.",
+        trust: createTrustSignal({
+          state: "stale",
+          subject: "Roads",
+        }),
       },
       {
         key: "cycles-scooters",
@@ -97,6 +124,10 @@ function createBaseSnapshot({ publishedAt = FIXTURE_PUBLISHED_AT, mapState = "de
         state: "disrupted",
         summary: "Open micromobility nearby is looking sparse while the rain sits over central London.",
         nuance: "Any remaining vehicles are likely to be more scattered than usual from here.",
+        trust: createTrustSignal({
+          state: "reduced-confidence",
+          subject: "Cycles and scooters",
+        }),
       },
     ],
   });
@@ -108,12 +139,18 @@ export const overallDepartureFallbackSnapshot = createBaseSnapshot({
   mapState: "fallback",
 });
 
-export function createFixtureDashboardSnapshot({ publishedAt = FIXTURE_PUBLISHED_AT } = {}) {
-  return createBaseSnapshot({ publishedAt });
+export function createFixtureDashboardSnapshot({
+  publishedAt = FIXTURE_PUBLISHED_AT,
+  overallTrend = null,
+} = {}) {
+  return createBaseSnapshot({ publishedAt, overallTrend });
 }
 
-export function createFixtureDashboardFallbackSnapshot({ publishedAt = FIXTURE_PUBLISHED_AT } = {}) {
-  return createBaseSnapshot({ publishedAt, mapState: "fallback" });
+export function createFixtureDashboardFallbackSnapshot({
+  publishedAt = FIXTURE_PUBLISHED_AT,
+  overallTrend = null,
+} = {}) {
+  return createBaseSnapshot({ publishedAt, mapState: "fallback", overallTrend });
 }
 
 export function getOverallDepartureSnapshot() {

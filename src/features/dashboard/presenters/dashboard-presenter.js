@@ -18,17 +18,41 @@ const LOCAL_MAP_STATE_LABELS = Object.freeze({
   fallback: "Fallback local frame",
 });
 
+const TREND_LABELS = Object.freeze({
+  improving: "Improving",
+  steady: "Steady",
+  worsening: "Worsening",
+});
+
 const DASHBOARD_METADATA = Object.freeze({
   title: "Albemarle Pulse | Royal Institution departures",
   description: "Overall departure picture for the Royal Institution foyer.",
 });
 
-export function createCurrentnessLabel(snapshotFreshnessLabel) {
-  if (typeof snapshotFreshnessLabel !== "string" || snapshotFreshnessLabel.trim().length === 0) {
-    return "Holding a calm shared picture for the foyer.";
+function createTrendMessage(overallTrend) {
+  if (overallTrend === "improving") {
+    return "The departure picture is improving.";
   }
 
-  return snapshotFreshnessLabel.trim();
+  if (overallTrend === "worsening") {
+    return "The departure picture is tightening.";
+  }
+
+  return "The departure picture is holding steady.";
+}
+
+function createCurrentnessMessage() {
+  return "Current signals refresh inside the same calm shared view.";
+}
+
+function presentTrust(trust) {
+  return Object.freeze({
+    state: trust.state,
+    label: trust.label,
+    detail: trust.detail,
+    confidence: trust.confidence,
+    isNarrowed: trust.confidence === "narrowed",
+  });
 }
 
 export function presentDashboardSnapshot(snapshotInput) {
@@ -37,11 +61,16 @@ export function presentDashboardSnapshot(snapshotInput) {
   return Object.freeze({
     placeLabel: snapshot.placeLabel,
     overallState: snapshot.overallState,
+    overallTrend: snapshot.overallTrend,
+    overallTrendLabel: snapshot.overallTrend ? TREND_LABELS[snapshot.overallTrend] : null,
+    trendMessage: snapshot.overallTrend ? createTrendMessage(snapshot.overallTrend) : null,
+    currentnessMessage: createCurrentnessMessage(),
     stateKicker: "Overall departure picture",
     stateHeadline: HEADLINES[snapshot.overallState],
     weatherSummary: snapshot.weatherSummary,
     mobilitySummary: snapshot.mobilitySummary,
-    freshnessLabel: createCurrentnessLabel(snapshot.freshnessLabel),
+    weatherTrust: presentTrust(snapshot.headerTrust.weather),
+    mobilityTrust: presentTrust(snapshot.headerTrust.mobility),
     supportLabel: snapshot.supportLabel,
     nearbyModeHeading: "Nearby modes",
     nearbyModeIntro: "From here, now: the nearby departure modes are reading as follows.",
@@ -49,6 +78,7 @@ export function presentDashboardSnapshot(snapshotInput) {
       snapshot.nearbyModes.map((mode) =>
         Object.freeze({
           ...mode,
+          trust: presentTrust(mode.trust),
           stateLabel: MODE_STATE_LABELS[mode.state],
         }),
       ),

@@ -9,16 +9,35 @@ type NearbyModeViewModel = {
   stateLabel: string;
   summary: string;
   nuance: string | null;
+  trust: {
+    label: string;
+    detail: string;
+    confidence: string;
+    isNarrowed: boolean;
+  };
 };
 
 type DashboardViewModel = {
   placeLabel: string;
   overallState: string;
+  overallTrend: string | null;
+  overallTrendLabel: string | null;
+  trendMessage: string | null;
+  currentnessMessage: string;
   stateKicker: string;
   stateHeadline: string;
   weatherSummary: string;
   mobilitySummary: string;
-  freshnessLabel: string;
+  weatherTrust: {
+    label: string;
+    detail: string;
+    confidence: string;
+  };
+  mobilityTrust: {
+    label: string;
+    detail: string;
+    confidence: string;
+  };
   supportLabel: string;
   nearbyModeHeading: string;
   nearbyModeIntro: string;

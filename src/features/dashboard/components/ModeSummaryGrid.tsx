@@ -7,6 +7,12 @@ type NearbyModeViewModel = {
   stateLabel: string;
   summary: string;
   nuance: string | null;
+  trust: {
+    label: string;
+    detail: string;
+    confidence: string;
+    isNarrowed: boolean;
+  };
 };
 
 type ModeSummaryGridViewModel = {

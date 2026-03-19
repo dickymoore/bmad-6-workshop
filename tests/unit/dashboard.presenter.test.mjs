@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { createTrustSignal } from "../../src/lib/contracts/freshness.js";
 import {
   DASHBOARD_ADVISORY_LANGUAGE_PATTERN,
   NEARBY_MODE_STATES,
@@ -7,7 +8,6 @@ import {
   createDashboardSnapshot,
 } from "../../src/lib/contracts/dashboard-snapshot.js";
 import {
-  createCurrentnessLabel,
   getDashboardMetadata,
   presentDashboardSnapshot,
 } from "../../src/features/dashboard/presenters/dashboard-presenter.js";
@@ -16,11 +16,21 @@ function buildSnapshot(overrides = {}) {
   return createDashboardSnapshot({
     publishedAt: "2026-03-19T08:00:00.000Z",
     overallState: "watchful",
+    overallTrend: "steady",
     weatherSummary: "Cold rain is moving across Mayfair and the street is reading a little slower.",
     mobilitySummary: "Nearby departures are still moving, with a tighter rhythm under the rain.",
     placeLabel: "Royal Institution, Albemarle Street",
-    freshnessLabel: "Now refreshed for the foyer.",
-    supportLabel: "Weather and mobility reinforce the same local read.",
+    supportLabel: "Weather and movement reinforce the same local read.",
+    headerTrust: {
+      weather: createTrustSignal({
+        state: "current",
+        subject: "Weather",
+      }),
+      mobility: createTrustSignal({
+        state: "aging",
+        subject: "Movement",
+      }),
+    },
     localMap: {
       title: "Local frame",
       state: "default",
@@ -56,12 +66,21 @@ function buildSnapshot(overrides = {}) {
         state: "available",
         summary: "Green Park and Piccadilly lines are still reading open nearby.",
         nuance: "Station approaches may bunch lightly after talks end.",
+        trust: createTrustSignal({
+          state: "current",
+          subject: "Tube and rail",
+        }),
       },
       {
         key: "bus",
         label: "Bus",
         state: "caution",
         summary: "West End stops are moving, though spacing is a little uneven in the rain.",
+        nuance: "Street queues are forming lightly under shelter.",
+        trust: createTrustSignal({
+          state: "delayed",
+          subject: "Bus",
+        }),
       },
     ],
     ...overrides,
@@ -69,505 +88,88 @@ function buildSnapshot(overrides = {}) {
 }
 
 describe("dashboard snapshot contract", () => {
-  it("supports only the approved overall departure vocabulary", () => {
+  it("supports the approved public-state vocabularies", () => {
     expect(OVERALL_DEPARTURE_STATES).toEqual(["calm", "watchful", "strained", "disrupted"]);
-  });
-
-  it("supports only the approved nearby-mode vocabulary", () => {
     expect(NEARBY_MODE_STATES).toEqual(["available", "caution", "disrupted"]);
   });
 
-  it("returns a frozen normalized snapshot for the public display", () => {
+  it("returns a frozen normalized snapshot with trend and local trust metadata", () => {
     const snapshot = buildSnapshot();
 
-    expect(snapshot).toEqual({
-      publishedAt: "2026-03-19T08:00:00.000Z",
-      overallState: "watchful",
-      weatherSummary: "Cold rain is moving across Mayfair and the street is reading a little slower.",
-      mobilitySummary: "Nearby departures are still moving, with a tighter rhythm under the rain.",
-      placeLabel: "Royal Institution, Albemarle Street",
-      freshnessLabel: "Now refreshed for the foyer.",
-      supportLabel: "Weather and mobility reinforce the same local read.",
-      localMap: {
-        title: "Local frame",
-        state: "default",
-        venueAnchor: {
-          key: "royal-institution",
-          label: "Royal Institution",
-          x: 48,
-          y: 58,
-        },
-        selectedNearbyNodes: [
-          {
-            key: "green-park",
-            label: "Green Park",
-            x: 64,
-            y: 32,
-          },
-          {
-            key: "piccadilly-arcade",
-            label: "Piccadilly Arcade",
-            x: 34,
-            y: 61,
-          },
-        ],
-        localityEmphasis: {
-          label: "Piccadilly and Green Park remain the clearest local corridor.",
-        },
-        fallbackCopy: null,
-      },
-      nearbyModes: [
-        {
-          key: "tube-rail",
-          label: "Tube and rail",
-          state: "available",
-          summary: "Green Park and Piccadilly lines are still reading open nearby.",
-          nuance: "Station approaches may bunch lightly after talks end.",
-        },
-        {
-          key: "bus",
-          label: "Bus",
-          state: "caution",
-          summary: "West End stops are moving, though spacing is a little uneven in the rain.",
-          nuance: null,
-        },
-      ],
-    });
+    expect(snapshot.overallTrend).toBe("steady");
+    expect(snapshot.headerTrust.weather.state).toBe("current");
+    expect(snapshot.nearbyModes[1].trust.state).toBe("delayed");
     expect(Object.isFrozen(snapshot)).toBe(true);
-    expect(Object.isFrozen(snapshot.localMap)).toBe(true);
-    expect(Object.isFrozen(snapshot.localMap.selectedNearbyNodes)).toBe(true);
-    expect(Object.isFrozen(snapshot.localMap.selectedNearbyNodes[0])).toBe(true);
+    expect(Object.isFrozen(snapshot.headerTrust)).toBe(true);
     expect(Object.isFrozen(snapshot.nearbyModes)).toBe(true);
   });
 
-  it("rejects advisory wording in shared public-display copy", () => {
-    let thrownError;
-
-    try {
-      buildSnapshot({
-        mobilitySummary: "Take the tube before the next burst of rain.",
-      });
-    } catch (error) {
-      thrownError = error;
-    }
-
-    expect(thrownError?.message).toMatch(/must stay fact-only/);
+  it("rejects advisory wording in public copy and trust details", () => {
     expect(DASHBOARD_ADVISORY_LANGUAGE_PATTERN.test("recommended")).toBe(true);
-  });
 
-  it("normalizes fixed local-map data for default and fallback states", () => {
-    const snapshot = buildSnapshot({
-      localMap: {
-        title: "  Local frame ",
-        state: "fallback",
-        venueAnchor: {
-          key: " royal-institution ",
-          label: " Royal Institution ",
-          x: 48,
-          y: 58,
-        },
-        selectedNearbyNodes: [
-          {
-            key: " green-park ",
-            label: " Green Park ",
-            x: 64,
-            y: 32,
-          },
-          {
-            key: "piccadilly-arcade",
-            label: "Piccadilly Arcade",
-            x: 34,
-            y: 61,
-          },
-        ],
-        localityEmphasis: {
-          label: " Piccadilly and Green Park remain the clearest local corridor. ",
-        },
-        fallbackCopy: " Simplified local frame while richer locality detail is unavailable. ",
-      },
-    });
-
-    expect(snapshot.localMap).toEqual({
-      title: "Local frame",
-      state: "fallback",
-      venueAnchor: {
-        key: "royal-institution",
-        label: "Royal Institution",
-        x: 48,
-        y: 58,
-      },
-      selectedNearbyNodes: [
-        {
-          key: "green-park",
-          label: "Green Park",
-          x: 64,
-          y: 32,
-        },
-        {
-          key: "piccadilly-arcade",
-          label: "Piccadilly Arcade",
-          x: 34,
-          y: 61,
-        },
-      ],
-      localityEmphasis: {
-        label: "Piccadilly and Green Park remain the clearest local corridor.",
-      },
-      fallbackCopy: "Simplified local frame while richer locality detail is unavailable.",
-    });
-  });
-
-  it("rejects unsupported nearby-mode states and duplicate keys", () => {
-    let invalidStateError;
-    let advisoryCopyError;
-    let duplicateKeyError;
+    let supportError;
+    let trustError;
 
     try {
       buildSnapshot({
-        nearbyModes: [
-          {
-            key: "roads",
-            label: "Roads",
-            state: "best",
-            summary: "Vehicle movement is still possible nearby.",
-          },
-        ],
+        supportLabel: "Take the tube while it is quiet.",
       });
     } catch (error) {
-      invalidStateError = error;
+      supportError = error;
     }
 
     try {
       buildSnapshot({
-        nearbyModes: [
-          {
-            key: "roads",
-            label: "Roads",
-            state: "caution",
-            summary: "Best option is to head west by car.",
-          },
-        ],
-      });
-    } catch (error) {
-      advisoryCopyError = error;
-    }
-
-    try {
-      buildSnapshot({
-        nearbyModes: [
-          {
-            key: " roads ",
-            label: "Roads",
-            state: "caution",
-            summary: "Vehicle movement is still possible nearby.",
-          },
-          {
-            key: "roads",
-            label: "Roads again",
-            state: "available",
-            summary: "Traffic is easing slightly.",
-          },
-        ],
-      });
-    } catch (error) {
-      duplicateKeyError = error;
-    }
-
-    expect(invalidStateError?.message).toMatch(/Unsupported nearby mode state/);
-    expect(advisoryCopyError?.message).toMatch(/must stay fact-only/);
-    expect(duplicateKeyError?.message).toMatch(/must be unique/);
-  });
-
-  it("rejects unsupported local-map states, invalid fallback usage, advisory fallback copy, and duplicate node keys", () => {
-    let invalidStateError;
-    let missingFallbackCopyError;
-    let unexpectedFallbackCopyError;
-    let advisoryCopyError;
-    let duplicateKeyError;
-
-    try {
-      buildSnapshot({
-        localMap: {
-          title: "Local frame",
-          state: "interactive",
-          venueAnchor: {
-            key: "royal-institution",
-            label: "Royal Institution",
-            x: 48,
-            y: 58,
-          },
-          selectedNearbyNodes: [
-            {
-              key: "green-park",
-              label: "Green Park",
-              x: 64,
-              y: 32,
-            },
-          ],
+        headerTrust: {
+          weather: createTrustSignal({
+            state: "current",
+            detail: "Weather is current and best option is unchanged.",
+          }),
+          mobility: createTrustSignal({
+            state: "current",
+            subject: "Movement",
+          }),
         },
       });
     } catch (error) {
-      invalidStateError = error;
+      trustError = error;
     }
 
-    try {
-      buildSnapshot({
-        localMap: {
-          title: "Local frame",
-          state: "fallback",
-          venueAnchor: {
-            key: "royal-institution",
-            label: "Royal Institution",
-            x: 48,
-            y: 58,
-          },
-          selectedNearbyNodes: [
-            {
-              key: "green-park",
-              label: "Green Park",
-              x: 64,
-              y: 32,
-            },
-          ],
-          localityEmphasis: null,
-        },
-      });
-    } catch (error) {
-      missingFallbackCopyError = error;
-    }
-
-    try {
-      buildSnapshot({
-        localMap: {
-          title: "Local frame",
-          state: "default",
-          venueAnchor: {
-            key: "royal-institution",
-            label: "Royal Institution",
-            x: 48,
-            y: 58,
-          },
-          selectedNearbyNodes: [
-            {
-              key: "green-park",
-              label: "Green Park",
-              x: 64,
-              y: 32,
-            },
-          ],
-          fallbackCopy: "Simplified local frame while richer locality detail is unavailable.",
-        },
-      });
-    } catch (error) {
-      unexpectedFallbackCopyError = error;
-    }
-
-    try {
-      buildSnapshot({
-        localMap: {
-          title: "Local frame",
-          state: "fallback",
-          venueAnchor: {
-            key: "royal-institution",
-            label: "Royal Institution",
-            x: 48,
-            y: 58,
-          },
-          selectedNearbyNodes: [
-            {
-              key: "green-park",
-              label: "Green Park",
-              x: 64,
-              y: 32,
-            },
-          ],
-          fallbackCopy: "Recommended local frame detail is unavailable.",
-        },
-      });
-    } catch (error) {
-      advisoryCopyError = error;
-    }
-
-    try {
-      buildSnapshot({
-        localMap: {
-          title: "Local frame",
-          state: "default",
-          venueAnchor: {
-            key: "royal-institution",
-            label: "Royal Institution",
-            x: 48,
-            y: 58,
-          },
-          selectedNearbyNodes: [
-            {
-              key: " green-park ",
-              label: "Green Park",
-              x: 64,
-              y: 32,
-            },
-            {
-              key: "green-park",
-              label: "Green Park station",
-              x: 66,
-              y: 34,
-            },
-          ],
-        },
-      });
-    } catch (error) {
-      duplicateKeyError = error;
-    }
-
-    expect(invalidStateError?.message).toMatch(/Unsupported local map state/);
-    expect(missingFallbackCopyError?.message).toMatch(/is required when state is "fallback"/);
-    expect(unexpectedFallbackCopyError?.message).toMatch(/is only allowed when state is "fallback"/);
-    expect(advisoryCopyError?.message).toMatch(/must stay fact-only/);
-    expect(duplicateKeyError?.message).toMatch(/must be unique/);
+    expect(supportError?.message).toMatch(/must stay fact-only/);
+    expect(trustError?.message).toMatch(/must stay fact-only/);
   });
 });
 
 describe("dashboard presenter", () => {
-  it("turns the snapshot into a room-scale display with nearby mode summaries and a fixed local map", () => {
+  it("shapes overall trend and local trust cues without broadening the whole screen", () => {
     const viewModel = presentDashboardSnapshot(buildSnapshot());
 
-    expect(viewModel).toEqual({
-      placeLabel: "Royal Institution, Albemarle Street",
-      overallState: "watchful",
-      stateKicker: "Overall departure picture",
-      stateHeadline: "Watchful across the Royal Institution threshold",
-      weatherSummary: "Cold rain is moving across Mayfair and the street is reading a little slower.",
-      mobilitySummary: "Nearby departures are still moving, with a tighter rhythm under the rain.",
-      freshnessLabel: "Now refreshed for the foyer.",
-      supportLabel: "Weather and mobility reinforce the same local read.",
-      nearbyModeHeading: "Nearby modes",
-      nearbyModeIntro: "From here, now: the nearby departure modes are reading as follows.",
-      nearbyModes: [
-        {
-          key: "tube-rail",
-          label: "Tube and rail",
-          state: "available",
-          stateLabel: "Available",
-          summary: "Green Park and Piccadilly lines are still reading open nearby.",
-          nuance: "Station approaches may bunch lightly after talks end.",
-        },
-        {
-          key: "bus",
-          label: "Bus",
-          state: "caution",
-          stateLabel: "Caution",
-          summary: "West End stops are moving, though spacing is a little uneven in the rain.",
-          nuance: null,
-        },
-      ],
-      localMap: {
-        title: "Local frame",
-        ariaLabel: "Fixed local map anchored to the Royal Institution",
-        state: "default",
-        stateLabel: "Default local frame",
-        venueAnchor: {
-          key: "royal-institution",
-          label: "Royal Institution",
-          x: 48,
-          y: 58,
-          caption: "Anchor",
-        },
-        selectedNearbyNodes: [
-          {
-            key: "green-park",
-            label: "Green Park",
-            x: 64,
-            y: 32,
-            caption: "Nearby node",
-          },
-          {
-            key: "piccadilly-arcade",
-            label: "Piccadilly Arcade",
-            x: 34,
-            y: 61,
-            caption: "Nearby node",
-          },
-        ],
-        localityEmphasis: "Piccadilly and Green Park remain the clearest local corridor.",
-        fallbackCopy: null,
-      },
-    });
-    expect(Object.isFrozen(viewModel)).toBe(true);
-    expect(Object.isFrozen(viewModel.localMap)).toBe(true);
-    expect(Object.isFrozen(viewModel.nearbyModes)).toBe(true);
+    expect(viewModel.overallTrendLabel).toBe("Steady");
+    expect(viewModel.trendMessage).toBe("The departure picture is holding steady.");
+    expect(viewModel.currentnessMessage).toBe("Current signals refresh inside the same calm shared view.");
+    expect(viewModel.weatherTrust.isNarrowed).toBe(false);
+    expect(viewModel.mobilityTrust.isNarrowed).toBe(true);
+    expect(viewModel.nearbyModes[0].trust.isNarrowed).toBe(false);
+    expect(viewModel.nearbyModes[1].trust.isNarrowed).toBe(true);
+    expect(viewModel.nearbyModes[1].trust.detail).toMatch(/should be read with care/i);
   });
 
-  it("presents a calm fallback local-map variant without planner language", () => {
-    const viewModel = presentDashboardSnapshot(
-      buildSnapshot({
-        localMap: {
-          title: "Local frame",
-          state: "fallback",
-          venueAnchor: {
-            key: "royal-institution",
-            label: "Royal Institution",
-            x: 48,
-            y: 58,
-          },
-          selectedNearbyNodes: [
-            {
-              key: "green-park",
-              label: "Green Park",
-              x: 64,
-              y: 32,
-            },
-          ],
-          localityEmphasis: null,
-          fallbackCopy: "Simplified local frame while richer locality detail is unavailable.",
-        },
-      }),
-    );
-
-    expect(viewModel.localMap.state).toBe("fallback");
-    expect(viewModel.localMap.stateLabel).toBe("Fallback local frame");
-    expect(viewModel.localMap.fallbackCopy).toBe(
-      "Simplified local frame while richer locality detail is unavailable.",
-    );
-    expect(/best option|recommended|switch to|take\b/i.test(JSON.stringify(viewModel.localMap))).toBe(false);
-  });
-
-  it("keeps presenter copy inside the non-advisory doctrine boundaries", () => {
-    const viewModel = presentDashboardSnapshot(
-      buildSnapshot({
-        overallState: "calm",
-        weatherSummary: "A bright, dry spell is keeping the local departure picture easy to read.",
-        mobilitySummary: "Nearby movement is settling into an even public rhythm.",
-        freshnessLabel: "Freshly settled across the foyer.",
-        supportLabel: "Conditions remain calm without narrowing anyone toward a single choice.",
-        nearbyModes: [
-          {
-            key: "roads",
-            label: "Roads",
-            state: "available",
-            summary: "Traffic is still flowing through Mayfair at a readable pace.",
-            nuance: "Crossings are staying simple to read.",
-          },
-        ],
-      }),
-    );
-
-    const copy = JSON.stringify(viewModel);
-
-    expect(/best option|recommended|switch to|take\b/i.test(copy)).toBe(false);
-    expect(/Map placeholder/i.test(copy)).toBe(false);
-  });
-
-  it("keeps metadata aligned with the overall departure picture", () => {
+  it("keeps metadata stable for the public route", () => {
     expect(getDashboardMetadata()).toEqual({
       title: "Albemarle Pulse | Royal Institution departures",
       description: "Overall departure picture for the Royal Institution foyer.",
     });
   });
 
-  it("keeps the visible currentness cue calm and snapshot-driven", () => {
-    expect(createCurrentnessLabel(" Freshly settled across the foyer. ")).toBe(
-      "Freshly settled across the foyer.",
+  it("keeps the header calm when no recent trend evidence exists", () => {
+    const viewModel = presentDashboardSnapshot(
+      buildSnapshot({
+        overallTrend: null,
+      }),
     );
-    expect(createCurrentnessLabel("")).toBe("Holding a calm shared picture for the foyer.");
+
+    expect(viewModel.overallTrendLabel).toBe(null);
+    expect(viewModel.trendMessage).toBe(null);
+    expect(viewModel.currentnessMessage).toBe("Current signals refresh inside the same calm shared view.");
   });
 });

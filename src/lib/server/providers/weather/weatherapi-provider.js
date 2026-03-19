@@ -6,6 +6,8 @@ const WEATHER_API_SCHEMA = z.object({
     wind_mph: z.number(),
     precip_mm: z.number(),
     is_day: z.union([z.literal(0), z.literal(1)]),
+    last_updated_epoch: z.number().optional(),
+    last_updated: z.string().optional(),
     condition: z.object({
       text: z.string(),
     }),
@@ -51,6 +53,7 @@ export async function fetchWeatherOverview({
   apiKey = process.env.WEATHERAPI_KEY ?? "",
   query = process.env.WEATHERAPI_LOCATION ?? "51.5099,-0.1419",
   forceLive = process.env.WEATHERAPI_FORCE_LIVE === "1",
+  now = new Date(),
 } = {}) {
   if (!forceLive && !apiKey) {
     return null;
@@ -72,5 +75,15 @@ export async function fetchWeatherOverview({
   }
 
   const payload = WEATHER_API_SCHEMA.parse(await response.json());
-  return summarizeWeather(payload.current);
+  return {
+    ...summarizeWeather(payload.current),
+    signalObservedAt:
+      typeof payload.current.last_updated_epoch === "number"
+        ? new Date(payload.current.last_updated_epoch * 1000).toISOString()
+        : typeof payload.current.last_updated === "string"
+          ? payload.current.last_updated
+          : now.toISOString(),
+    fetchedAt: now.toISOString(),
+    missedRefreshes: 0,
+  };
 }

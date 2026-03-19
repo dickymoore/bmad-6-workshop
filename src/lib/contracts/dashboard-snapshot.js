@@ -1,3 +1,10 @@
+import {
+  FRESHNESS_STATES,
+  TREND_STATES,
+  TRUST_CONFIDENCE_STATES,
+  createTrustSignal,
+} from "./freshness.js";
+
 export const OVERALL_DEPARTURE_STATES = Object.freeze([
   "calm",
   "watchful",
@@ -21,6 +28,52 @@ export const DASHBOARD_ADVISORY_LANGUAGE_PATTERN =
 
 function freezeSnapshot(snapshot) {
   return Object.freeze({ ...snapshot });
+}
+
+function normalizeTrustSignal(signal, fieldName) {
+  if (!signal || typeof signal !== "object") {
+    throw new Error(`Dashboard trust field "${fieldName}" must be an object`);
+  }
+
+  const { state, label, detail, confidence } = signal;
+
+  if (!FRESHNESS_STATES.includes(state)) {
+    throw new Error(`Unsupported freshness state for "${fieldName}": ${state}`);
+  }
+
+  if (!TRUST_CONFIDENCE_STATES.includes(confidence)) {
+    throw new Error(`Unsupported trust confidence state for "${fieldName}": ${confidence}`);
+  }
+
+  for (const [name, value] of Object.entries({ label, detail })) {
+    if (typeof value !== "string" || value.trim().length === 0) {
+      throw new Error(`Dashboard trust field "${fieldName}.${name}" must be a non-empty string`);
+    }
+  }
+
+  for (const [name, value] of Object.entries({ label, detail })) {
+    if (DASHBOARD_ADVISORY_LANGUAGE_PATTERN.test(value)) {
+      throw new Error(`Dashboard trust field "${fieldName}.${name}" must stay fact-only`);
+    }
+  }
+
+  return createTrustSignal({
+    state,
+    label: label.trim(),
+    detail: detail.trim(),
+    confidence,
+  });
+}
+
+function normalizeHeaderTrust(headerTrust) {
+  if (!headerTrust || typeof headerTrust !== "object") {
+    throw new Error('Dashboard snapshot field "headerTrust" must be an object');
+  }
+
+  return freezeSnapshot({
+    weather: normalizeTrustSignal(headerTrust.weather, "headerTrust.weather"),
+    mobility: normalizeTrustSignal(headerTrust.mobility, "headerTrust.mobility"),
+  });
 }
 
 function normalizeMapPoint(point, fieldName) {
@@ -157,7 +210,7 @@ function normalizeNearbyModes(nearbyModes) {
         throw new Error(`Dashboard nearby mode at index ${index} must be an object`);
       }
 
-      const { key, label, state, summary, nuance } = mode;
+      const { key, label, state, summary, nuance, trust } = mode;
 
       for (const [field, value] of Object.entries({ key, label, summary })) {
         if (typeof value !== "string" || value.trim().length === 0) {
@@ -197,6 +250,7 @@ function normalizeNearbyModes(nearbyModes) {
         state,
         summary: summary.trim(),
         nuance: typeof nuance === "string" ? nuance.trim() : null,
+        trust: normalizeTrustSignal(trust, `nearbyModes[${index}].trust`),
       });
     }),
   );
@@ -206,11 +260,12 @@ export function createDashboardSnapshot(input) {
   const {
     publishedAt,
     overallState,
+    overallTrend,
     weatherSummary,
     mobilitySummary,
     placeLabel,
-    freshnessLabel,
     supportLabel,
+    headerTrust,
     localMap,
     nearbyModes,
   } = input;
@@ -223,11 +278,14 @@ export function createDashboardSnapshot(input) {
     throw new Error(`Unsupported overall departure state: ${overallState}`);
   }
 
+  if (overallTrend != null && !TREND_STATES.includes(overallTrend)) {
+    throw new Error(`Unsupported dashboard trend state: ${overallTrend}`);
+  }
+
   for (const [field, value] of Object.entries({
     weatherSummary,
     mobilitySummary,
     placeLabel,
-    freshnessLabel,
     supportLabel,
   })) {
     if (typeof value !== "string" || value.trim().length === 0) {
@@ -238,7 +296,6 @@ export function createDashboardSnapshot(input) {
   for (const [field, value] of Object.entries({
     weatherSummary,
     mobilitySummary,
-    freshnessLabel,
     supportLabel,
   })) {
     if (DASHBOARD_ADVISORY_LANGUAGE_PATTERN.test(value)) {
@@ -249,11 +306,12 @@ export function createDashboardSnapshot(input) {
   return freezeSnapshot({
     publishedAt,
     overallState,
+    overallTrend: overallTrend ?? null,
     weatherSummary: weatherSummary.trim(),
     mobilitySummary: mobilitySummary.trim(),
     placeLabel: placeLabel.trim(),
-    freshnessLabel: freshnessLabel.trim(),
     supportLabel: supportLabel.trim(),
+    headerTrust: normalizeHeaderTrust(headerTrust),
     localMap: normalizeLocalMap(localMap),
     nearbyModes: normalizeNearbyModes(nearbyModes),
   });

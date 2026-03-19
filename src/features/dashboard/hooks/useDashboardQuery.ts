@@ -9,6 +9,12 @@ export type NearbyModeSnapshot = {
   state: string;
   summary: string;
   nuance: string | null;
+  trust: {
+    state: string;
+    label: string;
+    detail: string;
+    confidence: string;
+  };
 };
 
 export type DashboardApiResponse = {
@@ -16,10 +22,24 @@ export type DashboardApiResponse = {
     publishedAt: string;
     placeLabel: string;
     overallState: string;
+    overallTrend: string | null;
     weatherSummary: string;
     mobilitySummary: string;
-    freshnessLabel: string;
     supportLabel: string;
+    headerTrust: {
+      weather: {
+        state: string;
+        label: string;
+        detail: string;
+        confidence: string;
+      };
+      mobility: {
+        state: string;
+        label: string;
+        detail: string;
+        confidence: string;
+      };
+    };
     localMap: {
       title: string;
       state: string;

@@ -52,7 +52,7 @@ function summarizeModeState(modeKey, state, descriptions) {
   return `Nearby buses are reading disrupted${descriptions ? `: ${descriptions}.` : "."}`;
 }
 
-function normalizeTflLineGroup(lines, modeKey) {
+function normalizeTflLineGroup(lines, modeKey, fetchedAt) {
   if (lines.length === 0) {
     return null;
   }
@@ -73,8 +73,11 @@ function normalizeTflLineGroup(lines, modeKey) {
       state === "available"
         ? "TfL status is holding a calm nearby read."
         : state === "caution"
-          ? "Queues and platform rhythms may bunch a little more than usual."
+        ? "Queues and platform rhythms may bunch a little more than usual."
           : "The foyer read should stay watchful while the line status settles.",
+    signalObservedAt: fetchedAt,
+    fetchedAt,
+    missedRefreshes: 0,
   };
 }
 
@@ -84,6 +87,7 @@ export async function fetchTflOverview({
   apiKey = process.env.TFL_API_KEY ?? "",
   appId = process.env.TFL_APP_ID ?? "",
   forceLive = process.env.TFL_FORCE_LIVE === "1",
+  now = new Date(),
 } = {}) {
   if (!forceLive && !apiKey && !appId) {
     return null;
@@ -111,10 +115,11 @@ export async function fetchTflOverview({
   }
 
   const payload = TFL_LINE_STATUSES_SCHEMA.parse(await response.json());
+  const fetchedAt = now.toISOString();
   const tubeLines = payload.filter((line) => line.modeName !== "bus");
   const busLines = payload.filter((line) => line.modeName === "bus");
-  const tubeRail = normalizeTflLineGroup(tubeLines, "tube-rail");
-  const bus = normalizeTflLineGroup(busLines, "bus");
+  const tubeRail = normalizeTflLineGroup(tubeLines, "tube-rail", fetchedAt);
+  const bus = normalizeTflLineGroup(busLines, "bus", fetchedAt);
   const liveModes = [tubeRail, bus].filter(Boolean);
 
   if (liveModes.length === 0) {
@@ -135,5 +140,8 @@ export async function fetchTflOverview({
   return {
     liveModes,
     mobilitySummary,
+    signalObservedAt: fetchedAt,
+    fetchedAt,
+    missedRefreshes: 0,
   };
 }

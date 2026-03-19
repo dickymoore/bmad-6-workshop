@@ -124,9 +124,13 @@ test("story 1.5 public route composes the Royal Institution dashboard feature wi
     false,
     "public route should stay fact-only",
   );
-  assert.equal(/overallState|weatherSummary|placeLabel|freshnessLabel/i.test(contract), true, "dashboard contract should cover overall picture fields");
+  assert.equal(
+    /overallState|overallTrend|headerTrust|weatherSummary|placeLabel/i.test(contract),
+    true,
+    "dashboard contract should cover overall picture fields and trust metadata",
+  );
   assert.equal(/publishedAt/i.test(contract + apiContract), true, "live dashboard path should carry a publication timestamp through contract boundaries");
-  assert.equal(/nearbyModes|summary|state/i.test(contract), true, "dashboard contract should cover nearby mode summaries");
+  assert.equal(/nearbyModes|summary|state|trust/i.test(contract), true, "dashboard contract should cover nearby mode summaries and local trust");
   assert.equal(/localMap|selectedNearbyNodes|fallbackCopy/.test(contract), true, "dashboard contract should cover fixed local-map data");
   assert.equal(/calm|watchful|strained|disrupted/i.test(contract), true, "dashboard contract should encode approved overall-state vocabulary");
   assert.equal(/available|caution|disrupted/i.test(contract), true, "dashboard contract should encode approved nearby-mode vocabulary");
@@ -140,7 +144,11 @@ test("story 1.5 public route composes the Royal Institution dashboard feature wi
   assert.equal(/QueryClientProvider|useDashboardQuery|refetchInterval/.test(liveScreen + hook), true, "live path should poll through a dedicated query boundary");
   assert.equal(/"@tanstack\/react-query"\s*:/.test(tsconfig), false, "tsconfig should not alias react-query away from the installed package");
   assert.equal(/@\/lib\/vendor\/tanstack-react-query/.test(liveScreen + hook), true, "query compatibility wiring should be explicit in source");
-  assert.equal(/runtime\/snapshots|last-safe|fallback/.test(service + publish + store), true, "live path should publish and reuse safe snapshots");
+  assert.equal(
+    /runtime\/snapshots|dashboard-history|last-safe|fallback/.test(service + publish + store),
+    true,
+    "live path should publish and reuse safe snapshots with lightweight recent history",
+  );
   assert.equal(
     /const isFallback = viewModel\.state === "fallback";/.test(localMap),
     true,
@@ -163,6 +171,7 @@ test("story 1.5 public route composes the Royal Institution dashboard feature wi
     "public route should remain passive and non-interactive",
   );
   assert.equal(/spinner|loading takeover|manual refresh/i.test(publicFeature), false, "public route should avoid full-screen loading or manual refresh controls");
+  assert.equal(/provider request failed|TfL|WeatherAPI|HTTP|cache/i.test(publicCopySources), false, "public copy should stay plain-language and non-technical");
   assert.equal(/<svg|role="img"|aria-label="Fixed local map anchored to the Royal Institution"/.test(localMap), true, "local map should render as a passive framed graphic");
 });
 
