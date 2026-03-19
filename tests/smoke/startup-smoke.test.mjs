@@ -52,12 +52,32 @@ test("story 1.2 exposes a first-class local validation gate", () => {
 test("story 1.1 separates public and non-public ops routes", () => {
   const publicRoutePath = join(root, "src", "app", "(public)", "page.tsx");
   const opsRoutePath = join(root, "src", "app", "(ops)", "ops", "page.tsx");
+  const opsFeaturePath = join(root, "src", "features", "ops", "components", "OpsShell.tsx");
+  const opsContentPath = join(root, "src", "features", "ops", "ops-shell-content.js");
+  const opsAccessPath = join(root, "src", "lib", "server", "security", "assert-ops-access.js");
 
   assert.equal(existsSync(publicRoutePath), true, "expected public route group page");
   assert.equal(existsSync(opsRoutePath), true, "expected ops route group page");
+  assert.equal(existsSync(opsFeaturePath), true, "expected dedicated ops feature shell");
+  assert.equal(existsSync(opsContentPath), true, "expected ops shell content model");
+  assert.equal(existsSync(opsAccessPath), true, "expected server-side ops access helper");
 
+  const publicPage = readFileSync(publicRoutePath, "utf8");
   const opsPage = readFileSync(opsRoutePath, "utf8");
-  assert.equal(/notFound\s*\(/.test(opsPage), true, "ops route should stay hidden until secured access exists");
+  const opsFeature = readFileSync(opsFeaturePath, "utf8");
+  const opsContent = readFileSync(opsContentPath, "utf8");
+  const opsAccess = readFileSync(opsAccessPath, "utf8");
+
+  assert.equal(/assertOpsAccess|isOpsAccessDeniedError|headers\(\)/.test(opsPage), true, "ops route should gate access on the server before rendering");
+  assert.equal(/return <OpsShell \/>;/.test(opsPage), true, "ops route should delegate rendering to the ops feature shell");
+  assert.equal(/notFound\(\)/.test(opsPage), true, "denied ops access should fail closed with a non-leaky response");
+  assert.equal(/OPS_ALLOWED_HOSTS|localhost|127\.0\.0\.1/.test(opsAccess), true, "ops helper should document one repo-wide local-only allowlist rule");
+  assert.equal(/Venue operations|System checks|Recovery steps|Skip to system checks/.test(opsFeature + opsContent), true, "ops shell should expose clear keyboard-safe maintenance structure");
+  assert.equal(
+    /ops|maintenance|readiness|fallback/i.test(publicPage),
+    false,
+    "public route should remain free of ops or maintenance copy",
+  );
 });
 
 test("story 1.5 public route composes the Royal Institution dashboard feature with a fixed passive local map", () => {

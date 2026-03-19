@@ -12,15 +12,15 @@ development_status:
   1-5-anchor-the-display-with-a-fixed-local-map: done
   1-6-verify-the-primary-display-on-real-venue-sized-surfaces: done
   epic-1-retrospective: optional
-  epic-2: in-progress
+  epic-2: done
   2-1-keep-the-departure-picture-current-during-normal-operation: done
   2-2-show-trend-and-freshness-where-confidence-matters: done
   2-3-surface-serious-disruption-without-breaking-composure: done
   2-4-preserve-honest-usefulness-during-provider-failure: done
   2-5-maintain-stable-live-reading-during-updates-and-motion-changes: done
-  epic-2-retrospective: optional
-  epic-3: backlog
-  3-1-provide-a-separate-local-only-ops-access-surface: backlog
+  epic-2-retrospective: done
+  epic-3: in-progress
+  3-1-provide-a-separate-local-only-ops-access-surface: done
   3-2-show-public-readiness-and-current-ops-state: backlog
   3-3-diagnose-degraded-impact-by-signal-and-scope: backlog
   3-4-trigger-lightweight-refresh-and-trust-check-actions: backlog
