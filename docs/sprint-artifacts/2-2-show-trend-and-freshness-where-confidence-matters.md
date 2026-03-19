@@ -376,3 +376,29 @@ Approve
 ### Change Log
 
 - 2026-03-19: Ran the Story 2.2 code-review workflow, auto-fixed three findings, reran the full validation gate, and marked the story done.
+
+## Epic 4 External Review Rerun
+
+### Date
+
+2026-03-19
+
+### Source Recovery
+
+- Story 4.3 did not recover a standalone external adversarial findings artifact for Story `2.2` from approved planning artifacts, remediation records, or repo session logs.
+
+### Rerun Review Evidence
+
+- Inspected `src/lib/contracts/freshness.js`, `src/lib/server/dashboard/build-dashboard-snapshot.js`, `src/features/dashboard/presenters/dashboard-presenter.js`, `tests/unit/dashboard.trust.test.mjs`, and `tests/unit/dashboard.live-path.test.mjs`.
+- Confirmed trend remains bound to recent state-history evidence, local trust narrowing remains localized, and fallback responses do not invent synthetic trend or optimistic freshness cues.
+
+### Decision
+
+- No-code / no-action after rerun external adversarial review.
+- Story `2.2` remains `done`; no reopen was required.
+- No story-level `4.5` re-close work is required for Story `2.2`.
+
+### Validation Evidence
+
+- Story 4.3 traceability synced in `docs/sprint-artifacts/external-adversarial-remediation-register.md` and `docs/sprint-artifacts/sprint-status.yaml`.
+- Story 4.3 final verification reran `npm run validate`.

@@ -204,6 +204,47 @@ describe("ops health payload", () => {
     expect(payload.issues).toContain("The main public layout is incomplete in this read.");
   });
 
+  it("labels last-safe runtime fallback as carried forward instead of restart recovery", () => {
+    const payload = createOpsHealthPayload({
+      dashboardResponse: createDashboardResponse(
+        {
+          headerStatus: {
+            weather: {
+              state: "carried-forward",
+              label: "Carried forward",
+              detail: "Weather is carried forward while live weather detail narrows.",
+            },
+            mobility: {
+              state: "live",
+              label: "Live",
+              detail: "Movement is reading live for the foyer.",
+            },
+          },
+        },
+        {
+          snapshotState: "last-safe",
+          recovery: {
+            phase: "live",
+            recoveredAt: "2026-03-19T08:10:00.000Z",
+            recoverySource: "live-publish",
+            livePublicationResumed: true,
+            resumedAt: "2026-03-19T08:10:00.000Z",
+          },
+        },
+      ),
+    });
+
+    expect(payload.evidence.recovery).toEqual({
+      phase: "live",
+      label: "Carried forward",
+      summary: "The public view is carried forward while live detail narrows.",
+      recoveredAt: null,
+      recoverySource: "live-publish",
+      livePublicationResumed: false,
+      resumedAt: null,
+    });
+  });
+
   it("strips raw provider failures from operator-facing issues", async () => {
     const payload = await getOpsHealthPayload({
       getDashboardResponse: async () => {
@@ -223,6 +264,8 @@ describe("ops health route", () => {
     });
 
     expect(response.status).toBe(404);
+    expect(response.headers.get("Cache-Control")).toBe("no-store, max-age=0");
+    expect(response.headers.get("Vary")).toBe("host, x-forwarded-host, forwarded");
     expect(await response.text()).toBe("");
   });
 

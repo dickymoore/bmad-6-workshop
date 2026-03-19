@@ -7,12 +7,23 @@ function splitHeaderValues(value) {
     .filter(Boolean);
 }
 
+function unquoteHeaderValue(value) {
+  if (
+    (value.startsWith('"') && value.endsWith('"')) ||
+    (value.startsWith("'") && value.endsWith("'"))
+  ) {
+    return value.slice(1, -1);
+  }
+
+  return value;
+}
+
 function normalizeHost(rawValue) {
   if (!rawValue) {
     return null;
   }
 
-  const trimmedValue = rawValue.trim().toLowerCase();
+  const trimmedValue = unquoteHeaderValue(rawValue.trim().toLowerCase());
 
   if (!trimmedValue) {
     return null;
@@ -29,12 +40,22 @@ function normalizeHost(rawValue) {
   return hostValue.replace(/:\d+$/, "");
 }
 
+function extractForwardedHost(rawValue) {
+  if (!rawValue) {
+    return null;
+  }
+
+  const match = rawValue.match(/(?:^|;)\s*host=([^;]+)/i);
+
+  return match ? normalizeHost(match[1]) : null;
+}
+
 function collectCandidateHosts(headers) {
   const forwardedHosts = splitHeaderValues(headers.get("x-forwarded-host") ?? "").map(normalizeHost);
   const directHost = normalizeHost(headers.get("host"));
-  const standardForwardedHosts = splitHeaderValues(headers.get("forwarded") ?? "").map(normalizeHost);
+  const standardForwardedHosts = splitHeaderValues(headers.get("forwarded") ?? "").map(extractForwardedHost);
 
-  return [...forwardedHosts, directHost, ...standardForwardedHosts].filter(Boolean);
+  return [...new Set([...forwardedHosts, directHost, ...standardForwardedHosts].filter(Boolean))];
 }
 
 export function resolveOpsAccessAllowlist(envValue = process.env.OPS_ALLOWED_HOSTS ?? "") {
@@ -53,7 +74,8 @@ export function isAllowedOpsRequest({
     return false;
   }
 
-  return candidateHosts.some((host) => allowlist.has(host));
+  // Fail closed if any declared host context falls outside the allowlist.
+  return candidateHosts.every((host) => allowlist.has(host));
 }
 
 export function createOpsAccessDeniedError() {

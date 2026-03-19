@@ -1,6 +1,11 @@
 import { getOpsHealthPayload } from "./get-ops-health.js";
 import { assertOpsAccess, isOpsAccessDeniedError } from "../security/assert-ops-access.js";
 
+const OPS_ROUTE_HEADERS = Object.freeze({
+  "Cache-Control": "no-store, max-age=0",
+  Vary: "host, x-forwarded-host, forwarded",
+});
+
 /**
  * @param {{
  *   requestHeaders?: Headers;
@@ -19,6 +24,7 @@ export async function createOpsHealthRouteResponse({
     if (isOpsAccessDeniedError(error)) {
       return new Response(null, {
         status: 404,
+        headers: OPS_ROUTE_HEADERS,
       });
     }
 
@@ -28,9 +34,6 @@ export async function createOpsHealthRouteResponse({
   const payload = await getOpsHealth();
 
   return Response.json(payload, {
-    headers: {
-      "Cache-Control": "no-store, max-age=0",
-      Vary: "host, x-forwarded-host, forwarded",
-    },
+    headers: OPS_ROUTE_HEADERS,
   });
 }

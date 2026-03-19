@@ -189,7 +189,7 @@ export async function getDashboardApiResponse({
       const recoveryState =
         existingRecoveryState?.phase === "recovering" && !existingRecoveryState.livePublicationResumed
           ? existingRecoveryState
-          : await recordRestartRecovery({ now });
+          : null;
 
       cacheSet(CACHE_KEY, {
         snapshot: carriedForwardSnapshot,

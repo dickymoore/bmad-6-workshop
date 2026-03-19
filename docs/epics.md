@@ -182,6 +182,10 @@ Visitors can trust the display as conditions change because freshness, trend, di
 Venue-side operators can confirm readiness, understand degraded impact, and return the display to public service quickly without exposing internals to visitors.
 **FRs covered:** FR30, FR31, FR32, FR33, FR34
 
+### Epic 4: Review Debt Closure and Release Readiness
+The product team can prove that all externally identified adversarial review findings are traced, remediated, re-reviewed, and explicitly closed before the release state is treated as complete.
+**FRs covered:** Cross-cutting verification for previously delivered FRs implicated by the external review audit, especially trust, degradation, readiness, recovery, and calm public-display behavior.
+
 ## Epic 1: Shared Departure Picture
 
 Visitors and staff can use one calm, shared, venue-native public display to understand the current departure picture from the Royal Institution through overall state, mode comparison, weather context, and a fixed local map without route-planning behavior.
@@ -598,3 +602,132 @@ So that I can return it to public service without exposing recovery internals.
 **When** the ops surface is used to confirm recovery
 **Then** they can determine whether public service has resumed successfully
 **And** the workflow stays lightweight, local-only, and keyboard-safe.
+
+## Epic 4: Review Debt Closure and Release Readiness
+
+The product team can prove that all externally identified adversarial review findings are traced, remediated, re-reviewed, and explicitly closed before the release state is treated as complete.
+
+### Story 4.1: Audit External Adversarial Findings and Map Them to Story IDs
+
+As the project team,
+I want every external adversarial finding collected and mapped to the exact affected story and artifact,
+So that no review debt remains unowned or ambiguous.
+
+**FRs implemented:** Cross-cutting verification for all previously implemented FRs implicated by the audit.
+
+**Acceptance Criteria:**
+
+**Given** external adversarial review outputs exist or may exist outside the BMAD story loop
+**When** the audit is performed
+**Then** every finding is captured in one remediation register with source, summary, affected artifact, and closure state
+**And** each finding is mapped to an existing story or explicitly marked no-action with rationale.
+
+**Given** a finding touches completed implementation work
+**When** mapping is finalized
+**Then** the affected story IDs are identified before remediation begins
+**And** stories not implicated by the audit remain closed.
+
+**Given** the audit is complete
+**When** the team reviews the result
+**Then** unresolved external review debt is visible in the backlog
+**And** the sprint can no longer imply universal closure without evidence.
+
+### Story 4.2: Reopen and Remediate Epic 1 Review Debt
+
+As the project team,
+I want any Epic 1 stories implicated by the audit reopened and corrected,
+So that the shared departure display closes with explicit review evidence.
+
+**FRs implemented:** Cross-cutting verification for affected Epic 1 requirements and product-doctrine behavior.
+
+**Acceptance Criteria:**
+
+**Given** one or more Epic 1 stories are implicated by the audit
+**When** remediation begins
+**Then** each affected story moves from `done` back to `review`
+**And** the remediation scope is limited to the audited findings.
+
+**Given** remediation changes are applied to an Epic 1 story
+**When** the story artifact is updated
+**Then** the artifact records the finding source, remediation summary, and re-review evidence
+**And** the file list and status remain synchronized with the implementation state.
+
+**Given** an Epic 1 story is ready to close again
+**When** internal review, external adversarial review, and validation are rerun
+**Then** the story returns to `done` only if all three are green
+**And** any unresolved finding keeps the story open.
+
+### Story 4.3: Reopen and Remediate Epic 2 Review Debt
+
+As the project team,
+I want the Epic 2 stories implicated by the audit reassessed, and reopened only if rerun review or recovered evidence requires it,
+So that live-truthfulness and degraded-state behavior close with explicit review evidence.
+
+**FRs implemented:** Cross-cutting verification for affected Epic 2 trust, freshness, disruption, and stable-live-behavior requirements.
+
+**Acceptance Criteria:**
+
+**Given** one or more Epic 2 stories are implicated by the audit
+**When** remediation begins
+**Then** each affected story is either reopened with an evidence-backed remediation path or explicitly cleared as no-code or no-action after rerun external review
+**And** the remediation scope addresses only the exact audited gaps in truthfulness, degradation handling, or live-update behavior.
+
+**Given** remediation changes are applied to an Epic 2 story, or rerun review clears it without code changes
+**When** the story artifact is updated
+**Then** the artifact records the finding source or rerun-review evidence, the remediation summary or no-code rationale, and any re-review evidence
+**And** the story preserves honest degraded-state behavior without overclaiming confidence.
+
+**Given** the Epic 2 remediation pass is ready to close
+**When** rerun review, validation, and sprint-tracking sync are checked
+**Then** every Epic 2 candidate story has an explicit closure path, whether reopened for follow-up or cleared as no-code after rerun review
+**And** any unresolved finding keeps the Epic 2 scope open.
+
+### Story 4.4: Reopen and Remediate Epic 3 Review Debt
+
+As the project team,
+I want any Epic 3 stories implicated by the audit reopened and corrected,
+So that ops, readiness, maintenance, and recovery behavior close with explicit review evidence.
+
+**FRs implemented:** Cross-cutting verification for affected Epic 3 readiness, diagnostics, maintenance-action, and recovery requirements.
+
+**Acceptance Criteria:**
+
+**Given** one or more Epic 3 stories are implicated by the audit
+**When** remediation begins
+**Then** each affected story moves from `done` back to `review`
+**And** the remediation scope addresses the exact audited gaps in readiness honesty, action-result clarity, diagnostics, or recovery behavior.
+
+**Given** remediation changes are applied to an Epic 3 story
+**When** the story artifact is updated
+**Then** the artifact records the finding source, remediation summary, and re-review evidence
+**And** the file list and status remain synchronized with the implementation state.
+
+**Given** an Epic 3 story is ready to close again
+**When** internal review, external adversarial review, and validation are rerun
+**Then** the story returns to `done` only if all three are green
+**And** any unresolved finding keeps the story open.
+
+### Story 4.5: Re-Review and Re-Close Only Green Stories
+
+As the project team,
+I want every reopened story to pass internal code review, external adversarial review, and validation again before closure,
+So that the repo's done state matches real review completion.
+
+**FRs implemented:** Cross-cutting closure verification for all reopened stories.
+
+**Acceptance Criteria:**
+
+**Given** reopened stories exist across completed epics
+**When** the final closeout pass is run
+**Then** each story has an explicit internal review result, external adversarial review result, validation result, and artifact-sync check
+**And** closure evidence is recorded directly in the story artifact.
+
+**Given** sprint tracking is updated during remediation
+**When** a reopened story is marked `done` again
+**Then** `sprint-status.yaml`, the story status, the file list, and the closure notes all agree
+**And** no story is treated as complete while review evidence is missing.
+
+**Given** all affected stories are green
+**When** Epic 4 is reviewed for completion
+**Then** release-readiness can be treated as evidence-backed
+**And** any story without complete closure evidence remains open.

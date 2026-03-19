@@ -323,3 +323,64 @@ GPT-5 Codex
 
 - 2026-03-19: Implemented restart-aware cold-start recovery, explicit recovery metadata, local-only ops recovery evidence, and validating unit/smoke coverage for Story 3.5.
 - 2026-03-19: Code review fixed the public presenter so restart messaging only appears during active recovery, then synced the persisted recovery artifact to the resumed live snapshot state.
+
+## Epic 4 External Review Rerun
+
+### Date
+
+2026-03-19
+
+### Source Recovery
+
+- Story 4.4 did not recover a standalone external adversarial findings artifact for Story `3.5` from approved planning artifacts, remediation records, or repo session logs.
+
+### Rerun Review Evidence
+
+- Inspected `src/lib/server/dashboard/dashboard-service.js`, `src/lib/server/ops/get-ops-health.js`, `src/features/ops/ops-shell-view.js`, `tests/unit/dashboard.live-path.test.mjs`, `tests/unit/ops-health.test.mjs`, and `tests/unit/ops-shell.test.mjs`.
+- Confirmed ordinary runtime build failure could be relabeled as restart recovery, so restart evidence needed to stay distinct from carried-forward runtime narrowing all the way through the operator-facing ops shell.
+
+### Decision
+
+- Reopened and remediated in Story `4.4`.
+- Story `3.5` was reopened to `review` in sprint tracking during Story `4.4` for the Epic 4 review-debt path, even though its original implementation remained historically complete.
+- Story `4.5` re-reviewed and re-closed `3.5`; the current sprint-tracking state is `done`.
+
+### Validation Evidence
+
+- Added runtime-fallback-versus-restart coverage in `tests/unit/dashboard.live-path.test.mjs`.
+- Added carried-forward runtime-fallback coverage in `tests/unit/ops-health.test.mjs`.
+- Added operator-shell carried-forward recovery-heading coverage in `tests/unit/ops-shell.test.mjs`.
+- Story 4.4 verification reran the focused Epic 3 unit suite and then `npm run validate`.
+
+## Epic 4 Final Closure
+
+### Date
+
+2026-03-19
+
+### Internal Code Review
+
+- Outcome: pass
+- Evidence:
+  - Re-reviewed `src/lib/server/dashboard/dashboard-service.js`, `src/lib/server/ops/get-ops-health.js`, and `src/features/ops/ops-shell-view.js`.
+  - Confirmed ordinary runtime fallback remains distinct from true restart recovery all the way from server metadata to the ops-shell recovery framing.
+
+### External Adversarial Review
+
+- Outcome: pass
+- Evidence:
+  - Re-ran adversarial review against the Story `3.5` recovery path, recovery-state metadata, and operator-facing recovery evidence after the Story `4.4` remediation.
+  - No new evidence-backed defect was recovered in cold-start recovery semantics, carried-forward labeling, or restart-resumed framing.
+
+### Validation
+
+- Focused verification:
+  - `npm run test:unit -- --run tests/unit/ops-access.test.mjs tests/unit/ops-health.test.mjs tests/unit/ops-maintenance-action.test.mjs tests/unit/ops-shell.test.mjs tests/unit/dashboard.live-path.test.mjs`
+  - `npm run test:smoke -- tests/smoke/startup-smoke.test.mjs`
+- Full repo gate:
+  - `npm run validate`
+
+### Closure Decision
+
+- Story `3.5` returned to `done` in Story `4.5`.
+- Sprint tracking, the remediation register, and this story artifact were synchronized on 2026-03-19.

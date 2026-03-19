@@ -1,8 +1,35 @@
-generated: '2026-03-18'
+generated: '2026-03-19'
 project: bmad-6-workshop-migration
 project_key: NOKEY
 tracking_system: file-system
 story_location: /home/codexuser/bmad-6-workshop/docs/sprint-artifacts
+review_debt_status:
+  external_adversarial_register: /home/codexuser/bmad-6-workshop/docs/sprint-artifacts/external-adversarial-remediation-register.md
+  release_readiness: evidence-backed
+  no_action_context_only_story_ids:
+    epic-1:
+      - 1-3-render-the-overall-departure-picture
+      - 1-5-anchor-the-display-with-a-fixed-local-map
+  no_code_after_rerun_story_ids:
+    epic-2:
+      - 2-2-show-trend-and-freshness-where-confidence-matters
+      - 2-4-preserve-honest-usefulness-during-provider-failure
+      - 2-5-maintain-stable-live-reading-during-updates-and-motion-changes
+    epic-3:
+      - 3-3-diagnose-degraded-impact-by-signal-and-scope
+  reopened_story_ids:
+    epic-2: []
+    epic-3: []
+  candidate_story_ids:
+    epic-2: []
+    epic-3: []
+  pending_story_ids_for_4_5:
+    epic-2: []
+    epic-3: []
+  owner_path:
+    epic-2: 4-3-reopen-and-remediate-epic-2-review-debt
+    epic-3: 4-4-reopen-and-remediate-epic-3-review-debt
+    closure: 4-5-rerun-reviews-and-close-only-green-stories
 development_status:
   epic-1: done
   1-1-set-up-initial-project-from-approved-starter-template: done
@@ -19,10 +46,17 @@ development_status:
   2-4-preserve-honest-usefulness-during-provider-failure: done
   2-5-maintain-stable-live-reading-during-updates-and-motion-changes: done
   epic-2-retrospective: done
-  epic-3: in-progress
+  epic-3: done
   3-1-provide-a-separate-local-only-ops-access-surface: done
   3-2-show-public-readiness-and-current-ops-state: done
   3-3-diagnose-degraded-impact-by-signal-and-scope: done
   3-4-trigger-lightweight-refresh-and-trust-check-actions: done
   3-5-recover-the-display-after-interruption-or-restart: done
-  epic-3-retrospective: optional
+  epic-3-retrospective: done
+  epic-4: in-progress
+  4-1-audit-external-adversarial-findings-and-map-them-to-story-ids: done
+  4-2-reopen-and-remediate-epic-1-review-debt: backlog
+  4-3-reopen-and-remediate-epic-2-review-debt: done
+  4-4-reopen-and-remediate-epic-3-review-debt: done
+  4-5-rerun-reviews-and-close-only-green-stories: done
+  epic-4-retrospective: optional

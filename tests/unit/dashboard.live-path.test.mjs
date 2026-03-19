@@ -313,6 +313,62 @@ describe("dashboard live path", () => {
     expect(response.data.nearbyModes.every((mode) => mode.sourceStatus.state === "carried-forward")).toBe(true);
   });
 
+  it("does not relabel ordinary runtime fallback as restart recovery when a live cache entry already exists", async () => {
+    const storedSnapshot = createFixtureDashboardSnapshot({
+      publishedAt: "2026-03-19T08:15:00.000Z",
+      overallTrend: "steady",
+    });
+    const recordedRecoveryStates = [];
+
+    const response = await getDashboardApiResponse({
+      now: new Date("2026-03-19T08:32:00.000Z"),
+      cacheGet() {
+        return {
+          snapshot: storedSnapshot,
+          snapshotState: "live",
+          recoveryState: createRecoveryMeta(),
+          cachedAt: 0,
+        };
+      },
+      cacheSet() {
+        return null;
+      },
+      async readSnapshot() {
+        return storedSnapshot;
+      },
+      async readRecoveryState() {
+        return createRecoveryMeta();
+      },
+      async recordRestartRecovery({ now }) {
+        const state = {
+          phase: "recovering",
+          recoveredAt: now.toISOString(),
+          recoverySource: "stored-snapshot",
+          livePublicationResumed: false,
+          resumedAt: null,
+        };
+        recordedRecoveryStates.push(state);
+        return state;
+      },
+      async buildSnapshot() {
+        throw new Error("provider failure");
+      },
+      async publishSnapshot() {
+        throw new Error("should not publish");
+      },
+    });
+
+    expect(recordedRecoveryStates).toEqual([]);
+    expect(response.meta.snapshotState).toBe("last-safe");
+    expect(response.meta.recovery).toEqual({
+      phase: "live",
+      recoveredAt: null,
+      recoverySource: "live-publish",
+      livePublicationResumed: false,
+      resumedAt: null,
+    });
+  });
+
   it("does not invent a trend when the service drops to fixture fallback", async () => {
     const response = await getDashboardApiResponse({
       now: new Date("2026-03-19T08:32:00.000Z"),

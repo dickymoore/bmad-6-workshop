@@ -340,6 +340,32 @@ GPT-5 Codex
 - 2026-03-19: Implemented Story 2.4 with canonical source-status modeling, mixed provider-failure snapshot handling, calm public degraded-state messaging, and regression coverage for live, last-safe, and fallback paths.
 - 2026-03-19: Senior dev review fixed unavailable-path honesty gaps so fixture fallback no longer implies live service states, mode badges now follow source status when live detail is missing, and the story file list was reconciled with the actual change set.
 
+## Epic 4 External Review Rerun
+
+### Date
+
+2026-03-19
+
+### Source Recovery
+
+- Story 4.3 did not recover a standalone external adversarial findings artifact for Story `2.4` from approved planning artifacts, remediation records, or repo session logs.
+
+### Rerun Review Evidence
+
+- Inspected `src/lib/server/dashboard/build-dashboard-snapshot.js`, `src/lib/server/dashboard/dashboard-service.js`, `src/features/dashboard/presenters/dashboard-presenter.js`, `tests/unit/dashboard.live-path.test.mjs`, and `tests/unit/dashboard.presenter.test.mjs`.
+- Confirmed degraded and unavailable states remain localized, mixed live plus carried-forward snapshots stay honest, and provider-failure semantics do not broaden into true disruption semantics.
+
+### Decision
+
+- No-code / no-action after rerun external adversarial review.
+- Story `2.4` remains `done`; no reopen was required.
+- No story-level `4.5` re-close work is required for Story `2.4`.
+
+### Validation Evidence
+
+- Story 4.3 traceability synced in `docs/sprint-artifacts/external-adversarial-remediation-register.md` and `docs/sprint-artifacts/sprint-status.yaml`.
+- Story 4.3 final verification reran `npm run validate`.
+
 ## Senior Developer Review (AI)
 
 ### Findings

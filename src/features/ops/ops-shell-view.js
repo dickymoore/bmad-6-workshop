@@ -7,7 +7,7 @@ export function createOpsShellViewModel(status) {
     readinessSummary: status.readiness.summary,
     snapshotLabel: formatSnapshotState(status.evidence.snapshotState),
     publishedAt: formatPublishedAt(status.evidence.publishedAt),
-    recoveryHeading: "Restart recovery",
+    recoveryHeading: formatRecoveryHeading(status.evidence.recovery.phase),
     recoveryLabel: status.evidence.recovery.label,
     recoverySummary: status.evidence.recovery.summary,
     recoveryPhase: status.evidence.recovery.phase,
@@ -165,6 +165,10 @@ function formatSnapshotState(snapshotState) {
   }
 
   return "Live";
+}
+
+function formatRecoveryHeading(recoveryPhase) {
+  return recoveryPhase === "recovering" ? "Restart recovery" : "Recovery state";
 }
 
 function formatPublishedAt(publishedAt) {

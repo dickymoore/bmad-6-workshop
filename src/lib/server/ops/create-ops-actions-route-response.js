@@ -6,6 +6,11 @@ import {
 } from "./run-ops-maintenance-action.js";
 import { assertOpsAccess, isOpsAccessDeniedError } from "../security/assert-ops-access.js";
 
+const OPS_ROUTE_HEADERS = Object.freeze({
+  "Cache-Control": "no-store, max-age=0",
+  Vary: "host, x-forwarded-host, forwarded",
+});
+
 const OPS_ACTION_REQUEST_SCHEMA = z.object({
   action: z.enum(["refresh", "trust-check"]),
 });
@@ -19,10 +24,7 @@ function createCalmErrorResponse(summary, status) {
     },
     {
       status,
-      headers: {
-        "Cache-Control": "no-store, max-age=0",
-        Vary: "host, x-forwarded-host, forwarded",
-      },
+      headers: OPS_ROUTE_HEADERS,
     },
   );
 }
@@ -47,6 +49,7 @@ export async function createOpsActionsRouteResponse({
     if (isOpsAccessDeniedError(error)) {
       return new Response(null, {
         status: 404,
+        headers: OPS_ROUTE_HEADERS,
       });
     }
 
@@ -67,10 +70,7 @@ export async function createOpsActionsRouteResponse({
     });
 
     return Response.json(result, {
-      headers: {
-        "Cache-Control": "no-store, max-age=0",
-        Vary: "host, x-forwarded-host, forwarded",
-      },
+      headers: OPS_ROUTE_HEADERS,
     });
   } catch (error) {
     if (isUnsupportedOpsMaintenanceActionError(error)) {

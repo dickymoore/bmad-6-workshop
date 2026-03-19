@@ -286,3 +286,28 @@ Approve
 ### Verification
 
 - `npm run validate`
+
+## Epic 4 External Review Rerun
+
+### Date
+
+2026-03-19
+
+### Source Recovery
+
+- Story 4.4 did not recover a standalone external adversarial findings artifact for Story `3.3` from approved planning artifacts, remediation records, or repo session logs.
+
+### Rerun Review Evidence
+
+- Inspected `src/lib/server/ops/get-degraded-impact-diagnostics.js` and the degraded-impact coverage in `tests/unit/ops-health.test.mjs`.
+- Confirmed diagnostics scope classification, affected-area summaries, and healthy-area evidence remain evidence-backed and free of new external-review defects.
+
+### Decision
+
+- No-code / no-action after rerun external adversarial review.
+- Story `3.3` remains `done`; no story-level `4.5` re-close work is required for Story `3.3`.
+
+### Validation Evidence
+
+- Story 4.4 traceability synced in `docs/sprint-artifacts/external-adversarial-remediation-register.md` and `docs/sprint-artifacts/sprint-status.yaml`.
+- Story 4.4 verification reran the focused Epic 3 unit suite and then `npm run validate`.

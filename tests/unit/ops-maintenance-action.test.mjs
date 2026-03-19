@@ -223,6 +223,8 @@ describe("ops maintenance action route", () => {
     });
 
     expect(response.status).toBe(404);
+    expect(response.headers.get("Cache-Control")).toBe("no-store, max-age=0");
+    expect(response.headers.get("Vary")).toBe("host, x-forwarded-host, forwarded");
     expect(await response.text()).toBe("");
   });
 

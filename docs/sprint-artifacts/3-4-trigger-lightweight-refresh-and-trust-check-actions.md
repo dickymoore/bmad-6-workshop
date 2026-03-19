@@ -316,3 +316,62 @@ Approve
 - `npm run typecheck`
 - `npm test`
 - `npm run build`
+
+## Epic 4 External Review Rerun
+
+### Date
+
+2026-03-19
+
+### Source Recovery
+
+- Story 4.4 did not recover a standalone external adversarial findings artifact for Story `3.4` from approved planning artifacts, remediation records, or repo session logs.
+
+### Rerun Review Evidence
+
+- Inspected `src/lib/server/ops/create-ops-actions-route-response.js` and `tests/unit/ops-maintenance-action.test.mjs`.
+- Confirmed denied ops-action responses were missing the same `no-store` and host-varying headers as successful maintenance responses, which weakened the local-only write boundary under host-based gating.
+
+### Decision
+
+- Reopened and remediated in Story `4.4`.
+- Story `3.4` was reopened to `review` in sprint tracking during Story `4.4` for the Epic 4 review-debt path, even though its original implementation remained historically complete.
+- Story `4.5` re-reviewed and re-closed `3.4`; the current sprint-tracking state is `done`.
+
+### Validation Evidence
+
+- Added denied-response cache-isolation coverage in `tests/unit/ops-maintenance-action.test.mjs`.
+- Story 4.4 verification reran the focused Epic 3 unit suite and then `npm run validate`.
+
+## Epic 4 Final Closure
+
+### Date
+
+2026-03-19
+
+### Internal Code Review
+
+- Outcome: pass
+- Evidence:
+  - Re-reviewed `src/lib/server/ops/run-ops-maintenance-action.js`, `src/lib/server/ops/create-ops-actions-route-response.js`, and the related ops query and shell boundaries.
+  - Confirmed only `refresh` and `trust-check` remain accepted, denied responses stay non-cacheable and host-varying, and the maintenance result path stays calm and same-origin.
+
+### External Adversarial Review
+
+- Outcome: pass
+- Evidence:
+  - Re-ran adversarial review against the Story `3.4` write boundary, action helper, and UI handoff after the Story `4.4` remediation.
+  - No new evidence-backed defect was recovered in the bounded action set, denied-response behavior, or operator-facing maintenance state.
+
+### Validation
+
+- Focused verification:
+  - `npm run test:unit -- --run tests/unit/ops-access.test.mjs tests/unit/ops-health.test.mjs tests/unit/ops-maintenance-action.test.mjs tests/unit/ops-shell.test.mjs tests/unit/dashboard.live-path.test.mjs`
+  - `npm run test:smoke -- tests/smoke/startup-smoke.test.mjs`
+- Full repo gate:
+  - `npm run validate`
+
+### Closure Decision
+
+- Story `3.4` returned to `done` in Story `4.5`.
+- Sprint tracking, the remediation register, and this story artifact were synchronized on 2026-03-19.

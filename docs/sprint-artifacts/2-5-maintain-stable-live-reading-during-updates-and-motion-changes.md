@@ -348,3 +348,29 @@ GPT-5 Codex
 
 - 2026-03-19: Preserved the live public shell during refreshes, added fact-only reduced-motion-safe change cues, extended the local TanStack Query shim for calm venue polling controls, and added story-specific verification evidence for stable live reading.
 - 2026-03-19: Applied senior review fixes so live change summaries compare real snapshot deltas, announcements do not repeat stale current-state meaning, and nearby recovery remains explicit without relying on motion.
+
+## Epic 4 External Review Rerun
+
+### Date
+
+2026-03-19
+
+### Source Recovery
+
+- Story 4.3 did not recover a standalone external adversarial findings artifact for Story `2.5` from approved planning artifacts, remediation records, or repo session logs.
+
+### Rerun Review Evidence
+
+- Inspected `src/features/dashboard/components/DashboardLiveScreen.tsx`, `src/features/dashboard/hooks/useDashboardQuery.ts`, `src/features/dashboard/presenters/dashboard-presenter.js`, `src/app/globals.css`, `tests/unit/dashboard.live-path.test.mjs`, `tests/unit/dashboard.presenter.test.mjs`, and `tests/smoke/startup-smoke.test.mjs`.
+- Confirmed the live path keeps the existing shell in place, update meaning stays delta-based and reduced-motion-safe, and the public route does not degrade into a loading takeover or alert feed.
+
+### Decision
+
+- No-code / no-action after rerun external adversarial review.
+- Story `2.5` remains `done`; no reopen was required.
+- No story-level `4.5` re-close work is required for Story `2.5`.
+
+### Validation Evidence
+
+- Story 4.3 traceability synced in `docs/sprint-artifacts/external-adversarial-remediation-register.md` and `docs/sprint-artifacts/sprint-status.yaml`.
+- Story 4.3 final verification reran `npm run validate`.

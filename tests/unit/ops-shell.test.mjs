@@ -108,6 +108,7 @@ describe("ops shell", () => {
 
     expect(viewModel.readinessHeading).toBe("Public readiness");
     expect(viewModel.readinessLabel).toBe("Current");
+    expect(viewModel.recoveryHeading).toBe("Recovery state");
     expect(viewModel.publishedAt).toBe("19 Mar 2026, 08:00");
     expect(viewModel.recoveryLabel).toBe("Fresh live detail");
     expect(viewModel.recoverySourceLabel).toBe("Fresh live publish");
@@ -163,6 +164,7 @@ describe("ops shell", () => {
     );
 
     expect(viewModel.readinessLabel).toBe("Reduced confidence");
+    expect(viewModel.recoveryHeading).toBe("Restart recovery");
     expect(viewModel.recoveryLabel).toBe("Restart recovery");
     expect(viewModel.recoveryAt).toBe("19 Mar 2026, 08:05");
     expect(viewModel.recoveryLiveLabel).toBe("Still carried forward");
@@ -173,6 +175,47 @@ describe("ops shell", () => {
     expect(viewModel.healthyAreas).toContain("Movement remains healthy.");
     expect(/WeatherAPI|TfL|stack trace|token|secret/i.test(viewModel.issues.join(" "))).toBe(false);
     expect(/WeatherAPI|TfL|stack trace|token|secret/i.test(JSON.stringify(viewModel.diagnosticsAreas))).toBe(false);
+  });
+
+  it("keeps carried-forward runtime fallback out of the restart heading when no restart recovery is active", () => {
+    const viewModel = createOpsShellViewModel(
+      createStatus({
+        dashboardResponse: createDashboardApiResponse(
+          {
+            ...createCurrentSnapshot(),
+            headerStatus: {
+              weather: {
+                state: "carried-forward",
+                label: "Carried forward",
+                detail: "Weather is carried forward while live weather detail narrows.",
+              },
+              mobility: {
+                state: "live",
+                label: "Live",
+                detail: "Movement is reading live for the foyer.",
+              },
+            },
+          },
+          {
+            venueKey: "royal-institution",
+            publishedAt: "2026-03-19T08:00:00.000Z",
+            refreshIntervalMs: 30_000,
+            snapshotState: "last-safe",
+            recovery: {
+              phase: "live",
+              recoveredAt: "2026-03-19T08:05:00.000Z",
+              recoverySource: "live-publish",
+              livePublicationResumed: true,
+              resumedAt: "2026-03-19T08:05:00.000Z",
+            },
+          },
+        ),
+      }),
+    );
+
+    expect(viewModel.recoveryHeading).toBe("Recovery state");
+    expect(viewModel.recoveryLabel).toBe("Carried forward");
+    expect(viewModel.recoveryLiveLabel).toBe("Still carried forward");
   });
 
   it("normalizes partial diagnostics payloads before rendering", () => {

@@ -1,6 +1,6 @@
 # Story 3.1: Provide a Separate Local-Only Ops Access Surface
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -230,7 +230,7 @@ GPT-5 Codex
 - Added a dedicated ops feature shell with keyboard-safe headings, skip link, grouped maintenance actions, and restrained local-only styling.
 - Standardized the repo-wide ops access rule to loopback plus `OPS_ALLOWED_HOSTS` so later Epic 3 stories reuse one allowlist.
 - Updated smoke and unit coverage to protect route separation, non-leaky denial, allowed local contexts, denied remote contexts, and plain operational labels.
-- Story is ready for review and sprint tracking should move `3-1-provide-a-separate-local-only-ops-access-surface` to `review`.
+- Story is complete and sprint tracking should keep `3-1-provide-a-separate-local-only-ops-access-surface` at `done`.
 
 ### File List
 
@@ -250,3 +250,64 @@ GPT-5 Codex
 - Added a server-only local access helper and converted the `(ops)` route from a placeholder to a gated maintenance entry.
 - Added the first ops feature shell and styling with plain operational labels, keyboard-visible focus states, and grouped placeholder actions.
 - Extended smoke and unit coverage to lock in route separation, local-only access behavior, and keyboard-safe ops structure.
+
+## Epic 4 External Review Rerun
+
+### Date
+
+2026-03-19
+
+### Source Recovery
+
+- Story 4.4 did not recover a standalone external adversarial findings artifact for Story `3.1` from approved planning artifacts, remediation records, or repo session logs.
+
+### Rerun Review Evidence
+
+- Inspected `src/lib/server/security/assert-ops-access.js`, `src/lib/server/ops/create-ops-health-route-response.js`, `src/lib/server/ops/create-ops-actions-route-response.js`, `tests/unit/ops-access.test.mjs`, `tests/unit/ops-health.test.mjs`, and `tests/unit/ops-maintenance-action.test.mjs`.
+- Confirmed the local-only gate accepted an allowlisted forwarded host alongside a denied direct host, and denied ops responses were missing the same `no-store` plus host-varying headers used on successful local reads.
+
+### Decision
+
+- Reopened and remediated in Story `4.4`.
+- Story `3.1` was reopened to `review` in sprint tracking during Story `4.4` for the Epic 4 review-debt path, even though its original implementation remained historically complete.
+- Story `4.5` re-reviewed and re-closed `3.1`; the current sprint-tracking state is `done`.
+
+### Validation Evidence
+
+- Added strict mixed-host denial coverage in `tests/unit/ops-access.test.mjs`.
+- Added standards-compliant `Forwarded` host parsing coverage in `tests/unit/ops-access.test.mjs`.
+- Added denied-response cache-isolation checks in `tests/unit/ops-health.test.mjs` and `tests/unit/ops-maintenance-action.test.mjs`.
+- Story 4.4 verification reran the focused Epic 3 unit suite and then `npm run validate`.
+
+## Epic 4 Final Closure
+
+### Date
+
+2026-03-19
+
+### Internal Code Review
+
+- Outcome: pass
+- Evidence:
+  - Re-reviewed `src/lib/server/security/assert-ops-access.js`, `src/lib/server/ops/create-ops-health-route-response.js`, and `src/lib/server/ops/create-ops-actions-route-response.js`.
+  - Confirmed the mixed-host fail-closed behavior, standards-compliant `Forwarded` handling, and non-leaky denied-response headers remain intact.
+
+### External Adversarial Review
+
+- Outcome: pass
+- Evidence:
+  - Re-ran adversarial review against the Story `3.1` access-control seam and its route helpers after the Story `4.4` remediation.
+  - No new evidence-backed defect was recovered in the local-only host gate or denied-response handling path.
+
+### Validation
+
+- Focused verification:
+  - `npm run test:unit -- --run tests/unit/ops-access.test.mjs tests/unit/ops-health.test.mjs tests/unit/ops-maintenance-action.test.mjs tests/unit/ops-shell.test.mjs tests/unit/dashboard.live-path.test.mjs`
+  - `npm run test:smoke -- tests/smoke/startup-smoke.test.mjs`
+- Full repo gate:
+  - `npm run validate`
+
+### Closure Decision
+
+- Story `3.1` returned to `done` in Story `4.5`.
+- Sprint tracking, the remediation register, and this story artifact were synchronized on 2026-03-19.

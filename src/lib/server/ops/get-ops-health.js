@@ -15,12 +15,14 @@ const READINESS_SUMMARIES = Object.freeze({
 
 const RECOVERY_LABELS = Object.freeze({
   live: "Fresh live detail",
+  "carried-forward": "Carried forward",
   recovering: "Restart recovery",
   unavailable: "Unavailable",
 });
 
 const RECOVERY_SUMMARIES = Object.freeze({
   live: "Fresh live detail has resumed in the shared public view.",
+  "carried-forward": "The public view is carried forward while live detail narrows.",
   recovering: "The public view is recovering from restart with carried-forward detail.",
   unavailable: "A safe carried-forward public picture is not available after restart.",
 });
@@ -151,6 +153,54 @@ function classifyReadiness({ snapshot, snapshotState, checks, issues }) {
   return "current";
 }
 
+function createRecoveryEvidence({ snapshotState, recovery }) {
+  if (snapshotState === "fallback" || recovery?.phase === "unavailable") {
+    return Object.freeze({
+      phase: "unavailable",
+      label: RECOVERY_LABELS.unavailable,
+      summary: RECOVERY_SUMMARIES.unavailable,
+      recoveredAt: null,
+      recoverySource: "none",
+      livePublicationResumed: false,
+      resumedAt: null,
+    });
+  }
+
+  if (recovery?.phase === "recovering") {
+    return Object.freeze({
+      phase: "recovering",
+      label: RECOVERY_LABELS.recovering,
+      summary: RECOVERY_SUMMARIES.recovering,
+      recoveredAt: recovery.recoveredAt ?? null,
+      recoverySource: recovery.recoverySource ?? "stored-snapshot",
+      livePublicationResumed: false,
+      resumedAt: null,
+    });
+  }
+
+  if (snapshotState === "last-safe") {
+    return Object.freeze({
+      phase: recovery?.phase ?? "live",
+      label: RECOVERY_LABELS["carried-forward"],
+      summary: RECOVERY_SUMMARIES["carried-forward"],
+      recoveredAt: null,
+      recoverySource: recovery?.recoverySource ?? "live-publish",
+      livePublicationResumed: false,
+      resumedAt: null,
+    });
+  }
+
+  return Object.freeze({
+    phase: recovery?.phase ?? "live",
+    label: RECOVERY_LABELS.live,
+    summary: RECOVERY_SUMMARIES.live,
+    recoveredAt: recovery?.recoveredAt ?? null,
+    recoverySource: recovery?.recoverySource ?? "live-publish",
+    livePublicationResumed: Boolean(recovery?.livePublicationResumed),
+    resumedAt: recovery?.resumedAt ?? null,
+  });
+}
+
 export function createOpsHealthPayload({ dashboardResponse } = {}) {
   const snapshot = dashboardResponse?.data ?? {};
   const snapshotState = dashboardResponse?.meta?.snapshotState ?? "fallback";
@@ -171,6 +221,10 @@ export function createOpsHealthPayload({ dashboardResponse } = {}) {
     checks,
     issues,
   });
+  const recoveryEvidence = createRecoveryEvidence({
+    snapshotState,
+    recovery,
+  });
 
   return Object.freeze({
     readiness: Object.freeze({
@@ -184,15 +238,7 @@ export function createOpsHealthPayload({ dashboardResponse } = {}) {
     evidence: Object.freeze({
       snapshotState,
       publishedAt,
-      recovery: Object.freeze({
-        phase: recovery.phase,
-        label: RECOVERY_LABELS[recovery.phase] ?? RECOVERY_LABELS.unavailable,
-        summary: RECOVERY_SUMMARIES[recovery.phase] ?? RECOVERY_SUMMARIES.unavailable,
-        recoveredAt: recovery.recoveredAt ?? null,
-        recoverySource: recovery.recoverySource ?? "none",
-        livePublicationResumed: Boolean(recovery.livePublicationResumed),
-        resumedAt: recovery.resumedAt ?? null,
-      }),
+      recovery: recoveryEvidence,
     }),
   });
 }
