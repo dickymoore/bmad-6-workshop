@@ -13,14 +13,14 @@ export const OPS_SHELL_SECTIONS = Object.freeze([
   Object.freeze({
     id: "ops-recovery-steps",
     heading: "Recovery steps",
-    intro: "Prepare the next local actions before later stories add live recovery controls.",
+    intro: "Run the light maintenance checks here while keeping the public display isolated from direct control.",
   }),
 ]);
 
 export const OPS_RECOVERY_STEPS = Object.freeze([
   "Confirm the public display remains unchanged before any maintenance action.",
   "Review readiness and calm issue wording in this local surface.",
-  "Use later Epic 3 recovery actions here when they are implemented.",
+  "Run a refresh or trust check only from this local maintenance area.",
 ]);
 
 export const OPS_READINESS_STATES = Object.freeze({

@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { OPS_SHELL_SECTIONS } from "../../src/features/ops/ops-shell-content.js";
-import { createOpsShellViewModel } from "../../src/features/ops/ops-shell-view.js";
+import {
+  createOpsMaintenanceActionViewModel,
+  createOpsShellViewModel,
+} from "../../src/features/ops/ops-shell-view.js";
 import { createOpsHealthPayload } from "../../src/lib/server/ops/get-ops-health.js";
 import { createFixtureDashboardSnapshot } from "../../src/features/dashboard/data/overall-departure-snapshot.js";
 import { createDashboardApiResponse } from "../../src/lib/contracts/api-response.js";
@@ -90,6 +93,7 @@ describe("ops shell", () => {
       "System checks",
       "Recovery steps",
     ]);
+    expect(OPS_SHELL_SECTIONS[2].intro).toContain("light maintenance checks");
   });
 
   it("builds real readiness checks ahead of recovery notes in keyboard-safe order", () => {
@@ -186,5 +190,38 @@ describe("ops shell", () => {
       },
     ]);
     expect(viewModel.healthyAreas).toEqual(["Weather remains healthy."]);
+  });
+
+  it("builds a keyboard-safe maintenance action state with disabled in-flight controls", () => {
+    const viewModel = createOpsMaintenanceActionViewModel({
+      isPending: true,
+    });
+
+    expect(viewModel.disableActions).toBe(true);
+    expect(viewModel.pendingMessage).toBe("Maintenance action is running from this local surface.");
+    expect(viewModel.resultSummary).toBe(null);
+  });
+
+  it("renders calm maintenance action results without dropping the current ops context", () => {
+    const viewModel = createOpsMaintenanceActionViewModel({
+      actionResult: {
+        action: "trust-check",
+        status: "attention",
+        summary: "Trust check completed with reduced confidence.",
+        completedAt: "2026-03-19T08:12:00.000Z",
+        readiness: {
+          label: "Reduced confidence",
+          summary: "Public display stays readable with reduced confidence.",
+        },
+        attentionDetails: ["Weather is carried forward while live weather detail narrows."],
+      },
+    });
+
+    expect(viewModel.actionLabel).toBe("Run trust check");
+    expect(viewModel.resultStatusLabel).toBe("Attention still needed");
+    expect(viewModel.completedAt).toBe("19 Mar 2026, 08:12");
+    expect(viewModel.readinessLabel).toBe("Reduced confidence");
+    expect(viewModel.attentionDetails).toEqual(["Weather is carried forward while live weather detail narrows."]);
+    expect(/stack trace|token|secret/i.test(JSON.stringify(viewModel))).toBe(false);
   });
 });

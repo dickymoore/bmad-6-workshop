@@ -1017,6 +1017,88 @@ a {
   margin-top: 6px;
 }
 
+.ops-actions {
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid rgba(122, 91, 47, 0.16);
+  border-radius: 22px;
+  background: rgba(255, 253, 249, 0.96);
+}
+
+.ops-actions__header {
+  display: grid;
+  gap: 8px;
+}
+
+.ops-actions__copy,
+.ops-actions__summary,
+.ops-actions__readiness,
+.ops-actions__pending,
+.ops-actions__error {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.ops-actions__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.ops-actions__button {
+  appearance: none;
+  min-height: 44px;
+  padding: 11px 18px;
+  border: 1px solid rgba(122, 91, 47, 0.3);
+  border-radius: 999px;
+  background: rgba(122, 91, 47, 0.1);
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+}
+
+.ops-actions__button--secondary {
+  background: rgba(53, 93, 82, 0.08);
+}
+
+.ops-actions__button:hover:not(:disabled),
+.ops-actions__button:focus-visible {
+  background: rgba(122, 91, 47, 0.16);
+  outline: 2px solid rgba(122, 91, 47, 0.28);
+  outline-offset: 2px;
+}
+
+.ops-actions__button:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+.ops-actions__result {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.ops-actions__summary {
+  color: var(--text);
+}
+
+.ops-actions__pending,
+.ops-actions__error {
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(122, 91, 47, 0.14);
+  background: rgba(250, 244, 235, 0.82);
+}
+
+.ops-actions__error {
+  color: var(--strained);
+  border-color: rgba(152, 89, 47, 0.18);
+  background: rgba(252, 240, 232, 0.9);
+}
+
 .ops-shell__skip-link:focus-visible {
   outline: 3px solid rgba(122, 91, 47, 0.5);
   outline-offset: 3px;

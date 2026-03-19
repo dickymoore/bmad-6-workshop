@@ -52,6 +52,7 @@ type UseQueryResult<TData> = {
   isLoading: boolean;
   isFetching: boolean;
   status: "pending" | "success" | "error";
+  refetch: () => Promise<TData>;
 };
 
 export function useQuery<TData>({
@@ -76,6 +77,13 @@ export function useQuery<TData>({
   const [isFetching, setIsFetching] = useState(false);
   const [isLoading, setIsLoading] = useState(initialData === undefined);
   const queryKeyHash = JSON.stringify(queryKey);
+  const loadDataRef = useRef<(isBackground: boolean) => Promise<TData>>(async () => {
+    if (dataRef.current !== undefined) {
+      return dataRef.current;
+    }
+
+    return queryFnRef.current();
+  });
 
   useEffect(() => {
     queryFnRef.current = queryFn;
@@ -91,6 +99,7 @@ export function useQuery<TData>({
 
   useEffect(() => {
     let cancelled = false;
+    let timer: number | undefined;
 
     async function loadData(isBackground: boolean) {
       if (!isBackground) {
@@ -107,10 +116,14 @@ export function useQuery<TData>({
           setData(nextData);
           setError(null);
         }
+
+        return nextData;
       } catch (caughtError) {
         if (!cancelled) {
           setError(caughtError);
         }
+
+        throw caughtError;
       } finally {
         if (!cancelled) {
           setIsFetching(false);
@@ -119,21 +132,19 @@ export function useQuery<TData>({
       }
     }
 
+    loadDataRef.current = loadData;
+
     void loadData(initialDataRef.current !== undefined);
 
-    if (!refetchInterval) {
-      return () => {
-        cancelled = true;
-      };
+    if (refetchInterval) {
+      timer = window.setInterval(() => {
+        if (!refetchIntervalInBackground && document.hidden) {
+          return;
+        }
+
+        void loadData(true);
+      }, refetchInterval);
     }
-
-    const timer = window.setInterval(() => {
-      if (!refetchIntervalInBackground && document.hidden) {
-        return;
-      }
-
-      void loadData(true);
-    }, refetchInterval);
 
     function handleFocus() {
       if (refetchOnWindowFocus) {
@@ -152,7 +163,9 @@ export function useQuery<TData>({
 
     return () => {
       cancelled = true;
-      window.clearInterval(timer);
+      if (timer !== undefined) {
+        window.clearInterval(timer);
+      }
       window.removeEventListener("focus", handleFocus);
       window.removeEventListener("online", handleOnline);
     };
@@ -165,5 +178,6 @@ export function useQuery<TData>({
     isLoading,
     isFetching,
     status: error ? "error" : isLoading ? "pending" : "success",
+    refetch: () => loadDataRef.current(true),
   };
 }

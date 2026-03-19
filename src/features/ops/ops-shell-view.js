@@ -32,6 +32,58 @@ export function createOpsShellViewModel(status) {
   });
 }
 
+/**
+ * @param {{
+ *   actionResult?: {
+ *     action?: string;
+ *     status?: string;
+ *     summary?: string;
+ *     completedAt?: string | null;
+ *     readiness?: {
+ *       label?: string;
+ *       summary?: string;
+ *     };
+ *     attentionDetails?: readonly string[];
+ *   } | null;
+ *   errorMessage?: string | null;
+ *   isPending?: boolean;
+ * }} [options]
+ */
+export function createOpsMaintenanceActionViewModel({
+  actionResult,
+  errorMessage,
+  isPending = false,
+} = {}) {
+  const activeActionLabel =
+    actionResult?.action === "trust-check" ? "Run trust check" : actionResult?.action === "refresh" ? "Run refresh" : null;
+
+  return Object.freeze({
+    isPending,
+    disableActions: isPending,
+    pendingMessage: isPending ? "Maintenance action is running from this local surface." : null,
+    errorMessage:
+      typeof errorMessage === "string" && errorMessage.trim().length > 0
+        ? errorMessage.trim()
+        : null,
+    resultHeading: actionResult ? "Latest maintenance update" : "Maintenance actions",
+    resultSummary: typeof actionResult?.summary === "string" ? actionResult.summary : null,
+    resultStatusLabel:
+      actionResult?.status === "succeeded"
+        ? "Completed"
+        : actionResult?.status === "attention"
+          ? "Attention still needed"
+          : null,
+    actionLabel: activeActionLabel,
+    completedAt: formatPublishedAt(actionResult?.completedAt ?? null),
+    readinessLabel: actionResult?.readiness?.label ?? null,
+    readinessSummary: actionResult?.readiness?.summary ?? null,
+    attentionDetails:
+      Array.isArray(actionResult?.attentionDetails) && actionResult.attentionDetails.length > 0
+        ? actionResult.attentionDetails
+        : Object.freeze([]),
+  });
+}
+
 function normalizeDiagnostics(diagnostics) {
   if (!diagnostics || typeof diagnostics !== "object") {
     return {

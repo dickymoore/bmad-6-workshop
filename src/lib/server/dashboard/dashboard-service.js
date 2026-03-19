@@ -126,6 +126,7 @@ function createReducedConfidenceFallbackSnapshot(publishedAt) {
 export async function getDashboardApiResponse({
   now = new Date(),
   refreshIntervalMs = Number(process.env.DASHBOARD_REFRESH_INTERVAL_MS ?? DEFAULT_REFRESH_INTERVAL_MS),
+  forceRefresh = false,
   cacheGet = getMemoryCacheEntry,
   cacheSet = setMemoryCacheEntry,
   readSnapshot = readStoredDashboardSnapshot,
@@ -135,7 +136,7 @@ export async function getDashboardApiResponse({
   const nowMs = now.getTime();
   const cachedEntry = cacheGet(CACHE_KEY);
 
-  if (cachedEntry && nowMs - cachedEntry.cachedAt < refreshIntervalMs) {
+  if (!forceRefresh && cachedEntry && nowMs - cachedEntry.cachedAt < refreshIntervalMs) {
     return createResponse(cachedEntry.snapshot, cachedEntry.snapshotState, refreshIntervalMs);
   }
 
@@ -181,4 +182,25 @@ export async function getDashboardApiResponse({
 
     return createResponse(fallbackSnapshot, "fallback", refreshIntervalMs);
   }
+}
+
+export async function getLatestAvailableDashboardApiResponse({
+  now = new Date(),
+  refreshIntervalMs = Number(process.env.DASHBOARD_REFRESH_INTERVAL_MS ?? DEFAULT_REFRESH_INTERVAL_MS),
+  cacheGet = getMemoryCacheEntry,
+  readSnapshot = readStoredDashboardSnapshot,
+} = {}) {
+  const cachedEntry = cacheGet(CACHE_KEY);
+
+  if (cachedEntry) {
+    return createResponse(cachedEntry.snapshot, cachedEntry.snapshotState, refreshIntervalMs);
+  }
+
+  const storedSnapshot = await readSnapshot();
+
+  if (storedSnapshot) {
+    return createResponse(storedSnapshot, "last-safe", refreshIntervalMs);
+  }
+
+  return createResponse(createReducedConfidenceFallbackSnapshot(now.toISOString()), "fallback", refreshIntervalMs);
 }
