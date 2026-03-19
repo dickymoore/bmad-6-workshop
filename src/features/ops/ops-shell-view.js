@@ -7,6 +7,14 @@ export function createOpsShellViewModel(status) {
     readinessSummary: status.readiness.summary,
     snapshotLabel: formatSnapshotState(status.evidence.snapshotState),
     publishedAt: formatPublishedAt(status.evidence.publishedAt),
+    recoveryHeading: "Restart recovery",
+    recoveryLabel: status.evidence.recovery.label,
+    recoverySummary: status.evidence.recovery.summary,
+    recoveryPhase: status.evidence.recovery.phase,
+    recoveryAt: formatPublishedAt(status.evidence.recovery.recoveredAt),
+    recoveryResumedAt: formatPublishedAt(status.evidence.recovery.resumedAt),
+    recoverySourceLabel: formatRecoverySource(status.evidence.recovery.recoverySource),
+    recoveryLiveLabel: status.evidence.recovery.livePublicationResumed ? "Fresh live detail resumed" : "Still carried forward",
     checks: status.checks.map((check) =>
       Object.freeze({
         ...check,
@@ -175,4 +183,16 @@ function formatPublishedAt(publishedAt) {
     timeStyle: "short",
     timeZone: "Europe/London",
   }).format(parsedAt);
+}
+
+function formatRecoverySource(recoverySource) {
+  if (recoverySource === "stored-snapshot") {
+    return "Stored snapshot";
+  }
+
+  if (recoverySource === "live-publish") {
+    return "Fresh live publish";
+  }
+
+  return "No safe carried-forward source";
 }

@@ -24,5 +24,5 @@ development_status:
   3-2-show-public-readiness-and-current-ops-state: done
   3-3-diagnose-degraded-impact-by-signal-and-scope: done
   3-4-trigger-lightweight-refresh-and-trust-check-actions: done
-  3-5-recover-the-display-after-interruption-or-restart: backlog
+  3-5-recover-the-display-after-interruption-or-restart: done
   epic-3-retrospective: optional

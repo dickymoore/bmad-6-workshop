@@ -10,6 +10,17 @@ import { buildDashboardSnapshot } from "../../src/lib/server/dashboard/build-das
 import { getDashboardApiResponse } from "../../src/lib/server/dashboard/dashboard-service.js";
 import { publishDashboardSnapshot } from "../../src/lib/server/dashboard/publish-dashboard-snapshot.js";
 
+function createRecoveryMeta(overrides = {}) {
+  return {
+    phase: "live",
+    recoveredAt: null,
+    recoverySource: "live-publish",
+    livePublicationResumed: true,
+    resumedAt: null,
+    ...overrides,
+  };
+}
+
 const root = resolve(process.cwd());
 
 describe("dashboard live path", () => {
@@ -23,6 +34,7 @@ describe("dashboard live path", () => {
       publishedAt: snapshot.publishedAt,
       refreshIntervalMs: 30_000,
       snapshotState: "live",
+      recovery: createRecoveryMeta(),
     });
 
     expect(response.meta).toEqual({
@@ -30,6 +42,7 @@ describe("dashboard live path", () => {
       publishedAt: "2026-03-19T08:30:00.000Z",
       refreshIntervalMs: 30_000,
       snapshotState: "live",
+      recovery: createRecoveryMeta(),
     });
     expect(response.data.overallTrend).toBe("steady");
     expect(response.data.headerTrust.mobility.state).toBe("aging");
@@ -66,6 +79,13 @@ describe("dashboard live path", () => {
     expect(cacheEntries[0][0]).toBe("dashboard-snapshot");
     expect(cacheEntries[0][1].snapshot).toEqual(snapshot);
     expect(published.snapshotState).toBe("live");
+    expect(published.recoveryState).toEqual({
+      phase: "live",
+      recoveredAt: "2026-03-19T08:31:00.000Z",
+      recoverySource: "live-publish",
+      livePublicationResumed: true,
+      resumedAt: "2026-03-19T08:31:00.000Z",
+    });
   });
 
   it("builds a live snapshot from provider summaries, timing evidence, and recent history", async () => {
@@ -280,6 +300,13 @@ describe("dashboard live path", () => {
     });
 
     expect(response.meta.snapshotState).toBe("last-safe");
+    expect(response.meta.recovery).toEqual({
+      phase: "recovering",
+      recoveredAt: "2026-03-19T08:32:00.000Z",
+      recoverySource: "stored-snapshot",
+      livePublicationResumed: false,
+      resumedAt: null,
+    });
     expect(response.data.publishedAt).toBe("2026-03-19T08:15:00.000Z");
     expect(response.data.headerStatus.weather.state).toBe("carried-forward");
     expect(response.data.headerTrust.weather.state).toBe("reduced-confidence");
@@ -307,6 +334,7 @@ describe("dashboard live path", () => {
     });
 
     expect(response.meta.snapshotState).toBe("fallback");
+    expect(response.meta.recovery.phase).toBe("unavailable");
     expect(response.data.overallState).toBe("calm");
     expect(response.data.overallTrend).toBe(null);
     expect(response.data.headerStatus.weather.state).toBe("unavailable");
@@ -342,7 +370,7 @@ describe("dashboard live path", () => {
     assert.match(liveScreenSource, /const previousSnapshot =/);
     assert.match(liveScreenSource, /previousData\?\.data\.publishedAt && previousData\.data\.publishedAt !== response\.data\.publishedAt/);
     assert.match(liveScreenSource, /const hasUpdatedSinceLoad = response\.data\.publishedAt !== initialResponse\.data\.publishedAt/);
-    assert.match(liveScreenSource, /presentDashboardSnapshot\(response\.data,\s*\{\s*[\r\n]+\s*previousSnapshot,\s*[\r\n]+\s*hasUpdatedSinceLoad,/);
+    assert.match(liveScreenSource, /presentDashboardSnapshot\(response\.data,\s*\{\s*[\r\n]+\s*previousSnapshot,\s*[\r\n]+\s*hasUpdatedSinceLoad,\s*[\r\n]+\s*recovery: response\.meta\.recovery,/);
     assert.match(liveScreenSource, /<DashboardScreen viewModel=\{viewModel\} \/>/);
     assert.doesNotMatch(liveScreenSource, /if\s*\(\s*!data\s*\)|isLoading|isPending|loading takeover|full-screen reset/i);
     assert.doesNotMatch(liveScreenSource, /spinner|loading takeover|full-screen/i);
@@ -352,5 +380,88 @@ describe("dashboard live path", () => {
     assert.match(screenSource, /data-reading-zone="map"/);
     assert.match(pageSource, /getDashboardApiResponse/);
     assert.match(pageSource, /export const dynamic = "force-dynamic"/);
+  });
+
+  it("restores the carried-forward snapshot immediately on cold start before live providers succeed again", async () => {
+    const storedSnapshot = createFixtureDashboardSnapshot({
+      publishedAt: "2026-03-19T08:15:00.000Z",
+      overallTrend: "steady",
+    });
+    const recordedRecoveryStates = [];
+
+    const response = await getDashboardApiResponse({
+      now: new Date("2026-03-19T08:35:00.000Z"),
+      cacheGet() {
+        return null;
+      },
+      cacheSet(_key, value) {
+        return value;
+      },
+      async readSnapshot() {
+        return storedSnapshot;
+      },
+      async readRecoveryState() {
+        return null;
+      },
+      async recordRestartRecovery({ now }) {
+        const state = {
+          phase: "recovering",
+          recoveredAt: now.toISOString(),
+          recoverySource: "stored-snapshot",
+          livePublicationResumed: false,
+          resumedAt: null,
+        };
+        recordedRecoveryStates.push(state);
+        return state;
+      },
+      async buildSnapshot() {
+        throw new Error("should not build on the first cold-start recovery read");
+      },
+    });
+
+    expect(recordedRecoveryStates).toEqual([
+      {
+        phase: "recovering",
+        recoveredAt: "2026-03-19T08:35:00.000Z",
+        recoverySource: "stored-snapshot",
+        livePublicationResumed: false,
+        resumedAt: null,
+      },
+    ]);
+    expect(response.meta.snapshotState).toBe("last-safe");
+    expect(response.meta.recovery.phase).toBe("recovering");
+    expect(response.data.headerTrust.weather.state).toBe("reduced-confidence");
+    expect(response.data.supportLabel).toBe("The shared picture is carried forward while live detail narrows.");
+  });
+
+  it("marks recovery as resumed when a fresh live publish succeeds after restart", async () => {
+    const snapshot = createFixtureDashboardSnapshot({
+      publishedAt: "2026-03-19T08:40:00.000Z",
+      overallTrend: "steady",
+    });
+    const published = await publishDashboardSnapshot({
+      snapshot,
+      snapshotState: "live",
+      async readRecoveryState() {
+        return {
+          phase: "recovering",
+          recoveredAt: "2026-03-19T08:35:00.000Z",
+          recoverySource: "stored-snapshot",
+          livePublicationResumed: false,
+          resumedAt: null,
+        };
+      },
+      async writeRecoveryState(state) {
+        return state;
+      },
+    });
+
+    expect(published.recoveryState).toEqual({
+      phase: "live",
+      recoveredAt: "2026-03-19T08:35:00.000Z",
+      recoverySource: "live-publish",
+      livePublicationResumed: true,
+      resumedAt: "2026-03-19T08:40:00.000Z",
+    });
   });
 });

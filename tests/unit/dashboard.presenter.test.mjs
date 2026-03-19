@@ -263,6 +263,32 @@ describe("dashboard presenter", () => {
     expect(viewModel.liveAnnouncement).toBe(null);
   });
 
+  it("keeps restart messaging only while recovery is still active", () => {
+    const recoveringView = presentDashboardSnapshot(buildSnapshot(), {
+      recovery: {
+        phase: "recovering",
+        recoveredAt: "2026-03-19T08:05:00.000Z",
+        recoverySource: "stored-snapshot",
+        livePublicationResumed: false,
+        resumedAt: null,
+      },
+    });
+    const resumedView = presentDashboardSnapshot(buildSnapshot(), {
+      recovery: {
+        phase: "live",
+        recoveredAt: "2026-03-19T08:05:00.000Z",
+        recoverySource: "live-publish",
+        livePublicationResumed: true,
+        resumedAt: "2026-03-19T08:12:00.000Z",
+      },
+    });
+
+    expect(recoveringView.currentnessMessage).toBe(
+      "The public view is recovering and the shared picture is carried forward.",
+    );
+    expect(resumedView.currentnessMessage).toBe("Current signals refresh inside the same calm shared view.");
+  });
+
   it("keeps nearby modes in canonical order and derives calm text-first update cues", () => {
     const previousSnapshot = buildSnapshot({
       publishedAt: "2026-03-19T08:00:00.000Z",

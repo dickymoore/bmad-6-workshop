@@ -78,6 +78,13 @@ function createDashboardResponse(snapshotOverrides = {}, metaOverrides = {}) {
     publishedAt: snapshot.publishedAt,
     refreshIntervalMs: 30_000,
     snapshotState: "live",
+    recovery: {
+      phase: "live",
+      recoveredAt: null,
+      recoverySource: "live-publish",
+      livePublicationResumed: true,
+      resumedAt: null,
+    },
     ...metaOverrides,
   });
 }
@@ -245,6 +252,15 @@ describe("ops health route", () => {
         evidence: {
           snapshotState: "live",
           publishedAt: "2026-03-19T08:00:00.000Z",
+          recovery: {
+            phase: "live",
+            label: "Fresh live detail",
+            summary: "Fresh live detail has resumed in the shared public view.",
+            recoveredAt: null,
+            recoverySource: "live-publish",
+            livePublicationResumed: true,
+            resumedAt: null,
+          },
         },
       }),
     });
@@ -263,6 +279,50 @@ describe("ops health route", () => {
       healthyAreas: ["Weather remains healthy."],
     });
     expect(/TfL|WeatherAPI|stack|token|secret/i.test(JSON.stringify(payload))).toBe(false);
+  });
+});
+
+describe("restart recovery evidence", () => {
+  it("exposes carried-forward restart recovery only through the ops payload", () => {
+    const payload = createOpsHealthPayload({
+      dashboardResponse: createDashboardResponse(
+        {
+          headerStatus: {
+            weather: {
+              state: "carried-forward",
+              label: "Carried forward",
+              detail: "Weather is carried forward while live weather detail narrows.",
+            },
+            mobility: {
+              state: "carried-forward",
+              label: "Carried forward",
+              detail: "Movement is carried forward while live movement detail narrows.",
+            },
+          },
+        },
+        {
+          snapshotState: "last-safe",
+          recovery: {
+            phase: "recovering",
+            recoveredAt: "2026-03-19T08:35:00.000Z",
+            recoverySource: "stored-snapshot",
+            livePublicationResumed: false,
+            resumedAt: null,
+          },
+        },
+      ),
+    });
+
+    expect(payload.evidence.recovery).toEqual({
+      phase: "recovering",
+      label: "Restart recovery",
+      summary: "The public view is recovering from restart with carried-forward detail.",
+      recoveredAt: "2026-03-19T08:35:00.000Z",
+      recoverySource: "stored-snapshot",
+      livePublicationResumed: false,
+      resumedAt: null,
+    });
+    expect(/stack|token|secret|process id|pid/i.test(JSON.stringify(payload.evidence.recovery))).toBe(false);
   });
 });
 

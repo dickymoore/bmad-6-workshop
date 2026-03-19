@@ -74,6 +74,13 @@ function createDashboardResponse(snapshotOverrides = {}, metaOverrides = {}) {
     publishedAt: snapshot.publishedAt,
     refreshIntervalMs: 30_000,
     snapshotState: "live",
+    recovery: {
+      phase: "live",
+      recoveredAt: null,
+      recoverySource: "live-publish",
+      livePublicationResumed: true,
+      resumedAt: null,
+    },
     ...metaOverrides,
   });
 }
@@ -130,6 +137,13 @@ describe("ops maintenance action helper", () => {
           },
           {
             snapshotState: "last-safe",
+            recovery: {
+              phase: "recovering",
+              recoveredAt: "2026-03-19T08:12:00.000Z",
+              recoverySource: "stored-snapshot",
+              livePublicationResumed: false,
+              resumedAt: null,
+            },
           },
         );
       },
@@ -164,13 +178,22 @@ describe("ops maintenance action helper", () => {
           },
           {
             snapshotState: "last-safe",
+            recovery: {
+              phase: "recovering",
+              recoveredAt: "2026-03-19T08:12:00.000Z",
+              recoverySource: "stored-snapshot",
+              livePublicationResumed: false,
+              resumedAt: null,
+            },
           },
         );
       },
     });
 
     expect(result.status).toBe("attention");
-    expect(result.summary).toBe("Refresh could not confirm fresh live detail; the last safe picture remains in service.");
+    expect(result.summary).toBe(
+      "Refresh completed, but the public view is still recovering with the last safe picture in service.",
+    );
     expect(result.readiness.state).toBe("reduced-confidence");
     expect(result.evidence.snapshotState).toBe("last-safe");
   });
@@ -249,6 +272,15 @@ describe("ops maintenance action route", () => {
           evidence: {
             snapshotState: "last-safe",
             publishedAt: "2026-03-19T08:19:00.000Z",
+            recovery: {
+              phase: "recovering",
+              label: "Restart recovery",
+              summary: "The public view is recovering from restart with carried-forward detail.",
+              recoveredAt: "2026-03-19T08:18:00.000Z",
+              recoverySource: "stored-snapshot",
+              livePublicationResumed: false,
+              resumedAt: null,
+            },
           },
           attentionDetails: ["Weather is carried forward while live weather detail narrows."],
         };

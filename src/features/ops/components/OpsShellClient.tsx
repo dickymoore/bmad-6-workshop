@@ -65,6 +65,32 @@ function OpsShellBody({ initialStatus }: { initialStatus: OpsHealthStatus }) {
 
               <p className="ops-readiness__summary">{viewModel.readinessSummary}</p>
 
+              <section className="ops-readiness__issues" aria-labelledby="ops-restart-recovery-heading">
+                <p className="ops-readiness__label">{viewModel.recoveryHeading}</p>
+                <h3 className="ops-diagnostics__title" id="ops-restart-recovery-heading">
+                  {viewModel.recoveryLabel}
+                </h3>
+                <p className="ops-readiness__summary">{viewModel.recoverySummary}</p>
+                <dl className="ops-readiness__meta">
+                  <div>
+                    <dt>Source</dt>
+                    <dd>{viewModel.recoverySourceLabel}</dd>
+                  </div>
+                  <div>
+                    <dt>Recovered</dt>
+                    <dd>{viewModel.recoveryAt}</dd>
+                  </div>
+                  <div>
+                    <dt>Live status</dt>
+                    <dd>{viewModel.recoveryLiveLabel}</dd>
+                  </div>
+                  <div>
+                    <dt>Live resumed</dt>
+                    <dd>{viewModel.recoveryResumedAt}</dd>
+                  </div>
+                </dl>
+              </section>
+
               <ul className="ops-readiness__checks" aria-label="Public readiness checks">
                 {viewModel.checks.map((check: OpsCheckViewModel) => (
                   <li className="ops-readiness__check" key={check.id}>

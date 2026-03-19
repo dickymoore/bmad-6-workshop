@@ -6,8 +6,15 @@ import { createOpsHealthPayload } from "./get-ops-health.js";
 
 const SUPPORTED_ACTIONS = Object.freeze(["refresh", "trust-check"]);
 
-function createActionSummary({ action, snapshotState, readinessState }) {
+function createActionSummary({ action, snapshotState, readinessState, recoveryPhase, livePublicationResumed, recoveredAt }) {
   if (action === "refresh") {
+    if (snapshotState === "live" && livePublicationResumed && recoveredAt) {
+      return {
+        status: "succeeded",
+        summary: "Refresh completed and fresh live detail has resumed.",
+      };
+    }
+
     if (snapshotState === "live" && readinessState === "current") {
       return {
         status: "succeeded",
@@ -25,7 +32,10 @@ function createActionSummary({ action, snapshotState, readinessState }) {
     if (snapshotState === "last-safe") {
       return {
         status: "attention",
-        summary: "Refresh could not confirm fresh live detail; the last safe picture remains in service.",
+        summary:
+          recoveryPhase === "recovering"
+            ? "Refresh completed, but the public view is still recovering with the last safe picture in service."
+            : "Refresh could not confirm fresh live detail; the last safe picture remains in service.",
       };
     }
 
@@ -96,6 +106,9 @@ export async function runOpsMaintenanceAction({
     action,
     snapshotState: dashboardResponse.meta.snapshotState,
     readinessState: health.readiness.state,
+    recoveryPhase: health.evidence.recovery.phase,
+    livePublicationResumed: health.evidence.recovery.livePublicationResumed,
+    recoveredAt: health.evidence.recovery.recoveredAt,
   });
 
   return Object.freeze({

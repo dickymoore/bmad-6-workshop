@@ -33,6 +33,13 @@ export type OpsHealthStatus = {
   evidence: {
     snapshotState: string;
     publishedAt: string | null;
+    recovery: {
+      phase: string;
+      recoveredAt: string | null;
+      recoverySource: string;
+      livePublicationResumed: boolean;
+      resumedAt: string | null;
+    };
   };
 };
 

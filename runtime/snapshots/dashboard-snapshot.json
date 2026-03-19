@@ -1,14 +1,51 @@
 {
-  "publishedAt": "2026-03-19T07:48:55.715Z",
-  "overallState": "strained",
+  "publishedAt": "2026-03-19T08:40:00.000Z",
+  "overallState": "watchful",
+  "overallTrend": "steady",
   "weatherSummary": "Cold rain is moving across Mayfair and the street is reading a little slower.",
   "mobilitySummary": "Nearby departures are still moving, with a tighter rhythm under the rain.",
   "placeLabel": "Royal Institution, Albemarle Street",
-  "freshnessLabel": "Freshly settled across the foyer.",
   "supportLabel": "Weather and mobility reinforce the same local read.",
+  "disruptionEmphasis": {
+    "level": "none",
+    "headline": null,
+    "detail": null,
+    "affectedModeKeys": []
+  },
+  "headerTrust": {
+    "weather": {
+      "state": "current",
+      "label": "Current",
+      "detail": "Weather is current for the foyer.",
+      "confidence": "full"
+    },
+    "mobility": {
+      "state": "aging",
+      "label": "Aging",
+      "detail": "Movement is aging slightly.",
+      "confidence": "narrowed"
+    }
+  },
+  "headerStatus": {
+    "weather": {
+      "state": "live",
+      "label": "Live",
+      "detail": "Weather is reading live for the foyer."
+    },
+    "mobility": {
+      "state": "live",
+      "label": "Live",
+      "detail": "Movement is reading live for the foyer."
+    }
+  },
   "localMap": {
     "title": "Local frame",
     "state": "default",
+    "sourceStatus": {
+      "state": "live",
+      "label": "Live",
+      "detail": "The local frame is reading live for this foyer."
+    },
     "venueAnchor": {
       "key": "royal-institution",
       "label": "Royal Institution",
@@ -45,29 +82,77 @@
       "key": "tube-rail",
       "label": "Tube and rail",
       "state": "available",
+      "disruptionScope": "unaffected-readable",
       "summary": "Green Park and Piccadilly lines are still reading open within the short walk from here.",
-      "nuance": "Platforms may feel a little fuller once the current lecture lets out."
+      "nuance": "Platforms may feel a little fuller once the current lecture lets out.",
+      "sourceStatus": {
+        "state": "live",
+        "label": "Live",
+        "detail": "Tube and rail is reading live nearby."
+      },
+      "trust": {
+        "state": "current",
+        "label": "Current",
+        "detail": "Tube and rail is current for the foyer.",
+        "confidence": "full"
+      }
     },
     {
       "key": "bus",
       "label": "Bus",
       "state": "caution",
+      "disruptionScope": "unaffected-readable",
       "summary": "West End stops nearby are moving, though spacing is a little uneven in the rain.",
-      "nuance": "Sheltered queues are beginning to gather along the wetter side streets."
+      "nuance": "Sheltered queues are beginning to gather along the wetter side streets.",
+      "sourceStatus": {
+        "state": "live",
+        "label": "Live",
+        "detail": "Bus is reading live nearby."
+      },
+      "trust": {
+        "state": "aging",
+        "label": "Aging",
+        "detail": "Bus is aging slightly.",
+        "confidence": "narrowed"
+      }
     },
     {
       "key": "roads",
       "label": "Roads",
       "state": "caution",
+      "disruptionScope": "unaffected-readable",
       "summary": "Mayfair traffic is still flowing, with slower turns around the wetter junctions.",
-      "nuance": "Street crossings remain readable, but the pace is not especially brisk."
+      "nuance": "Street crossings remain readable, but the pace is not especially brisk.",
+      "sourceStatus": {
+        "state": "live",
+        "label": "Live",
+        "detail": "Roads are reading live nearby."
+      },
+      "trust": {
+        "state": "stale",
+        "label": "Stale",
+        "detail": "Roads is stale and may have shifted.",
+        "confidence": "narrowed"
+      }
     },
     {
       "key": "cycles-scooters",
       "label": "Cycles and scooters",
-      "state": "disrupted",
-      "summary": "Open micromobility nearby is looking sparse while the rain sits over central London.",
-      "nuance": "Any remaining vehicles are likely to be more scattered than usual from here."
+      "state": "caution",
+      "disruptionScope": "unaffected-readable",
+      "summary": "Open micromobility nearby is still moving, though vehicles are thinner under the rain.",
+      "nuance": "Availability remains patchier than the clearer corridors nearby.",
+      "sourceStatus": {
+        "state": "live",
+        "label": "Live",
+        "detail": "Cycles and scooters are reading live nearby."
+      },
+      "trust": {
+        "state": "reduced-confidence",
+        "label": "Reduced confidence",
+        "detail": "Cycles and scooters is less certain just now.",
+        "confidence": "narrowed"
+      }
     }
   ]
 }

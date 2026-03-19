@@ -87,6 +87,13 @@ export type DashboardApiResponse = {
     publishedAt: string;
     refreshIntervalMs: number;
     snapshotState: "live" | "last-safe" | "fallback";
+    recovery: {
+      phase: "live" | "recovering" | "unavailable";
+      recoveredAt: string | null;
+      recoverySource: "stored-snapshot" | "live-publish" | "none";
+      livePublicationResumed: boolean;
+      resumedAt: string | null;
+    };
   };
 };
 

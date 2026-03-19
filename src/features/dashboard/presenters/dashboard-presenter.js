@@ -64,6 +64,14 @@ function createCurrentnessMessage() {
   return "Current signals refresh inside the same calm shared view.";
 }
 
+function createRecoveryCurrentnessMessage(recovery) {
+  if (recovery?.phase === "recovering") {
+    return "The public view is recovering and the shared picture is carried forward.";
+  }
+
+  return createCurrentnessMessage();
+}
+
 function orderNearbyModesForReading(nearbyModes) {
   return [...nearbyModes].sort((left, right) => {
     const leftIndex = CANONICAL_MODE_ORDER.indexOf(left.key);
@@ -291,6 +299,7 @@ export function presentDashboardSnapshot(snapshotInput, options = {}) {
   const snapshot = createDashboardSnapshot(snapshotInput);
   const previousSnapshot = options.previousSnapshot ? createDashboardSnapshot(options.previousSnapshot) : null;
   const updateSummary = createUpdateSummary(previousSnapshot, snapshot, options.hasUpdatedSinceLoad);
+  const recovery = options.recovery ?? null;
   const previousModesByKey = previousSnapshot
     ? new Map(previousSnapshot.nearbyModes.map((mode) => [mode.key, mode]))
     : new Map();
@@ -302,7 +311,10 @@ export function presentDashboardSnapshot(snapshotInput, options = {}) {
     overallTrend: snapshot.overallTrend,
     overallTrendLabel: snapshot.overallTrend ? TREND_LABELS[snapshot.overallTrend] : null,
     trendMessage: snapshot.overallTrend ? createTrendMessage(snapshot.overallTrend) : null,
-    currentnessMessage: updateSummary.currentnessMessage,
+    currentnessMessage:
+      updateSummary.currentnessMessage === createCurrentnessMessage()
+        ? createRecoveryCurrentnessMessage(recovery)
+        : updateSummary.currentnessMessage,
     updateSummary: updateSummary.updateSummary,
     liveAnnouncement: updateSummary.liveAnnouncement,
     stateKicker: "Overall departure picture",

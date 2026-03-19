@@ -320,6 +320,40 @@ test("story 2.5 keeps live reading stable during refreshes and motion changes", 
   assert.equal(/target-device|supported desktop|reduced-motion|calm update|browser/i.test(verificationNotes), true, "verification notes should capture explicit live-reading review categories");
 });
 
+test("story 3.5 keeps restart recovery inside the existing public and local-only ops shells", () => {
+  const servicePath = join(root, "src", "lib", "server", "dashboard", "dashboard-service.js");
+  const recoveryStatePath = join(root, "src", "lib", "server", "dashboard", "recovery-state.js");
+  const apiContractPath = join(root, "src", "lib", "contracts", "api-response.js");
+  const publicPagePath = join(root, "src", "app", "(public)", "page.tsx");
+  const liveScreenPath = join(root, "src", "features", "dashboard", "components", "DashboardLiveScreen.tsx");
+  const opsHealthPath = join(root, "src", "lib", "server", "ops", "get-ops-health.js");
+  const opsViewPath = join(root, "src", "features", "ops", "ops-shell-view.js");
+  const opsClientPath = join(root, "src", "features", "ops", "components", "OpsShellClient.tsx");
+  const opsActionPath = join(root, "src", "lib", "server", "ops", "run-ops-maintenance-action.js");
+  const opsRoutePath = join(root, "src", "app", "(ops)", "ops", "page.tsx");
+
+  const service = readFileSync(servicePath, "utf8");
+  const recoveryState = readFileSync(recoveryStatePath, "utf8");
+  const apiContract = readFileSync(apiContractPath, "utf8");
+  const publicPage = readFileSync(publicPagePath, "utf8");
+  const liveScreen = readFileSync(liveScreenPath, "utf8");
+  const opsHealth = readFileSync(opsHealthPath, "utf8");
+  const opsView = readFileSync(opsViewPath, "utf8");
+  const opsClient = readFileSync(opsClientPath, "utf8");
+  const opsAction = readFileSync(opsActionPath, "utf8");
+  const opsRoute = readFileSync(opsRoutePath, "utf8");
+
+  assert.equal(existsSync(recoveryStatePath), true, "expected a dedicated recovery-state seam");
+  assert.equal(/recordDashboardRestartRecovery|readDashboardRecoveryState|createDashboardRecoveryMeta/.test(service + recoveryState), true, "restart recovery should be derived explicitly from a server-only recovery state");
+  assert.equal(/meta\.recovery|livePublicationResumed|recoverySource|recoveredAt/.test(apiContract + liveScreen), true, "public and local consumers should share explicit recovery metadata through the canonical API response");
+  assert.equal(/DashboardLiveScreen|getDashboardApiResponse/.test(publicPage), true, "public route should continue using the same single-screen live boundary");
+  assert.equal(/boot screen|debug|recovery tooling|restart button|process-control/i.test(publicPage + liveScreen), false, "public route should not introduce boot tooling or recovery controls");
+  assert.equal(/recoveryHeading|recoveryLabel|recoverySourceLabel|recoveryLiveLabel/.test(opsHealth + opsView + opsClient), true, "ops shell should expose restart recovery evidence in the existing local-only surface");
+  assert.equal(/refresh|trust-check/.test(opsAction), true, "ops actions should remain limited to the lightweight refresh and trust-check tools");
+  assert.equal(/restart-service|process-control|systemctl|pm2/i.test(opsAction + opsClient + opsRoute), false, "ops surface should not grow process-control affordances");
+  assert.equal(/assertOpsAccess|notFound\(\)/.test(opsRoute), true, "ops recovery confirmation should remain local-only");
+});
+
 test("story 1.2 keeps CI focused on Node 24 build readiness for venue promotion", () => {
   const workflowPath = join(root, ".github", "workflows", "build-readiness.yml");
 

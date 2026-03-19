@@ -13,6 +13,18 @@ const READINESS_SUMMARIES = Object.freeze({
   unavailable: "Public display is unavailable for normal public trust.",
 });
 
+const RECOVERY_LABELS = Object.freeze({
+  live: "Fresh live detail",
+  recovering: "Restart recovery",
+  unavailable: "Unavailable",
+});
+
+const RECOVERY_SUMMARIES = Object.freeze({
+  live: "Fresh live detail has resumed in the shared public view.",
+  recovering: "The public view is recovering from restart with carried-forward detail.",
+  unavailable: "A safe carried-forward public picture is not available after restart.",
+});
+
 const CHECK_DEFINITIONS = Object.freeze([
   Object.freeze({
     id: "main-layout",
@@ -143,6 +155,13 @@ export function createOpsHealthPayload({ dashboardResponse } = {}) {
   const snapshot = dashboardResponse?.data ?? {};
   const snapshotState = dashboardResponse?.meta?.snapshotState ?? "fallback";
   const publishedAt = dashboardResponse?.meta?.publishedAt ?? null;
+  const recovery = dashboardResponse?.meta?.recovery ?? {
+    phase: snapshotState === "fallback" ? "unavailable" : "live",
+    recoveredAt: null,
+    recoverySource: snapshotState === "fallback" ? "none" : "live-publish",
+    livePublicationResumed: snapshotState !== "last-safe",
+    resumedAt: null,
+  };
   const checks = CHECK_DEFINITIONS.map((definition) => createCheck(definition, snapshot));
   const issues = createIssues(snapshot, snapshotState, checks);
   const diagnostics = createDegradedImpactDiagnostics({ dashboardResponse });
@@ -165,6 +184,15 @@ export function createOpsHealthPayload({ dashboardResponse } = {}) {
     evidence: Object.freeze({
       snapshotState,
       publishedAt,
+      recovery: Object.freeze({
+        phase: recovery.phase,
+        label: RECOVERY_LABELS[recovery.phase] ?? RECOVERY_LABELS.unavailable,
+        summary: RECOVERY_SUMMARIES[recovery.phase] ?? RECOVERY_SUMMARIES.unavailable,
+        recoveredAt: recovery.recoveredAt ?? null,
+        recoverySource: recovery.recoverySource ?? "none",
+        livePublicationResumed: Boolean(recovery.livePublicationResumed),
+        resumedAt: recovery.resumedAt ?? null,
+      }),
     }),
   });
 }
@@ -201,6 +229,15 @@ export async function getOpsHealthPayload({
       evidence: Object.freeze({
         snapshotState: "fallback",
         publishedAt: null,
+        recovery: Object.freeze({
+          phase: "unavailable",
+          label: RECOVERY_LABELS.unavailable,
+          summary: RECOVERY_SUMMARIES.unavailable,
+          recoveredAt: null,
+          recoverySource: "none",
+          livePublicationResumed: false,
+          resumedAt: null,
+        }),
       }),
     });
   }

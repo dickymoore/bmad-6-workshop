@@ -6,17 +6,26 @@ import { getMemoryCacheEntry, setMemoryCacheEntry } from "../cache/memory-cache.
 import { readStoredDashboardSnapshot } from "../cache/snapshot-store.js";
 import { buildDashboardSnapshot } from "./build-dashboard-snapshot.js";
 import { publishDashboardSnapshot } from "./publish-dashboard-snapshot.js";
+import {
+  createDashboardRecoveryMeta,
+  readDashboardRecoveryState,
+  recordDashboardRestartRecovery,
+} from "./recovery-state.js";
 
 const CACHE_KEY = "dashboard-snapshot";
 const VENUE_KEY = "royal-institution";
 const DEFAULT_REFRESH_INTERVAL_MS = 30_000;
 
-function createResponse(snapshot, snapshotState, refreshIntervalMs) {
+function createResponse(snapshot, snapshotState, refreshIntervalMs, recoveryState) {
   return createDashboardApiResponse(snapshot, {
     venueKey: VENUE_KEY,
     publishedAt: snapshot.publishedAt,
     refreshIntervalMs,
     snapshotState,
+    recovery: createDashboardRecoveryMeta({
+      snapshotState,
+      recoveryState,
+    }),
   });
 }
 
@@ -130,6 +139,8 @@ export async function getDashboardApiResponse({
   cacheGet = getMemoryCacheEntry,
   cacheSet = setMemoryCacheEntry,
   readSnapshot = readStoredDashboardSnapshot,
+  readRecoveryState = readDashboardRecoveryState,
+  recordRestartRecovery = recordDashboardRestartRecovery,
   buildSnapshot = buildDashboardSnapshot,
   publishSnapshot = publishDashboardSnapshot,
 } = {}) {
@@ -137,17 +148,29 @@ export async function getDashboardApiResponse({
   const cachedEntry = cacheGet(CACHE_KEY);
 
   if (!forceRefresh && cachedEntry && nowMs - cachedEntry.cachedAt < refreshIntervalMs) {
-    return createResponse(cachedEntry.snapshot, cachedEntry.snapshotState, refreshIntervalMs);
+    return createResponse(
+      cachedEntry.snapshot,
+      cachedEntry.snapshotState,
+      refreshIntervalMs,
+      cachedEntry.recoveryState,
+    );
   }
 
   const storedSnapshot = cachedEntry?.snapshot ?? (await readSnapshot());
+  const existingRecoveryState = cachedEntry?.recoveryState ?? (await readRecoveryState());
 
-  if (!cachedEntry && storedSnapshot) {
+  if (!cachedEntry && storedSnapshot && !forceRefresh) {
+    const carriedForwardSnapshot = createCarriedForwardSnapshot(storedSnapshot);
+    const recoveryState = await recordRestartRecovery({ now });
+
     cacheSet(CACHE_KEY, {
-      snapshot: storedSnapshot,
+      snapshot: carriedForwardSnapshot,
       snapshotState: "last-safe",
+      recoveryState,
       cachedAt: nowMs,
     });
+
+    return createResponse(carriedForwardSnapshot, "last-safe", refreshIntervalMs, recoveryState);
   }
 
   try {
@@ -156,20 +179,26 @@ export async function getDashboardApiResponse({
       snapshot: built.snapshot,
       snapshotState: built.snapshotState,
       cacheSet,
+      readRecoveryState: async () => existingRecoveryState,
     });
 
-    return createResponse(published.snapshot, published.snapshotState, refreshIntervalMs);
+    return createResponse(published.snapshot, published.snapshotState, refreshIntervalMs, published.recoveryState);
   } catch {
     if (storedSnapshot) {
       const carriedForwardSnapshot = createCarriedForwardSnapshot(storedSnapshot);
+      const recoveryState =
+        existingRecoveryState?.phase === "recovering" && !existingRecoveryState.livePublicationResumed
+          ? existingRecoveryState
+          : await recordRestartRecovery({ now });
 
       cacheSet(CACHE_KEY, {
         snapshot: carriedForwardSnapshot,
         snapshotState: "last-safe",
+        recoveryState,
         cachedAt: nowMs,
       });
 
-      return createResponse(carriedForwardSnapshot, "last-safe", refreshIntervalMs);
+      return createResponse(carriedForwardSnapshot, "last-safe", refreshIntervalMs, recoveryState);
     }
 
     const fallbackSnapshot = createReducedConfidenceFallbackSnapshot(now.toISOString());
@@ -177,10 +206,23 @@ export async function getDashboardApiResponse({
     cacheSet(CACHE_KEY, {
       snapshot: fallbackSnapshot,
       snapshotState: "fallback",
+      recoveryState: {
+        phase: "unavailable",
+        recoveredAt: null,
+        recoverySource: "none",
+        livePublicationResumed: false,
+        resumedAt: null,
+      },
       cachedAt: nowMs,
     });
 
-    return createResponse(fallbackSnapshot, "fallback", refreshIntervalMs);
+    return createResponse(fallbackSnapshot, "fallback", refreshIntervalMs, {
+      phase: "unavailable",
+      recoveredAt: null,
+      recoverySource: "none",
+      livePublicationResumed: false,
+      resumedAt: null,
+    });
   }
 }
 
@@ -188,19 +230,47 @@ export async function getLatestAvailableDashboardApiResponse({
   now = new Date(),
   refreshIntervalMs = Number(process.env.DASHBOARD_REFRESH_INTERVAL_MS ?? DEFAULT_REFRESH_INTERVAL_MS),
   cacheGet = getMemoryCacheEntry,
+  cacheSet = setMemoryCacheEntry,
   readSnapshot = readStoredDashboardSnapshot,
+  readRecoveryState = readDashboardRecoveryState,
+  recordRestartRecovery = recordDashboardRestartRecovery,
 } = {}) {
   const cachedEntry = cacheGet(CACHE_KEY);
 
   if (cachedEntry) {
-    return createResponse(cachedEntry.snapshot, cachedEntry.snapshotState, refreshIntervalMs);
+    return createResponse(
+      cachedEntry.snapshot,
+      cachedEntry.snapshotState,
+      refreshIntervalMs,
+      cachedEntry.recoveryState,
+    );
   }
 
   const storedSnapshot = await readSnapshot();
+  const existingRecoveryState = await readRecoveryState();
 
   if (storedSnapshot) {
-    return createResponse(storedSnapshot, "last-safe", refreshIntervalMs);
+    const carriedForwardSnapshot = createCarriedForwardSnapshot(storedSnapshot);
+    const recoveryState =
+      existingRecoveryState?.phase === "recovering" && !existingRecoveryState.livePublicationResumed
+        ? existingRecoveryState
+        : await recordRestartRecovery({ now });
+
+    cacheSet(CACHE_KEY, {
+      snapshot: carriedForwardSnapshot,
+      snapshotState: "last-safe",
+      recoveryState,
+      cachedAt: now.getTime(),
+    });
+
+    return createResponse(carriedForwardSnapshot, "last-safe", refreshIntervalMs, recoveryState);
   }
 
-  return createResponse(createReducedConfidenceFallbackSnapshot(now.toISOString()), "fallback", refreshIntervalMs);
+  return createResponse(createReducedConfidenceFallbackSnapshot(now.toISOString()), "fallback", refreshIntervalMs, {
+    phase: "unavailable",
+    recoveredAt: null,
+    recoverySource: "none",
+    livePublicationResumed: false,
+    resumedAt: null,
+  });
 }

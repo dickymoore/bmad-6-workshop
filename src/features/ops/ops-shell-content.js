@@ -8,7 +8,7 @@ export const OPS_SHELL_SECTIONS = Object.freeze([
   Object.freeze({
     id: "ops-system-checks",
     heading: "System checks",
-    intro: "Review current readiness, data freshness, and fallback posture in a stable keyboard order.",
+    intro: "Review current readiness, restart recovery evidence, and fallback posture in a stable keyboard order.",
   }),
   Object.freeze({
     id: "ops-recovery-steps",
@@ -19,7 +19,7 @@ export const OPS_SHELL_SECTIONS = Object.freeze([
 
 export const OPS_RECOVERY_STEPS = Object.freeze([
   "Confirm the public display remains unchanged before any maintenance action.",
-  "Review readiness and calm issue wording in this local surface.",
+  "Review readiness and restart recovery evidence in this local surface.",
   "Run a refresh or trust check only from this local maintenance area.",
 ]);
 

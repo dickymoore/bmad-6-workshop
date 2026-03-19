@@ -76,6 +76,13 @@ function createStatus(overrides = {}) {
       publishedAt: "2026-03-19T08:00:00.000Z",
       refreshIntervalMs: 30_000,
       snapshotState: "live",
+      recovery: {
+        phase: "live",
+        recoveredAt: null,
+        recoverySource: "live-publish",
+        livePublicationResumed: true,
+        resumedAt: null,
+      },
     }),
     ...overrides,
   });
@@ -102,6 +109,8 @@ describe("ops shell", () => {
     expect(viewModel.readinessHeading).toBe("Public readiness");
     expect(viewModel.readinessLabel).toBe("Current");
     expect(viewModel.publishedAt).toBe("19 Mar 2026, 08:00");
+    expect(viewModel.recoveryLabel).toBe("Fresh live detail");
+    expect(viewModel.recoverySourceLabel).toBe("Fresh live publish");
     expect(viewModel.checks.map((check) => check.label)).toEqual([
       "Main layout is present",
       "Overall departure state is present",
@@ -141,12 +150,22 @@ describe("ops shell", () => {
             publishedAt: "2026-03-19T08:00:00.000Z",
             refreshIntervalMs: 30_000,
             snapshotState: "last-safe",
+            recovery: {
+              phase: "recovering",
+              recoveredAt: "2026-03-19T08:05:00.000Z",
+              recoverySource: "stored-snapshot",
+              livePublicationResumed: false,
+              resumedAt: null,
+            },
           },
         ),
       }),
     );
 
     expect(viewModel.readinessLabel).toBe("Reduced confidence");
+    expect(viewModel.recoveryLabel).toBe("Restart recovery");
+    expect(viewModel.recoveryAt).toBe("19 Mar 2026, 08:05");
+    expect(viewModel.recoveryLiveLabel).toBe("Still carried forward");
     expect(viewModel.issues.join(" ")).toContain("carried forward");
     expect(viewModel.diagnosticsAreas.length).toBe(1);
     expect(viewModel.diagnosticsAreas[0].areaLabel).toBe("Weather");

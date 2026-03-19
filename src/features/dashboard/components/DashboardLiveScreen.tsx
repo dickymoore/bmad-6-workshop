@@ -20,6 +20,7 @@ function DashboardLiveBoundary({ initialResponse }: { initialResponse: Dashboard
   const viewModel = presentDashboardSnapshot(response.data, {
     previousSnapshot,
     hasUpdatedSinceLoad,
+    recovery: response.meta.recovery,
   });
 
   return <DashboardScreen viewModel={viewModel} />;
