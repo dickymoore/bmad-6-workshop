@@ -1,0 +1,123 @@
+{
+  "phase-1-analysis": {
+    "note": "Phase 1 outputs are shown from the next frozen snapshot because `phase-1-analysis/` mirrors the pre-analysis workshop branch.",
+    "items": [
+      {
+        "label": "Product brief",
+        "patterns": ["phase-2-planning/snapshot/docs/product-brief-*.md"]
+      },
+      {
+        "label": "Research outputs",
+        "patterns": [
+          "phase-2-planning/snapshot/docs/research/domain-*.md",
+          "phase-2-planning/snapshot/docs/research/technical-*.md"
+        ]
+      },
+      {
+        "label": "Brainstorming output",
+        "patterns": ["phase-2-planning/snapshot/_bmad-output/brainstorming/*.md"]
+      }
+    ]
+  },
+  "phase-2-planning": {
+    "note": "Phase 2 outputs are shown from the next frozen snapshot because `phase-2-planning/` mirrors the branch before planning artifacts exist.",
+    "items": [
+      {
+        "label": "PRD",
+        "patterns": ["phase-3-solutioning/snapshot/docs/prd.md"]
+      },
+      {
+        "label": "UX design specification",
+        "patterns": ["phase-3-solutioning/snapshot/docs/ux-design-specification.md"]
+      }
+    ]
+  },
+  "phase-3-solutioning": {
+    "note": "Phase 3 outputs are shown from the next frozen snapshot because `phase-3-solutioning/` mirrors the branch before solutioning artifacts exist.",
+    "items": [
+      {
+        "label": "Architecture",
+        "patterns": ["phase-4-implementation-setup/snapshot/docs/architecture.md"]
+      },
+      {
+        "label": "Epics",
+        "patterns": ["phase-4-implementation-setup/snapshot/docs/epics.md"]
+      },
+      {
+        "label": "Implementation readiness report",
+        "patterns": ["phase-4-implementation-setup/snapshot/docs/implementation-readiness-report-*.md"]
+      },
+      {
+        "label": "PRD",
+        "patterns": ["phase-4-implementation-setup/snapshot/docs/prd.md"]
+      },
+      {
+        "label": "Validation report",
+        "patterns": ["phase-4-implementation-setup/snapshot/docs/validation-report-*.md"]
+      }
+    ]
+  },
+  "phase-4-implementation-setup": {
+    "note": "The implementation slide uses the implementation snapshot because sprint artifacts and code only exist once the workshop reaches `phase-6-implementation/`.",
+    "items": [
+      {
+        "label": "Sprint status",
+        "patterns": ["phase-6-implementation/snapshot/docs/sprint-artifacts/sprint-status.yaml"]
+      },
+      {
+        "label": "First story",
+        "patterns": ["phase-6-implementation/snapshot/docs/sprint-artifacts/1-1-*.md"]
+      }
+    ]
+  },
+  "phase-6-implementation": {
+    "note": "These are the direct implementation artifacts available in this snapshot.",
+    "items": [
+      {
+        "label": "Sprint status",
+        "patterns": ["phase-6-implementation/snapshot/docs/sprint-artifacts/sprint-status.yaml"]
+      },
+      {
+        "label": "First story",
+        "patterns": ["phase-6-implementation/snapshot/docs/sprint-artifacts/1-1-*.md"]
+      }
+    ]
+  },
+  "bmb/evidence-blueprint": {
+    "note": "These are the files to show for the modules slide and BMB replay example.",
+    "items": [
+      {
+        "label": "Module brief",
+        "patterns": ["bmb/evidence-blueprint/module-brief-*.md"]
+      },
+      {
+        "label": "Validation report",
+        "patterns": ["bmb/evidence-blueprint/validation-report-*.md"]
+      },
+      {
+        "label": "Module README",
+        "patterns": ["bmb/evidence-blueprint/module/README.md"]
+      },
+      {
+        "label": "Module TODO",
+        "patterns": ["bmb/evidence-blueprint/module/TODO.md"]
+      },
+      {
+        "label": "Module config",
+        "patterns": ["bmb/evidence-blueprint/module/module.yaml"]
+      },
+      {
+        "label": "Agent specs",
+        "patterns": ["bmb/evidence-blueprint/module/agents/*.md"]
+      },
+      {
+        "label": "Workflow specs",
+        "patterns": ["bmb/evidence-blueprint/module/workflows/**/*.md"]
+      },
+      {
+        "label": "Installer",
+        "patterns": ["bmb/evidence-blueprint/module/_module-installer/*"]
+      }
+    ]
+  }
+}

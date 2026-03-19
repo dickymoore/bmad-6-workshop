@@ -151,6 +151,7 @@ Current default track: `desk-booking`
   - `files/` contains phase folders like `phase-1-analysis/` and `phase-6-implementation/`
   - phases without a frozen branch yet still get placeholder folders
   - clones `https://github.com/dickymoore/agent-replay` into `agent-replay/`
+  - generates `SPEAKER-GUIDE-LINKS.md` inside each facilitator folder with relative links to the files referenced in the speaker guide
   - optional BMB export support:
 
 ```bash

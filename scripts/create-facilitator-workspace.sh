@@ -372,6 +372,9 @@ if [[ -n "$BMB_REPO" ]]; then
   printf -- '\n## BMB exports\n\n- `bmb/%s/` -> copied from `%s`\n' "$BMB_MODULE" "$BMB_REPO" >> "$files_root/README.md"
 fi
 
+log "generating speaker-guide link files"
+"$SCRIPT_DIR/generate-facilitator-links.py" --track "$TRACK" --files-root "$files_root"
+
 log "cloning agent-replay into $agent_replay_root"
 git clone "$AGENT_REPLAY_URL" "$agent_replay_root" >/dev/null
 

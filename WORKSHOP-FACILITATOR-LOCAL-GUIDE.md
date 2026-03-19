@@ -95,6 +95,8 @@ Create a clean external facilitator workspace:
 ./scripts/create-facilitator-workspace.sh --track albemarle-pulse --destination ../albemarle-pulse-facilitator --reset
 ```
 
+Each generated phase folder includes `SPEAKER-GUIDE-LINKS.md` with relative links to the files called out in the speaker guide.
+
 ## Operator Rules
 
 - Prefer the namespaced `workshop/desk-booking/*` branches in all live guidance.
