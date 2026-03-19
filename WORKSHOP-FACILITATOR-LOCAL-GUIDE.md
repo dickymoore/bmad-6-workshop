@@ -95,6 +95,25 @@ Create a clean external facilitator workspace:
 ./scripts/create-facilitator-workspace.sh --track albemarle-pulse --destination ../albemarle-pulse-facilitator --reset
 ```
 
+Create a batch of facilitator workspaces for rehearsals and workshop runs:
+
+```bash
+mkdir -p ../facilitator-workspaces
+
+for session in \
+  test-runthrough \
+  deep-dive \
+  test-2 \
+  Wed-1 Wed-2 Wed-3 Wed-4 \
+  Thu-1 Thu-2 Thu-3 Thu-4
+do
+  ./scripts/create-facilitator-workspace.sh \
+    --track albemarle-pulse \
+    --destination "../facilitator-workspaces/${session}" \
+    --reset
+done
+```
+
 Each generated phase folder includes `SPEAKER-GUIDE-LINKS.md` with relative links to the files called out in the speaker guide.
 The generated workspace also includes `files/installation/` so you can show the BMAD install payload itself.
 

@@ -146,6 +146,25 @@ Current default track: `desk-booking`
 ./scripts/create-facilitator-workspace.sh --track albemarle-pulse --destination ../albemarle-pulse-facilitator --reset
 ```
 
+- Batch example for multiple sessions:
+
+```bash
+mkdir -p ../facilitator-workspaces
+
+for session in \
+  test-runthrough \
+  deep-dive \
+  test-2 \
+  Wed-1 Wed-2 Wed-3 Wed-4 \
+  Thu-1 Thu-2 Thu-3 Thu-4
+do
+  ./scripts/create-facilitator-workspace.sh \
+    --track albemarle-pulse \
+    --destination "../facilitator-workspaces/${session}" \
+    --reset
+done
+```
+
 - Notes:
   - destination must be outside the repo
   - `files/installation/` shows the BMAD install payload from `main`, including `.agents/skills` and selected `_bmad` config files
