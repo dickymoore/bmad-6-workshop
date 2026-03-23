@@ -514,6 +514,7 @@ export function createDashboardSnapshot(input) {
     overallState,
     overallTrend,
     weatherSummary,
+    weatherTemperatureC,
     mobilitySummary,
     placeLabel,
     supportLabel,
@@ -534,6 +535,13 @@ export function createDashboardSnapshot(input) {
 
   if (overallTrend != null && !TREND_STATES.includes(overallTrend)) {
     throw new Error(`Unsupported dashboard trend state: ${overallTrend}`);
+  }
+
+  if (
+    weatherTemperatureC != null &&
+    (typeof weatherTemperatureC !== "number" || Number.isNaN(weatherTemperatureC))
+  ) {
+    throw new Error('Dashboard snapshot field "weatherTemperatureC" must be a number when present');
   }
 
   for (const [field, value] of Object.entries({
@@ -568,6 +576,7 @@ export function createDashboardSnapshot(input) {
     overallState,
     overallTrend: overallTrend ?? null,
     weatherSummary: weatherSummary.trim(),
+    weatherTemperatureC: typeof weatherTemperatureC === "number" ? weatherTemperatureC : null,
     mobilitySummary: mobilitySummary.trim(),
     placeLabel: placeLabel.trim(),
     supportLabel: supportLabel.trim(),

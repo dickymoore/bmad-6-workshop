@@ -125,21 +125,21 @@ function createHeaderSegment({ segment, liveOverview, storedSummary, now, publis
       summary: storedSummary,
       trust: createCarriedForwardTrust(
         segment.subject,
-        `${segment.subject} is carried forward while live ${segment.summaryNoun} narrows.`,
+        `${segment.subject} is showing the last available update.`,
       ),
       sourceStatus: createSourceStatus({
         state: "carried-forward",
-        detail: `${segment.subject} is carried forward while live ${segment.summaryNoun} narrows.`,
+        detail: `${segment.subject} is showing the last available update.`,
       }),
     };
   }
 
   return {
-    summary: `${segment.subject} is temporarily unavailable for the foyer.`,
-    trust: createUnavailableTrust(segment.subject, `${segment.subject} is temporarily unavailable for the foyer.`),
+    summary: `${segment.subject} data is unavailable.`,
+    trust: createUnavailableTrust(segment.subject, `${segment.subject} data is unavailable.`),
     sourceStatus: createSourceStatus({
       state: "unavailable",
-      detail: `${segment.subject} is temporarily unavailable for the foyer.`,
+      detail: `${segment.subject} data is unavailable.`,
     }),
   };
 }
@@ -162,13 +162,13 @@ function createCarriedForwardMode(mode, storedMode) {
     ...mode,
     state: storedMode?.state ?? (mode.state === "disrupted" ? "caution" : mode.state),
     disruptionScope: "unaffected-readable",
-    summary: storedMode?.summary ?? `${mode.label} is carried forward while live nearby detail narrows.`,
-    nuance: storedMode?.nuance ?? "The rest of the nearby picture remains readable.",
+    summary: storedMode?.summary ?? `${mode.label} is showing the last available update.`,
+    nuance: storedMode?.nuance ?? "Other nearby data is still shown.",
     sourceStatus: createSourceStatus({
       state: "carried-forward",
-      detail: `${mode.label} is carried forward while live nearby detail narrows.`,
+      detail: `${mode.label} is showing the last available update.`,
     }),
-    trust: createCarriedForwardTrust(mode.label, `${mode.label} is carried forward while live nearby detail narrows.`),
+    trust: createCarriedForwardTrust(mode.label, `${mode.label} is showing the last available update.`),
   };
 }
 
@@ -177,13 +177,13 @@ function createUnavailableMode(mode) {
     ...mode,
     state: "caution",
     disruptionScope: "unaffected-readable",
-    summary: `${mode.label} is temporarily unavailable in this nearby read.`,
-    nuance: "The rest of the nearby picture remains readable.",
+    summary: `${mode.label} data is unavailable.`,
+    nuance: "Other nearby data is still shown.",
     sourceStatus: createSourceStatus({
       state: "unavailable",
-      detail: `${mode.label} is temporarily unavailable in this nearby read.`,
+      detail: `${mode.label} data is unavailable.`,
     }),
-    trust: createUnavailableTrust(mode.label, `${mode.label} is temporarily unavailable in this nearby read.`),
+    trust: createUnavailableTrust(mode.label, `${mode.label} data is unavailable.`),
   };
 }
 
@@ -216,8 +216,8 @@ function deriveDisruptionEmphasis({ overallState, nearbyModes }) {
       headline: "Disrupted across the Royal Institution threshold",
       detail:
         affectedLabels.length > 0
-          ? `${affectedLabels} are under visible strain across the nearby departure picture.`
-          : "The nearby departure picture is under visible strain while remaining readable.",
+          ? `${affectedLabels} have the most disruption nearby.`
+          : "There is serious disruption nearby.",
       affectedModeKeys: affectedModes.map((mode) => mode.key),
     };
   }
@@ -231,7 +231,7 @@ function deriveDisruptionEmphasis({ overallState, nearbyModes }) {
         affectedModes.length === 1
           ? `${affectedModes[0].label} is disrupted nearby`
           : "Multiple nearby modes are disrupted",
-      detail: `${affectedLabels} ${affectedModes.length === 1 ? "is" : "are"} under the most strain nearby while the rest of the departure picture stays readable.`,
+      detail: `${affectedLabels} ${affectedModes.length === 1 ? "has" : "have"} the most disruption nearby.`,
       affectedModeKeys: affectedModes.map((mode) => mode.key),
     };
   }
@@ -246,18 +246,18 @@ function deriveDisruptionEmphasis({ overallState, nearbyModes }) {
 
 function createMixedSupportLabel({ weatherStatus, mobilityStatus }) {
   if (weatherStatus.state === "live" && mobilityStatus.state === "live") {
-    return "Weather and movement are live.";
+    return "Transport and weather are live.";
   }
 
   if (weatherStatus.state === "live" && mobilityStatus.state !== "live") {
-    return "Weather is live, movement is partial.";
+    return "Weather is live. Transport is delayed.";
   }
 
   if (weatherStatus.state !== "live" && mobilityStatus.state === "live") {
-    return "Movement is live, weather is partial.";
+    return "Transport is live. Weather is delayed.";
   }
 
-  return "Live detail is partial.";
+  return "Some live data is delayed.";
 }
 
 function createLocalMap({ baseSnapshot, storedSnapshot, tflOverview }) {
@@ -359,6 +359,7 @@ export async function buildDashboardSnapshot({
         ? null
         : {
             summary: weatherOverview.weatherSummary,
+            temperatureC: weatherOverview.temperatureC,
             signalObservedAt: weatherOverview.signalObservedAt,
             missedRefreshes: weatherOverview.missedRefreshes ?? 0,
           },
@@ -399,6 +400,10 @@ export async function buildDashboardSnapshot({
     overallState,
     overallTrend: null,
     weatherSummary: weatherHeader.summary,
+    weatherTemperatureC:
+      typeof weatherOverview?.temperatureC === "number"
+        ? weatherOverview.temperatureC
+        : storedSnapshot?.weatherTemperatureC ?? baseSnapshot.weatherTemperatureC ?? null,
     mobilitySummary: mobilityHeader.summary,
     supportLabel: createMixedSupportLabel({
       weatherStatus: weatherHeader.sourceStatus,

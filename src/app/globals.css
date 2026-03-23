@@ -3015,7 +3015,7 @@ a {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: flex-start;
-  gap: 12px;
+  gap: 8px;
 }
 
 .atmospheric-header__kicker {
@@ -3029,7 +3029,7 @@ a {
 }
 
 .atmospheric-header__headline {
-  max-width: 15ch;
+  max-width: 19ch;
   font-size: 1.72rem;
   line-height: 1.08;
   letter-spacing: -0.035em;
@@ -3070,8 +3070,8 @@ a {
 }
 
 .atmospheric-header__status-pill {
-  min-width: 128px;
-  padding: 10px 14px;
+  min-width: 120px;
+  padding: 10px 12px;
   border-radius: 999px;
 }
 
@@ -3420,25 +3420,34 @@ a {
   box-shadow: 0 8px 28px rgba(56, 56, 49, 0.06);
 }
 
-.local-map-panel__embed,
-.local-map-panel__map-wash {
+.local-map-panel__base-map {
   position: absolute;
   inset: 0;
-}
-
-.local-map-panel__embed {
   width: 100%;
   height: 100%;
-  border: 0;
-  opacity: 0.72;
-  filter: grayscale(1) sepia(0.18) saturate(0.82) contrast(1.04);
-  pointer-events: none;
+  overflow: hidden;
+  background: #f4efe5;
+  filter: grayscale(1) sepia(0.08) saturate(0.72) contrast(1.02) brightness(1.03);
 }
 
-.local-map-panel__map-wash {
+.local-map-panel__tile,
+.local-map-panel__base-map-wash {
+  position: absolute;
+  inset: auto;
+}
+
+.local-map-panel__tile {
+  display: block;
+  opacity: 0.94;
+  object-fit: fill;
+  transform: scale(1.02);
+}
+
+.local-map-panel__base-map-wash {
+  inset: 0;
   background:
-    linear-gradient(180deg, rgba(255, 252, 247, 0.28), rgba(245, 241, 232, 0.42)),
-    radial-gradient(circle at 22% 20%, rgba(181, 150, 96, 0.16), transparent 26%);
+    linear-gradient(180deg, rgba(255, 252, 247, 0.1), rgba(245, 241, 232, 0.18)),
+    radial-gradient(circle at 24% 24%, rgba(255, 252, 247, 0.22), transparent 28%);
 }
 
 .local-map-panel__district-label {
@@ -3449,32 +3458,85 @@ a {
   z-index: 2;
 }
 
-.local-map-panel__graphic {
-  position: relative;
+.local-map-panel__marker-layer {
+  position: absolute;
+  inset: 0;
   z-index: 2;
-  opacity: 0.62;
+  pointer-events: none;
 }
 
-.local-map-panel__frame {
-  stroke: rgba(255, 255, 255, 0.58);
-  stroke-width: 1.3;
+.local-map-panel__node,
+.local-map-panel__venue-anchor {
+  position: absolute;
+  transform: translate(-50%, -50%);
 }
 
-.local-map-panel__street-label {
-  fill: rgba(56, 56, 49, 0.72);
+.local-map-panel__node-dot,
+.local-map-panel__venue-dot {
+  display: block;
+  border-radius: 999px;
+}
+
+.local-map-panel__node-dot {
+  width: 10px;
+  height: 10px;
+  background: rgba(75, 123, 107, 0.88);
+  box-shadow: 0 0 0 3px rgba(255, 252, 247, 0.7);
+}
+
+.local-map-panel__node-label {
+  position: absolute;
+  min-width: max-content;
+  max-width: 128px;
+  margin: 0;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 252, 247, 0.94);
+  color: rgba(56, 56, 49, 0.94);
+  font-size: 0.64rem;
   font-weight: 700;
+  line-height: 1.25;
+  box-shadow: 0 6px 18px rgba(56, 56, 49, 0.06);
+  white-space: normal;
 }
 
-.local-map-panel__street-label--primary {
-  fill: rgba(56, 56, 49, 0.92);
+.local-map-panel__node--north .local-map-panel__node-label {
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
 }
 
-.local-map-panel__marker text {
-  fill: rgba(56, 56, 49, 0.84);
+.local-map-panel__node--west .local-map-panel__node-label {
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  text-align: right;
+}
+
+.local-map-panel__node--north-west .local-map-panel__node-label {
+  right: 14px;
+  bottom: 14px;
+  text-align: right;
+}
+
+.local-map-panel__venue-anchor {
+  z-index: 3;
+}
+
+.local-map-panel__venue-dot {
+  width: 14px;
+  height: 14px;
+  background: rgba(195, 104, 97, 0.94);
+  box-shadow: 0 0 0 4px rgba(255, 252, 247, 0.72);
 }
 
 .local-map-panel__venue-pill {
-  top: 46%;
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  transform: translateY(-50%);
+  margin: 0;
   padding: 8px 14px;
   font-size: 0.62rem;
   background: rgba(56, 56, 49, 0.94);
@@ -3483,11 +3545,11 @@ a {
 
 .local-map-panel__overlay-card {
   display: grid;
-  gap: 4px;
+  gap: 2px;
   right: 18px;
   bottom: 18px;
   left: 18px;
-  padding: 12px 14px;
+  padding: 10px 12px;
   border-radius: 14px;
   background: rgba(255, 252, 247, 0.9);
   box-shadow: 0 8px 22px rgba(56, 56, 49, 0.08);
@@ -3506,8 +3568,8 @@ a {
   display: block;
   margin: 0;
   color: rgba(101, 101, 92, 0.92);
-  font-size: 0.68rem;
-  line-height: 1.35;
+  font-size: 0.62rem;
+  line-height: 1.3;
 }
 
 @media (max-width: 1023px) {

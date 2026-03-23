@@ -40,18 +40,18 @@ const SOURCE_STATUS_LABELS = Object.freeze({
 });
 
 const DEFAULT_DETAIL_BUILDERS = Object.freeze({
-  current: (subject) => `${subject} is current for the foyer.`,
-  aging: (subject) => `${subject} is aging slightly.`,
-  stale: (subject) => `${subject} is stale and may have shifted.`,
-  delayed: (subject) => `${subject} is delayed and should be read with care.`,
-  "reduced-confidence": (subject) => `${subject} is less certain just now.`,
-  unavailable: (subject) => `${subject} is temporarily unavailable.`,
+  current: (subject) => `${subject} is up to date.`,
+  aging: (subject) => `${subject} is a few minutes old.`,
+  stale: (subject) => `${subject} may be out of date.`,
+  delayed: (subject) => `${subject} is delayed.`,
+  "reduced-confidence": (subject) => `${subject} has reduced confidence.`,
+  unavailable: (subject) => `${subject} is unavailable.`,
 });
 
 const DEFAULT_SOURCE_STATUS_BUILDERS = Object.freeze({
-  live: (subject) => `${subject} is reading live for the foyer.`,
-  "carried-forward": (subject) => `${subject} is carried forward while live detail narrows.`,
-  unavailable: (subject) => `${subject} is temporarily unavailable for the foyer.`,
+  live: (subject) => `${subject} is live.`,
+  "carried-forward": (subject) => `${subject} is showing the last available update.`,
+  unavailable: (subject) => `${subject} is unavailable.`,
 });
 
 export function getFreshnessLabel(state) {

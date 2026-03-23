@@ -147,7 +147,7 @@ describe("dashboard live path", () => {
     expect(built.snapshot.disruptionEmphasis).toEqual({
       level: "local",
       headline: "Bus is disrupted nearby",
-      detail: "Bus is under the most strain nearby while the rest of the departure picture stays readable.",
+      detail: "Bus has the most disruption nearby.",
       affectedModeKeys: ["bus"],
     });
     expect(built.snapshot.headerTrust.weather.state).toBe("current");
@@ -271,7 +271,7 @@ describe("dashboard live path", () => {
     expect(built.snapshot.headerStatus.mobility.state).toBe("unavailable");
     expect(built.snapshot.nearbyModes.every((mode) => mode.state === "caution")).toBe(true);
     expect(built.snapshot.nearbyModes.every((mode) => mode.sourceStatus.state === "unavailable")).toBe(true);
-    expect(built.snapshot.nearbyModes.every((mode) => mode.summary.includes("temporarily unavailable"))).toBe(true);
+    expect(built.snapshot.nearbyModes.every((mode) => mode.summary.includes("data is unavailable"))).toBe(true);
     expect(built.snapshot.localMap.sourceStatus.state).toBe("unavailable");
   });
 
@@ -397,7 +397,7 @@ describe("dashboard live path", () => {
     expect(response.data.headerTrust.weather.state).toBe("unavailable");
     expect(response.data.headerTrust.mobility.state).toBe("unavailable");
     expect(response.data.disruptionEmphasis.level).toBe("none");
-    expect(response.data.supportLabel).toBe("The Royal Institution picture stays readable while live detail reconnects.");
+    expect(response.data.supportLabel).toBe("Live data is reconnecting.");
     expect(response.data.nearbyModes.every((mode) => mode.state === "caution")).toBe(true);
     expect(response.data.nearbyModes.every((mode) => mode.sourceStatus.state === "unavailable")).toBe(true);
     expect(response.data.nearbyModes.every((mode) => mode.trust.state === "unavailable")).toBe(true);
@@ -487,7 +487,7 @@ describe("dashboard live path", () => {
     expect(response.meta.snapshotState).toBe("last-safe");
     expect(response.meta.recovery.phase).toBe("recovering");
     expect(response.data.headerTrust.weather.state).toBe("reduced-confidence");
-    expect(response.data.supportLabel).toBe("The shared picture is carried forward while live detail narrows.");
+    expect(response.data.supportLabel).toBe("Showing the last available update.");
   });
 
   it("marks recovery as resumed when a fresh live publish succeeds after restart", async () => {

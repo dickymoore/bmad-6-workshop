@@ -31,25 +31,25 @@ function mapSeverityToState(severity) {
 function summarizeModeState(modeKey, state, descriptions) {
   if (modeKey === "tube-rail") {
     if (state === "available") {
-      return "Tube and rail are reading open around Green Park and Piccadilly.";
+      return "Green Park and Piccadilly services are running normally.";
     }
 
     if (state === "caution") {
-      return `Tube and rail are moving with a tighter rhythm nearby${descriptions ? `: ${descriptions}.` : "."}`;
+      return `Green Park and Piccadilly services have minor delays${descriptions ? `: ${descriptions}.` : "."}`;
     }
 
-    return `Tube and rail are carrying a disrupted read nearby${descriptions ? `: ${descriptions}.` : "."}`;
+    return `Green Park and Piccadilly services are disrupted${descriptions ? `: ${descriptions}.` : "."}`;
   }
 
   if (state === "available") {
-    return "Nearby bus movement is reading open through the West End streets.";
+    return "Nearby buses are running normally.";
   }
 
   if (state === "caution") {
-    return `Nearby buses are moving with uneven spacing${descriptions ? `: ${descriptions}.` : "."}`;
+    return `Nearby buses are slower than normal${descriptions ? `: ${descriptions}.` : "."}`;
   }
 
-  return `Nearby buses are reading disrupted${descriptions ? `: ${descriptions}.` : "."}`;
+  return `Nearby buses are disrupted${descriptions ? `: ${descriptions}.` : "."}`;
 }
 
 function normalizeTflLineGroup(lines, modeKey, fetchedAt) {
@@ -71,10 +71,10 @@ function normalizeTflLineGroup(lines, modeKey, fetchedAt) {
     summary: summarizeModeState(modeKey, state, descriptions),
     nuance:
       state === "available"
-        ? "TfL status is holding a calm nearby read."
+        ? "No reported issue."
         : state === "caution"
-        ? "Queues and platform rhythms may bunch a little more than usual."
-          : "The foyer read should stay watchful while the line status settles.",
+          ? "Expect some delay."
+          : "Check live service status.",
     signalObservedAt: fetchedAt,
     fetchedAt,
     missedRefreshes: 0,
@@ -129,12 +129,12 @@ export async function fetchTflOverview({
   const disruptedCount = liveModes.filter((mode) => mode.state === "disrupted").length;
   const cautionCount = liveModes.filter((mode) => mode.state === "caution").length;
 
-  let mobilitySummary = "Nearby departures are holding a calm live rhythm.";
+  let mobilitySummary = "Nearby transport is running normally.";
 
   if (disruptedCount > 0) {
-    mobilitySummary = "Nearby departures are still readable, though some live movement is disrupted.";
+    mobilitySummary = "Some nearby services are disrupted.";
   } else if (cautionCount > 0) {
-    mobilitySummary = "Nearby departures are moving, with a slightly tighter live rhythm.";
+    mobilitySummary = "Some nearby services are slower than normal.";
   }
 
   return {

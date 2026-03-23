@@ -57,7 +57,7 @@ describe("freshness classification", () => {
     });
 
     expect(trust.label).toBe("Stale");
-    expect(trust.detail).toBe("Bus is stale and may have shifted.");
+    expect(trust.detail).toBe("Bus may be out of date.");
     expect(trust.confidence).toBe("narrowed");
   });
 });

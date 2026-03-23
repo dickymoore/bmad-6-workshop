@@ -340,7 +340,7 @@ test("story 5.2 replaces verbose nearby cards with compact RAG transport rows", 
 
   assert.equal(/dashboard-shell__header[\s\S]*dashboard-lower-grid__modes[\s\S]*dashboard-lower-grid__map/.test(screen), true, "canonical shell order should remain header, nearby rows, then map");
   assert.equal(
-    /Nearby mode status|W1S wayfinding|Readable nearby|Disrupted nearby/i.test(modeGrid + presenter),
+    /Nearby mode status|W1S wayfinding|Running nearby|Disrupted nearby/i.test(modeGrid + presenter),
     true,
     "nearby mode section should describe compact board rows",
   );

@@ -35,21 +35,21 @@ function createCarriedForwardSnapshot(snapshot) {
     headerTrust: {
       weather: createTrustSignal({
         state: "reduced-confidence",
-        detail: "Weather is carried forward while live weather detail narrows.",
+        detail: "Weather is showing the last available update.",
       }),
       mobility: createTrustSignal({
         state: "reduced-confidence",
-        detail: "Movement is carried forward while live movement detail narrows.",
+        detail: "Movement is showing the last available update.",
       }),
     },
     headerStatus: {
       weather: createSourceStatus({
         state: "carried-forward",
-        detail: "Weather is carried forward while live weather detail narrows.",
+        detail: "Weather is showing the last available update.",
       }),
       mobility: createSourceStatus({
         state: "carried-forward",
-        detail: "Movement is carried forward while live movement detail narrows.",
+        detail: "Movement is showing the last available update.",
       }),
     },
     localMap: {
@@ -57,21 +57,21 @@ function createCarriedForwardSnapshot(snapshot) {
       state: "fallback",
       sourceStatus: createSourceStatus({
         state: "carried-forward",
-        detail: "The local frame stays simplified while richer locality detail narrows.",
+        detail: "Showing the simpler local map.",
       }),
-      fallbackCopy: "The local frame stays simplified while richer locality detail narrows.",
+      fallbackCopy: "Showing the simpler local map.",
     },
-    supportLabel: "The shared picture is carried forward while live detail narrows.",
+    supportLabel: "Showing the last available update.",
     nearbyModes: snapshot.nearbyModes.map((mode) => ({
       ...mode,
       disruptionScope: "unaffected-readable",
       sourceStatus: createSourceStatus({
         state: "carried-forward",
-        detail: `${mode.label} is carried forward while live nearby detail narrows.`,
+        detail: `${mode.label} is showing the last available update.`,
       }),
       trust: createTrustSignal({
         state: "reduced-confidence",
-        detail: `${mode.label} is carried forward while live nearby detail narrows.`,
+        detail: `${mode.label} is showing the last available update.`,
       }),
     })),
   });
@@ -84,25 +84,25 @@ function createReducedConfidenceFallbackSnapshot(publishedAt) {
     ...fallbackSnapshot,
     overallState: "calm",
     overallTrend: null,
-    supportLabel: "The Royal Institution picture stays readable while live detail reconnects.",
+    supportLabel: "Live data is reconnecting.",
     headerTrust: {
       weather: createTrustSignal({
         state: "unavailable",
-        detail: "Weather is temporarily unavailable for the foyer.",
+        detail: "Weather data is unavailable.",
       }),
       mobility: createTrustSignal({
         state: "unavailable",
-        detail: "Movement is temporarily unavailable for the foyer.",
+        detail: "Movement data is unavailable.",
       }),
     },
     headerStatus: {
       weather: createSourceStatus({
         state: "unavailable",
-        detail: "Weather is temporarily unavailable for the foyer.",
+        detail: "Weather data is unavailable.",
       }),
       mobility: createSourceStatus({
         state: "unavailable",
-        detail: "Movement is temporarily unavailable for the foyer.",
+        detail: "Movement data is unavailable.",
       }),
     },
     localMap: {
@@ -110,23 +110,23 @@ function createReducedConfidenceFallbackSnapshot(publishedAt) {
       state: "fallback",
       sourceStatus: createSourceStatus({
         state: "unavailable",
-        detail: "The local frame stays simplified while richer locality detail is temporarily unavailable.",
+        detail: "Showing the simpler local map.",
       }),
-      fallbackCopy: "The local frame stays simplified while richer locality detail is temporarily unavailable.",
+      fallbackCopy: "Showing the simpler local map.",
     },
     nearbyModes: fallbackSnapshot.nearbyModes.map((mode) => ({
       ...mode,
       state: "caution",
       disruptionScope: "unaffected-readable",
-      summary: `${mode.label} is temporarily unavailable in this nearby read.`,
-      nuance: "The rest of the nearby picture remains readable.",
+      summary: `${mode.label} data is unavailable.`,
+      nuance: "Other nearby data is still shown.",
       sourceStatus: createSourceStatus({
         state: "unavailable",
-        detail: `${mode.label} is temporarily unavailable in this nearby read.`,
+        detail: `${mode.label} data is unavailable.`,
       }),
       trust: createTrustSignal({
         state: "unavailable",
-        detail: `${mode.label} is temporarily unavailable in this nearby read.`,
+        detail: `${mode.label} data is unavailable.`,
       }),
     })),
   });

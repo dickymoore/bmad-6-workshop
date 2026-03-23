@@ -29,6 +29,7 @@ export type DashboardApiResponse = {
     overallState: string;
     overallTrend: string | null;
     weatherSummary: string;
+    weatherTemperatureC: number | null;
     mobilitySummary: string;
     supportLabel: string;
     headerTrust: {

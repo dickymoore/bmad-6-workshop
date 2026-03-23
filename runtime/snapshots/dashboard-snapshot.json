@@ -1,11 +1,12 @@
 {
-  "publishedAt": "2026-03-23T16:25:09.098Z",
+  "publishedAt": "2026-03-23T19:31:38.304Z",
   "overallState": "watchful",
   "overallTrend": "steady",
   "weatherSummary": "Cold rain is moving across Mayfair and the street is reading a little slower.",
-  "mobilitySummary": "Nearby departures are holding a calm live rhythm.",
+  "weatherTemperatureC": 12,
+  "mobilitySummary": "Nearby transport is running normally.",
   "placeLabel": "Royal Institution, Albemarle Street",
-  "supportLabel": "Movement is live, weather is partial.",
+  "supportLabel": "Transport is live. Weather is delayed.",
   "disruptionEmphasis": {
     "level": "none",
     "headline": null,
@@ -16,13 +17,13 @@
     "weather": {
       "state": "reduced-confidence",
       "label": "Reduced confidence",
-      "detail": "Weather is carried forward while live weather detail narrows.",
+      "detail": "Weather is showing the last available update.",
       "confidence": "narrowed"
     },
     "mobility": {
       "state": "current",
       "label": "Current",
-      "detail": "Movement is current for the foyer.",
+      "detail": "Movement is up to date.",
       "confidence": "full"
     }
   },
@@ -30,12 +31,12 @@
     "weather": {
       "state": "carried-forward",
       "label": "Carried forward",
-      "detail": "Weather is carried forward while live weather detail narrows."
+      "detail": "Weather is showing the last available update."
     },
     "mobility": {
       "state": "live",
       "label": "Live",
-      "detail": "Movement is reading live for the foyer."
+      "detail": "Movement is live."
     }
   },
   "localMap": {
@@ -49,8 +50,8 @@
     "venueAnchor": {
       "key": "royal-institution",
       "label": "Royal Institution",
-      "x": 56,
-      "y": 60
+      "x": 44,
+      "y": 47
     },
     "nearbyReferences": [
       {
@@ -76,25 +77,25 @@
       {
         "key": "green-park",
         "label": "Green Park",
-        "x": 72,
-        "y": 36
+        "x": 54,
+        "y": 30
       },
       {
         "key": "piccadilly-stop-r",
         "label": "Piccadilly / St James's Street",
-        "x": 46,
-        "y": 76
+        "x": 37,
+        "y": 59
       },
       {
         "key": "albemarle-street",
         "label": "Albemarle Street",
-        "x": 56,
-        "y": 48
+        "x": 44,
+        "y": 38
       }
     ],
-    "orientationSummary": "Royal Institution sits on Albemarle Street with Green Park and the Piccadilly / St James's Street stop in the immediate local read.",
+    "orientationSummary": "Royal Institution, Green Park, and the Piccadilly / St James's Street stop are shown on the local map.",
     "localityEmphasis": {
-      "label": "Royal Institution sits on Albemarle Street with Green Park and the Piccadilly / St James's Street stop in the immediate local read."
+      "label": "Royal Institution, Green Park, and the Piccadilly / St James's Street stop are shown on the local map."
     },
     "fallbackCopy": null
   },
@@ -104,8 +105,8 @@
       "label": "Tube and rail",
       "state": "available",
       "disruptionScope": "unaffected-readable",
-      "summary": "Tube and rail are reading open around Green Park and Piccadilly.",
-      "nuance": "TfL status is holding a calm nearby read.",
+      "summary": "Green Park and Piccadilly services are running normally.",
+      "nuance": "No reported issue.",
       "sourceStatus": {
         "state": "live",
         "label": "Live",
@@ -114,7 +115,7 @@
       "trust": {
         "state": "current",
         "label": "Current",
-        "detail": "Tube and rail is current for the foyer.",
+        "detail": "Tube and rail is up to date.",
         "confidence": "full"
       }
     },
@@ -123,8 +124,8 @@
       "label": "Bus",
       "state": "available",
       "disruptionScope": "unaffected-readable",
-      "summary": "Nearby bus movement is reading open through the West End streets.",
-      "nuance": "TfL status is holding a calm nearby read.",
+      "summary": "Nearby buses are running normally.",
+      "nuance": "No reported issue.",
       "sourceStatus": {
         "state": "live",
         "label": "Live",
@@ -133,7 +134,7 @@
       "trust": {
         "state": "current",
         "label": "Current",
-        "detail": "Bus is current for the foyer.",
+        "detail": "Bus is up to date.",
         "confidence": "full"
       }
     },
@@ -147,12 +148,12 @@
       "sourceStatus": {
         "state": "carried-forward",
         "label": "Carried forward",
-        "detail": "Roads is carried forward while live nearby detail narrows."
+        "detail": "Roads is showing the last available update."
       },
       "trust": {
         "state": "reduced-confidence",
         "label": "Reduced confidence",
-        "detail": "Roads is carried forward while live nearby detail narrows.",
+        "detail": "Roads is showing the last available update.",
         "confidence": "narrowed"
       }
     },
@@ -166,12 +167,12 @@
       "sourceStatus": {
         "state": "carried-forward",
         "label": "Carried forward",
-        "detail": "Cycles and scooters is carried forward while live nearby detail narrows."
+        "detail": "Cycles and scooters is showing the last available update."
       },
       "trust": {
         "state": "reduced-confidence",
         "label": "Reduced confidence",
-        "detail": "Cycles and scooters is carried forward while live nearby detail narrows.",
+        "detail": "Cycles and scooters is showing the last available update.",
         "confidence": "narrowed"
       }
     }

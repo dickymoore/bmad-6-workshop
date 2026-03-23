@@ -20,30 +20,27 @@ function summarizeWeather(current) {
   if (current.precip_mm >= 1.5) {
     return {
       overallState: "watchful",
-      weatherSummary: "Rain is moving across Mayfair and the nearby street is reading a little slower.",
+      weatherSummary: "Rain nearby.",
     };
   }
 
   if (current.wind_mph >= 18) {
     return {
       overallState: "watchful",
-      weatherSummary: "A brisk wind is moving through Mayfair, though the local picture is still readable.",
+      weatherSummary: "Windy nearby.",
     };
   }
 
   if (condition.includes("mist") || condition.includes("fog")) {
     return {
       overallState: "watchful",
-      weatherSummary: "A softer, hazier light is sitting over Mayfair while the local picture stays readable.",
+      weatherSummary: "Reduced visibility nearby.",
     };
   }
 
   return {
     overallState: "calm",
-    weatherSummary:
-      current.is_day === 1
-        ? "The weather is staying open over Mayfair, keeping the foyer picture easy to read."
-        : "A settled evening sky is keeping the Mayfair picture easy to read.",
+    weatherSummary: current.is_day === 1 ? "Dry nearby." : "Dry this evening.",
   };
 }
 
@@ -77,6 +74,7 @@ export async function fetchWeatherOverview({
   const payload = WEATHER_API_SCHEMA.parse(await response.json());
   return {
     ...summarizeWeather(payload.current),
+    temperatureC: payload.current.temp_c,
     signalObservedAt:
       typeof payload.current.last_updated_epoch === "number"
         ? new Date(payload.current.last_updated_epoch * 1000).toISOString()

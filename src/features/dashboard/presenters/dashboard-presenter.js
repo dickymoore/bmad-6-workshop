@@ -14,8 +14,8 @@ const MODE_STATE_LABELS = Object.freeze({
 });
 
 const LOCAL_MAP_STATE_LABELS = Object.freeze({
-  default: "Live local read",
-  fallback: "Simplified local read",
+  default: "Live local map",
+  fallback: "Simplified local map",
 });
 
 const TREND_LABELS = Object.freeze({
@@ -36,9 +36,9 @@ const DISRUPTION_LABELS = Object.freeze({
 });
 
 const MODE_DISRUPTION_LABELS = Object.freeze({
-  "unaffected-readable": "Readable nearby",
+  "unaffected-readable": "Running nearby",
   "locally-disrupted": "Disrupted nearby",
-  "overall-disrupted": "Disrupted across the picture",
+  "overall-disrupted": "Wider disruption",
 });
 
 const LOCALITY_KIND_LABELS = Object.freeze({
@@ -62,56 +62,79 @@ const CANONICAL_MODE_ORDER = Object.freeze([
 
 function createTrendMessage(overallTrend) {
   if (overallTrend === "improving") {
-    return "The departure picture is improving.";
+    return "Conditions are improving.";
   }
 
   if (overallTrend === "worsening") {
-    return "The departure picture is tightening.";
+    return "Conditions are getting worse.";
   }
 
-  return "The departure picture is holding steady.";
+  return "Conditions are stable.";
 }
 
 function createCurrentnessMessage() {
-  return "Current signals refresh inside the same calm shared view.";
+  return "Board refreshes in place.";
 }
 
-function createSupportLabel(supportLabel) {
-  const sentence = normalizeSentence(supportLabel);
-
-  if (!sentence) {
-    return "Live detail is partial.";
+function createWeatherLead(weatherSummary, weatherStatus) {
+  if (!weatherStatus.isLive) {
+    return null;
   }
 
-  if (/weather and (mobility|movement) (still )?(reinforce the same local read|align nearby)/i.test(sentence)) {
-    return "Weather and movement are live.";
+  const cue = createWeatherBoardCue(weatherSummary, weatherStatus);
+
+  if (cue === "Clear") {
+    return "Clear nearby.";
   }
 
-  if (/movement remains live while weather detail narrows nearby/i.test(sentence)) {
-    return "Movement is live, weather is partial.";
+  if (cue === "Cloudy") {
+    return "Cloudy nearby.";
   }
 
-  if (/weather remains live while movement detail narrows nearby/i.test(sentence)) {
-    return "Weather is live, movement is partial.";
+  if (cue === "Rain") {
+    return "Rain nearby.";
   }
 
-  if (/shared picture (stays readable|is carried forward) while live detail narrows/i.test(sentence)) {
-    return "Live detail is partial.";
+  if (cue === "Wind") {
+    return "Windy nearby.";
   }
 
-  if (/picture stays readable while live detail reconnects/i.test(sentence)) {
-    return "Live detail is reconnecting.";
+  return null;
+}
+
+function createWeatherBullet(weatherSummary) {
+  const summary = normalizeSentence(weatherSummary);
+
+  if (!summary) {
+    return null;
   }
 
-  return `${sentence
-    .replace(/\bthe same local read\b/gi, "the same nearby read")
-    .replace(/\s{2,}/g, " ")
-    .trim()}.`;
+  if (/rain/i.test(summary)) {
+    return "Rain nearby.";
+  }
+
+  if (/cloud/i.test(summary)) {
+    return "Cloudy nearby.";
+  }
+
+  if (/sun|clear|dry/i.test(summary)) {
+    return "Dry nearby.";
+  }
+
+  if (/wind/i.test(summary)) {
+    return "Windy nearby.";
+  }
+
+  if (/visibility|fog|mist/i.test(summary)) {
+    return "Reduced visibility nearby.";
+  }
+
+  return `${summary}.`;
 }
 
 function createRecoveryCurrentnessMessage(recovery) {
   if (recovery?.phase === "recovering") {
-    return "The public view is recovering and the shared picture is carried forward.";
+    return "Board is recovering. Last safe data is on screen.";
   }
 
   return createCurrentnessMessage();
@@ -150,9 +173,13 @@ function createCompactModeSummary(mode) {
   }
 
   return `${sentence
-    .replace(/\bwithin the short walk from here\b/gi, "nearby")
-    .replace(/\bfrom here, now\b/gi, "nearby")
-    .replace(/\bstill\b/gi, "")
+    .replace(/\bare still reading open\b/gi, "are running normally")
+    .replace(/\bis still reading open\b/gi, "is running normally")
+    .replace(/\bstill reading open\b/gi, "running normally")
+    .replace(/\bis still flowing, with slower turns around the wetter junctions\b/gi, "is slower than normal")
+    .replace(/\bstill flowing\b/gi, "moving")
+    .replace(/\btemporarily unavailable in this nearby read\b/gi, "data is unavailable")
+    .replace(/\bremain readable nearby\b/gi, "are running normally")
     .replace(/\s{2,}/g, " ")
     .trim()}.`;
 }
@@ -226,13 +253,33 @@ function createWeatherBoardCue(weatherSummary, weatherStatus) {
   return weatherStatus.label;
 }
 
+function formatTemperatureC(temperatureC) {
+  if (typeof temperatureC !== "number" || Number.isNaN(temperatureC)) {
+    return null;
+  }
+
+  return `${Math.round(temperatureC)}°C`;
+}
+
+function createWeatherBoardValue(weatherSummary, weatherStatus, weatherTemperatureC) {
+  const temperatureLabel = formatTemperatureC(weatherTemperatureC);
+  const cue = createWeatherBoardCue(weatherSummary, weatherStatus);
+
+  if (temperatureLabel && cue && cue !== weatherStatus.label) {
+    return `${cue} ${temperatureLabel}`;
+  }
+
+  return temperatureLabel ?? cue;
+}
+
 function pickContextMode(nearbyModes, key, fallbackIndex) {
   return nearbyModes.find((mode) => mode.key === key) ?? nearbyModes.at(fallbackIndex) ?? null;
 }
 
-function createContextTiles(nearbyModes, weatherSummary, weatherStatus) {
+function createContextTiles(nearbyModes, weatherSummary, weatherStatus, weatherTemperatureC) {
   const busMode = pickContextMode(nearbyModes, "bus", 1);
   const roadsMode = pickContextMode(nearbyModes, "roads", 2);
+  const weatherValue = createWeatherBoardValue(weatherSummary, weatherStatus, weatherTemperatureC);
 
   return Object.freeze([
     Object.freeze({
@@ -250,10 +297,49 @@ function createContextTiles(nearbyModes, weatherSummary, weatherStatus) {
     Object.freeze({
       key: "weather",
       label: "Weather",
-      value: createWeatherBoardCue(weatherSummary, weatherStatus),
+      value: weatherValue,
       tone: weatherStatus.isLive ? "available" : "caution",
     }),
   ]);
+}
+
+function createBoardSummary(snapshot, weatherStatus, mobilityStatus) {
+  const weatherLead = createWeatherLead(snapshot.weatherSummary, weatherStatus);
+  const weatherBullet = createWeatherBullet(snapshot.weatherSummary);
+  const hasDisruptedMode = snapshot.nearbyModes.some((mode) => mode.state === "disrupted");
+  const hasCautionMode = snapshot.nearbyModes.some((mode) => mode.state === "caution");
+  const transportBullet =
+    hasDisruptedMode
+      ? "Services disrupted nearby."
+      : hasCautionMode
+        ? "Some delays nearby."
+        : "Services steady.";
+
+  if (!weatherStatus.isLive && !mobilityStatus.isLive) {
+    if (weatherBullet) {
+      return `Last update held. ${normalizeSentence(weatherBullet)}, ${normalizeSentence(transportBullet)?.toLowerCase()}.`;
+    }
+
+    return `Last update held. ${transportBullet}`;
+  }
+
+  if (!mobilityStatus.isLive) {
+    return weatherLead ? `${weatherLead} Service update pending.` : "Service update pending.";
+  }
+
+  if (!weatherStatus.isLive) {
+    return `${normalizeSentence(transportBullet)} Weather update pending.`;
+  }
+
+  if (hasDisruptedMode) {
+    return weatherLead ? `${weatherLead} Services disrupted nearby.` : "Services disrupted nearby.";
+  }
+
+  if (hasCautionMode) {
+    return weatherLead ? `${weatherLead} Some delays nearby.` : "Some delays nearby.";
+  }
+
+  return weatherLead ? `${weatherLead} Services steady.` : "Services steady nearby.";
 }
 
 function createModeChangeSummary(previousMode, nextMode) {
@@ -297,8 +383,8 @@ function createMapChangeSummary(previousSnapshot, nextSnapshot) {
   if (previousSnapshot.localMap.state !== nextSnapshot.localMap.state) {
     return (
       nextSnapshot.localMap.state === "fallback"
-        ? "Local orientation stays fixed while richer locality detail narrows."
-        : "Local orientation returns to the fuller live locality read."
+        ? "Showing the simpler local map."
+        : "Full local map restored."
     );
   }
 
@@ -351,7 +437,7 @@ function createCurrentStateUpdateSummary(snapshot) {
     currentnessMessage:
       updateDetail == null
         ? createCurrentnessMessage()
-        : "Current signals refreshed in place and kept the shared read stable.",
+        : "Data refreshed in place.",
     updateSummary:
       updateDetail == null
         ? null
@@ -419,8 +505,8 @@ function createUpdateSummary(previousSnapshot, nextSnapshot, hasUpdatedSinceLoad
   return Object.freeze({
     currentnessMessage:
       updateDetail == null
-        ? "Current signals refreshed in place without moving the shared read."
-        : "Current signals refreshed in place and kept the shared read stable.",
+        ? "Data refreshed in place."
+        : "Data refreshed in place.",
     updateSummary:
       updateDetail == null
         ? null
@@ -463,7 +549,7 @@ function createLocalitySummary(references, localityEmphasis) {
     return null;
   }
 
-  return `${references.map((reference) => reference.label).join(", ")} stay in the immediate local read.`;
+  return `${references.map((reference) => reference.label).join(", ")} are shown on the map.`;
 }
 
 function createLocalityLineTokens(reference) {
@@ -569,16 +655,22 @@ export function presentDashboardSnapshot(snapshotInput, options = {}) {
       hasSeriousDisruption: snapshot.disruptionEmphasis.level !== "none",
     }),
     weatherSummary: snapshot.weatherSummary,
+    weatherTemperatureC: snapshot.weatherTemperatureC,
     mobilitySummary: snapshot.mobilitySummary,
     weatherTrust: presentTrust(snapshot.headerTrust.weather),
     mobilityTrust: presentTrust(snapshot.headerTrust.mobility),
     weatherStatus: presentedWeatherStatus,
     mobilityStatus: presentedMobilityStatus,
-    supportLabel: createSupportLabel(snapshot.supportLabel),
+    supportLabel: createBoardSummary(snapshot, presentedWeatherStatus, presentedMobilityStatus),
     nearbyModeHeading: "Nearby modes",
-    nearbyModeIntro: "Compact local transport rows with one calm local cue where confidence narrows.",
+    nearbyModeIntro: "Use these rows to check each nearby mode.",
     nearbyModes: presentedNearbyModes,
-    contextTiles: createContextTiles(presentedNearbyModes, snapshot.weatherSummary, presentedWeatherStatus),
+    contextTiles: createContextTiles(
+      presentedNearbyModes,
+      snapshot.weatherSummary,
+      presentedWeatherStatus,
+      snapshot.weatherTemperatureC,
+    ),
     locality: Object.freeze({
       title: "Nearby",
       heading: "Nearby stations",

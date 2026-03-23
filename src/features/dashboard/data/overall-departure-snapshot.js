@@ -12,10 +12,11 @@ function createBaseSnapshot({
     publishedAt,
     overallState: "watchful",
     overallTrend,
-    weatherSummary: "Cold rain is moving across Mayfair and the street is reading a little slower.",
-    mobilitySummary: "Nearby departures are still moving, with a tighter rhythm under the rain.",
+    weatherSummary: "Rain nearby.",
+    weatherTemperatureC: 12,
+    mobilitySummary: "Some nearby services are slower than normal.",
     placeLabel: "Royal Institution, Albemarle Street",
-    supportLabel: "Weather and movement align nearby.",
+    supportLabel: "Transport and weather are live.",
     disruptionEmphasis: {
       level: "none",
       headline: null,
@@ -49,14 +50,14 @@ function createBaseSnapshot({
         state: mapState === "fallback" ? "carried-forward" : "live",
         detail:
           mapState === "fallback"
-            ? "The local orientation stays simplified while richer locality detail narrows."
-            : "The local orientation is reading live for this foyer.",
+            ? "Showing the simpler local map."
+            : "Local map is live.",
       }),
       venueAnchor: {
         key: "royal-institution",
         label: "Royal Institution",
-        x: 56,
-        y: 60,
+        x: 44,
+        y: 47,
       },
       nearbyReferences:
         mapState === "fallback"
@@ -100,47 +101,47 @@ function createBaseSnapshot({
               {
                 key: "green-park",
                 label: "Green Park",
-                x: 72,
-                y: 36,
+                x: 54,
+                y: 30,
               },
               {
                 key: "piccadilly-stop-r",
                 label: "Piccadilly / St James's Street",
-                x: 46,
-                y: 76,
+                x: 37,
+                y: 59,
               },
             ]
           : [
               {
                 key: "green-park",
                 label: "Green Park",
-                x: 72,
-                y: 36,
+                x: 54,
+                y: 30,
               },
               {
                 key: "piccadilly-stop-r",
                 label: "Piccadilly / St James's Street",
-                x: 46,
-                y: 76,
+                x: 37,
+                y: 59,
               },
               {
                 key: "albemarle-street",
                 label: "Albemarle Street",
-                x: 56,
-                y: 48,
+                x: 44,
+                y: 38,
               },
             ],
       orientationSummary:
         mapState === "fallback"
-          ? "Royal Institution, Green Park, and the Piccadilly / St James's Street stop remain in the simplified local read."
-          : "Royal Institution sits on Albemarle Street with Green Park and the Piccadilly / St James's Street stop in the immediate local read.",
+          ? "Simplified local orientation keeps the Royal Institution, Green Park, and the Piccadilly / St James's Street stop visible."
+          : "Royal Institution, Green Park, and the Piccadilly / St James's Street stop are shown on the local map.",
       localityEmphasis:
         mapState === "fallback"
           ? {
-              label: "Royal Institution, Green Park, and the Piccadilly / St James's Street stop remain in the simplified local read.",
+              label: "Simplified local orientation keeps the Royal Institution, Green Park, and the Piccadilly / St James's Street stop visible.",
             }
           : {
-              label: "Royal Institution sits on Albemarle Street with Green Park and the Piccadilly / St James's Street stop in the immediate local read.",
+              label: "Royal Institution, Green Park, and the Piccadilly / St James's Street stop are shown on the local map.",
             },
       fallbackCopy:
         mapState === "fallback"
@@ -153,11 +154,11 @@ function createBaseSnapshot({
         label: "Tube and rail",
         state: "available",
         disruptionScope: "unaffected-readable",
-        summary: "Green Park and Piccadilly lines are still reading open within the short walk from here.",
-        nuance: "Platforms may feel a little fuller once the current lecture lets out.",
+        summary: "Green Park and Piccadilly services are running normally.",
+        nuance: "No reported issue.",
         sourceStatus: createSourceStatus({
           state: "live",
-          detail: "Tube and rail is reading live nearby.",
+          detail: "Tube and rail is live.",
         }),
         trust: createTrustSignal({
           state: "current",
@@ -169,11 +170,11 @@ function createBaseSnapshot({
         label: "Bus",
         state: "caution",
         disruptionScope: "unaffected-readable",
-        summary: "West End stops nearby are moving, though spacing is a little uneven in the rain.",
-        nuance: "Sheltered queues are beginning to gather along the wetter side streets.",
+        summary: "Nearby buses are slower than normal.",
+        nuance: "Expect some delay.",
         sourceStatus: createSourceStatus({
           state: "live",
-          detail: "Bus is reading live nearby.",
+          detail: "Bus is live.",
         }),
         trust: createTrustSignal({
           state: "aging",
@@ -185,11 +186,11 @@ function createBaseSnapshot({
         label: "Roads",
         state: "caution",
         disruptionScope: "unaffected-readable",
-        summary: "Mayfair traffic is still flowing, with slower turns around the wetter junctions.",
-        nuance: "Street crossings remain readable, but the pace is not especially brisk.",
+        summary: "Road traffic is slower than normal.",
+        nuance: "Pickup waits may be longer.",
         sourceStatus: createSourceStatus({
           state: "live",
-          detail: "Roads are reading live nearby.",
+          detail: "Roads are live.",
         }),
         trust: createTrustSignal({
           state: "stale",
@@ -201,11 +202,11 @@ function createBaseSnapshot({
         label: "Cycles and scooters",
         state: "caution",
         disruptionScope: "unaffected-readable",
-        summary: "Open micromobility nearby is still moving, though vehicles are thinner under the rain.",
-        nuance: "Availability remains patchier than the clearer corridors nearby.",
+        summary: "Micromobility availability is reduced.",
+        nuance: "Docking points are thinner than usual.",
         sourceStatus: createSourceStatus({
           state: "live",
-          detail: "Cycles and scooters are reading live nearby.",
+          detail: "Cycles and scooters are live.",
         }),
         trust: createTrustSignal({
           state: "reduced-confidence",

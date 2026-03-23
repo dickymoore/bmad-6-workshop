@@ -28,7 +28,7 @@
       "x": 20,
       "y": 64,
       "width": 786,
-      "height": 576,
+      "height": 606,
       "backgroundColor": "rgba(0, 0, 0, 0)",
       "borderColor": "rgb(37, 37, 32)",
       "boxShadow": "none"
@@ -98,9 +98,9 @@
       "source": "docs/design-inputs/screen.png",
       "sampleWidth": 180,
       "sampleHeight": 119,
-      "diffPixelRatio": 0.0831,
-      "meanChannelDelta": 13.55,
-      "meanLuminanceDelta": 17.1
+      "diffPixelRatio": 0.1191,
+      "meanChannelDelta": 15.2,
+      "meanLuminanceDelta": 19.44
     }
   }
 }

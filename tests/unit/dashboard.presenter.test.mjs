@@ -26,14 +26,15 @@ function buildSnapshot(overrides = {}) {
     publishedAt: "2026-03-19T08:00:00.000Z",
     overallState: "watchful",
     overallTrend: "steady",
-    weatherSummary: "Cold rain is moving across Mayfair and the street is reading a little slower.",
-    mobilitySummary: "Nearby departures are still moving, with a tighter rhythm under the rain.",
+    weatherSummary: "Rain nearby.",
+    weatherTemperatureC: 12,
+    mobilitySummary: "Some nearby services are slower than normal.",
     placeLabel: "Royal Institution, Albemarle Street",
-    supportLabel: "Weather and movement reinforce the same local read.",
+    supportLabel: "Transport and weather are live.",
     disruptionEmphasis: {
       level: "local",
       headline: "Bus is disrupted nearby",
-      detail: "Bus is under the most strain nearby while the rest of the picture stays readable.",
+      detail: "Bus has the most disruption nearby.",
       affectedModeKeys: ["bus"],
     },
     headerTrust: {
@@ -50,12 +51,12 @@ function buildSnapshot(overrides = {}) {
       weather: {
         state: "live",
         label: "Live",
-        detail: "Weather is reading live for the foyer.",
+        detail: "Weather is live.",
       },
       mobility: {
         state: "carried-forward",
         label: "Carried forward",
-        detail: "Movement is carried forward while live nearby detail narrows.",
+        detail: "Movement is showing the last available update.",
       },
     },
     localMap: {
@@ -69,8 +70,8 @@ function buildSnapshot(overrides = {}) {
       venueAnchor: {
         key: "royal-institution",
         label: "Royal Institution",
-        x: 56,
-        y: 60,
+        x: 44,
+        y: 47,
       },
       nearbyReferences: [
         {
@@ -96,26 +97,26 @@ function buildSnapshot(overrides = {}) {
         {
           key: "green-park",
           label: "Green Park",
-          x: 72,
-          y: 36,
+          x: 54,
+          y: 30,
         },
         {
           key: "piccadilly-stop-r",
           label: "Piccadilly / St James's Street",
-          x: 46,
-          y: 76,
+          x: 37,
+          y: 59,
         },
         {
           key: "albemarle-street",
           label: "Albemarle Street",
-          x: 56,
-          y: 48,
+          x: 44,
+          y: 38,
         },
       ],
       orientationSummary:
-        "Royal Institution sits on Albemarle Street with Green Park and the Piccadilly / St James's Street stop in the immediate local read.",
+        "Royal Institution, Green Park, and the Piccadilly / St James's Street stop are shown on the local map.",
       localityEmphasis: {
-        label: "Royal Institution sits on Albemarle Street with Green Park and the Piccadilly / St James's Street stop in the immediate local read.",
+        label: "Royal Institution, Green Park, and the Piccadilly / St James's Street stop are shown on the local map.",
       },
       fallbackCopy: null,
     },
@@ -125,12 +126,12 @@ function buildSnapshot(overrides = {}) {
         label: "Tube and rail",
         state: "available",
         disruptionScope: "unaffected-readable",
-        summary: "Green Park and Piccadilly lines are still reading open nearby.",
+        summary: "Green Park and Piccadilly services are running normally.",
         nuance: "Station approaches may bunch lightly after talks end.",
         sourceStatus: {
           state: "live",
           label: "Live",
-          detail: "Tube and rail is reading live nearby.",
+          detail: "Tube and rail is live.",
         },
         trust: createTrustSignal({
           state: "current",
@@ -142,12 +143,12 @@ function buildSnapshot(overrides = {}) {
         label: "Bus",
         state: "caution",
         disruptionScope: "locally-disrupted",
-        summary: "West End stops are moving, though spacing is a little uneven in the rain.",
+        summary: "Nearby buses are slower than normal.",
         nuance: "Street queues are forming lightly under shelter.",
         sourceStatus: {
           state: "carried-forward",
           label: "Carried forward",
-          detail: "Bus is carried forward while live nearby detail narrows.",
+          detail: "Bus is showing the last available update.",
         },
         trust: createTrustSignal({
           state: "delayed",
@@ -272,8 +273,8 @@ describe("dashboard presenter", () => {
     const viewModel = presentDashboardSnapshot(buildSnapshot());
 
     expect(viewModel.overallTrendLabel).toBe("Steady");
-    expect(viewModel.trendMessage).toBe("The departure picture is holding steady.");
-    expect(viewModel.currentnessMessage).toBe("Current signals refresh inside the same calm shared view.");
+    expect(viewModel.trendMessage).toBe("Conditions are stable.");
+    expect(viewModel.currentnessMessage).toBe("Board refreshes in place.");
     expect(viewModel.weatherTrust.isNarrowed).toBe(false);
     expect(viewModel.mobilityTrust.isNarrowed).toBe(true);
     expect(viewModel.weatherStatus.state).toBe("live");
@@ -284,7 +285,7 @@ describe("dashboard presenter", () => {
     expect(viewModel.nearbyModes[0].trust.isNarrowed).toBe(false);
     expect(viewModel.nearbyModes[0].sourceStatus.state).toBe("live");
     expect(viewModel.nearbyModes[0].disruptionScope).toBe("unaffected-readable");
-    expect(viewModel.nearbyModes[0].emphasisLabel).toBe("Readable nearby");
+    expect(viewModel.nearbyModes[0].emphasisLabel).toBe("Running nearby");
     expect(viewModel.nearbyModes[0].summary.split(".").filter(Boolean).length).toBe(1);
     expect(/still reading|from here, now|best option|recommended/i.test(viewModel.nearbyModes[0].summary)).toBe(false);
     expect(viewModel.nearbyModes[0].nuance).toBe(null);
@@ -292,11 +293,11 @@ describe("dashboard presenter", () => {
     expect(viewModel.nearbyModes[1].sourceStatus.state).toBe("carried-forward");
     expect(viewModel.nearbyModes[1].disruptionScope).toBe("locally-disrupted");
     expect(viewModel.nearbyModes[1].emphasisLabel).toBe("Disrupted nearby");
-    expect(viewModel.nearbyModes[1].summary).toMatch(/spacing uneven|west end/i);
+    expect(viewModel.nearbyModes[1].summary).toMatch(/slower than normal|nearby buses/i);
     expect(/shelter|queues|recommended|take\b/i.test(viewModel.nearbyModes[1].summary)).toBe(false);
     expect(viewModel.nearbyModes[1].nuance).toMatch(/carried forward|read with care/i);
     expect(/west end stops are moving/i.test(viewModel.nearbyModes[1].nuance)).toBe(false);
-    expect(viewModel.nearbyModes[1].trust.detail).toMatch(/should be read with care/i);
+    expect(viewModel.nearbyModes[1].trust.detail).toBe("Bus is delayed.");
     expect(viewModel.locality.title).toBe("Nearby");
     expect(viewModel.locality.heading).toBe("Nearby stations");
     expect(viewModel.locality.summary).toMatch(/green park|piccadilly/i);
@@ -316,7 +317,7 @@ describe("dashboard presenter", () => {
       {
         key: "weather",
         label: "Weather",
-        value: "Rain",
+        value: "Rain 12°C",
         tone: "available",
       },
     ]);
@@ -350,7 +351,7 @@ describe("dashboard presenter", () => {
     expect(viewModel.localMap.title).toBe("Local orientation");
     expect(viewModel.localMap.ariaLabel).toBe("Passive local orientation map anchored to the Royal Institution");
     expect(viewModel.localMap.localityEmphasis).toBe(
-      "Royal Institution sits on Albemarle Street with Green Park and the Piccadilly / St James's Street stop in the immediate local read.",
+      "Royal Institution, Green Park, and the Piccadilly / St James's Street stop are shown on the local map.",
     );
     expect(viewModel.localMap.selectedNearbyNodes.map((node) => node.label)).toEqual([
       "Green Park",
@@ -372,7 +373,7 @@ describe("dashboard presenter", () => {
           sourceStatus: {
             state: "carried-forward",
             label: "Carried forward",
-            detail: "The local orientation stays simplified while richer locality detail narrows.",
+            detail: "Showing the simpler local map.",
           },
           venueAnchor: {
             key: "royal-institution",
@@ -389,14 +390,14 @@ describe("dashboard presenter", () => {
               y: 32,
             },
           ],
-          orientationSummary: "Green Park remains in the simplified local read.",
+          orientationSummary: "Green Park is shown on the simplified local map.",
           localityEmphasis: null,
           fallbackCopy: "Simplified local orientation keeps Green Park visible around the Royal Institution.",
         },
       }),
     );
 
-    expect(viewModel.locality.summary).toBe("Green Park remains in the simplified local read.");
+    expect(viewModel.locality.summary).toBe("Green Park is shown on the simplified local map.");
     expect(viewModel.locality.references).toEqual([
       {
         key: "green-park",
@@ -407,7 +408,7 @@ describe("dashboard presenter", () => {
         lineTokens: ["station"],
       },
     ]);
-    expect(viewModel.localMap.localityEmphasis).toBe("Green Park remains in the simplified local read.");
+    expect(viewModel.localMap.localityEmphasis).toBe("Green Park is shown on the simplified local map.");
     expect(viewModel.localMap.fallbackCopy).toBe(
       "Simplified local orientation keeps Green Park visible around the Royal Institution.",
     );
@@ -453,7 +454,7 @@ describe("dashboard presenter", () => {
             sourceStatus: {
               state: "carried-forward",
               label: "Carried forward",
-              detail: "Roads are carried forward while live nearby detail narrows.",
+              detail: "Roads are showing the last available update.",
             },
             trust: createTrustSignal({
               state: "stale",
@@ -465,7 +466,7 @@ describe("dashboard presenter", () => {
     );
 
     expect(viewModel.nearbyModeHeading).toBe("Nearby modes");
-    expect(viewModel.nearbyModeIntro).toMatch(/compact local transport rows/i);
+    expect(viewModel.nearbyModeIntro).toBe("Use these rows to check each nearby mode.");
     expect(viewModel.nearbyModes[0].summary.split(".").filter(Boolean).length).toBe(1);
     expect(viewModel.nearbyModes[0].summary).toMatch(/mayfair traffic|wetter junctions/i);
     expect(/still flowing|not especially brisk|recommended|switch to|take\b/i.test(viewModel.nearbyModes[0].summary)).toBe(false);
@@ -495,9 +496,9 @@ describe("dashboard presenter", () => {
     });
 
     expect(recoveringView.currentnessMessage).toBe(
-      "The public view is recovering and the shared picture is carried forward.",
+      "Board is recovering. Last safe data is on screen.",
     );
-    expect(resumedView.currentnessMessage).toBe("Current signals refresh inside the same calm shared view.");
+    expect(resumedView.currentnessMessage).toBe("Board refreshes in place.");
   });
 
   it("keeps nearby modes in canonical order and derives calm text-first update cues", () => {
@@ -510,12 +511,12 @@ describe("dashboard presenter", () => {
           label: "Bus",
           state: "available",
           disruptionScope: "unaffected-readable",
-          summary: "West End stops are moving evenly nearby.",
+          summary: "Nearby buses are running normally.",
           nuance: "Street queues remain light.",
           sourceStatus: {
             state: "live",
             label: "Live",
-            detail: "Bus is reading live nearby.",
+            detail: "Bus is live.",
           },
           trust: createTrustSignal({
             state: "current",
@@ -527,12 +528,12 @@ describe("dashboard presenter", () => {
           label: "Tube and rail",
           state: "available",
           disruptionScope: "unaffected-readable",
-          summary: "Green Park and Piccadilly lines are still reading open nearby.",
+          summary: "Green Park and Piccadilly services are running normally.",
           nuance: "Station approaches remain readable.",
           sourceStatus: {
             state: "live",
             label: "Live",
-            detail: "Tube and rail is reading live nearby.",
+            detail: "Tube and rail is live.",
           },
           trust: createTrustSignal({
             state: "current",
@@ -560,32 +561,32 @@ describe("dashboard presenter", () => {
         sourceStatus: {
           state: "carried-forward",
           label: "Carried forward",
-          detail: "The local orientation stays simplified while richer locality detail narrows.",
+          detail: "Showing the simpler local map.",
         },
         venueAnchor: {
           key: "royal-institution",
           label: "Royal Institution",
-          x: 56,
-          y: 60,
+          x: 44,
+          y: 47,
         },
         nearbyReferences: [],
         selectedNearbyNodes: [
           {
             key: "green-park",
             label: "Green Park",
-            x: 72,
-            y: 36,
+            x: 54,
+            y: 30,
           },
           {
             key: "piccadilly-stop-r",
             label: "Piccadilly / St James's Street",
-            x: 46,
-            y: 76,
+            x: 37,
+            y: 59,
           },
         ],
-        orientationSummary: "Royal Institution, Green Park, and the Piccadilly / St James's Street stop remain in the simplified local read.",
+        orientationSummary: "Simplified local orientation keeps the Royal Institution, Green Park, and the Piccadilly / St James's Street stop visible.",
         localityEmphasis: {
-          label: "Royal Institution, Green Park, and the Piccadilly / St James's Street stop remain in the simplified local read.",
+          label: "Simplified local orientation keeps the Royal Institution, Green Park, and the Piccadilly / St James's Street stop visible.",
         },
         fallbackCopy: "Simplified local orientation keeps the Royal Institution, Green Park, and the Piccadilly / St James's Street stop visible.",
       },
@@ -595,12 +596,12 @@ describe("dashboard presenter", () => {
           label: "Bus",
           state: "caution",
           disruptionScope: "locally-disrupted",
-          summary: "West End stops are moving, though spacing is a little uneven in the rain.",
+          summary: "Nearby buses are slower than normal.",
           nuance: "Street queues are forming lightly under shelter.",
           sourceStatus: {
             state: "carried-forward",
             label: "Carried forward",
-            detail: "Bus is carried forward while live nearby detail narrows.",
+            detail: "Bus is showing the last available update.",
           },
           trust: createTrustSignal({
             state: "delayed",
@@ -612,12 +613,12 @@ describe("dashboard presenter", () => {
           label: "Tube and rail",
           state: "available",
           disruptionScope: "unaffected-readable",
-          summary: "Green Park and Piccadilly lines are still reading open nearby.",
+          summary: "Green Park and Piccadilly services are running normally.",
           nuance: "Station approaches may bunch lightly after talks end.",
           sourceStatus: {
             state: "live",
             label: "Live",
-            detail: "Tube and rail is reading live nearby.",
+            detail: "Tube and rail is live.",
           },
           trust: createTrustSignal({
             state: "current",
@@ -630,19 +631,19 @@ describe("dashboard presenter", () => {
     const viewModel = presentDashboardSnapshot(nextSnapshot, { previousSnapshot });
 
     expect(viewModel.nearbyModes.map((mode) => mode.key)).toEqual(["tube-rail", "bus"]);
-    expect(viewModel.currentnessMessage).toBe("Current signals refreshed in place and kept the shared read stable.");
+    expect(viewModel.currentnessMessage).toBe("Data refreshed in place.");
     expect(viewModel.updateSummary).toEqual({
       label: "Latest change",
-      detail: "The departure picture is tightening. Movement is delayed and should be read with care.",
+      detail: "Conditions are getting worse. Movement is delayed.",
     });
     expect(viewModel.liveAnnouncement).toBe(
-      "Live update. Movement is delayed and should be read with care. Local orientation stays fixed while richer locality detail narrows.",
+      "Live update. Movement is delayed. Showing the simpler local map.",
     );
     expect(viewModel.nearbyModes[1].changeSummary).toBe(
       "Bus now reads caution. Bus is now reading disrupted within the nearby picture.",
     );
     expect(viewModel.localMap.changeSummary).toBe(
-      "Local orientation stays fixed while richer locality detail narrows.",
+      "Showing the simpler local map.",
     );
   });
 
@@ -691,13 +692,11 @@ describe("dashboard presenter", () => {
 
     expect(firstUpdateViewModel.updateSummary).toEqual({
       label: "Latest change",
-      detail: "The departure picture is tightening. Movement is delayed and should be read with care.",
+      detail: "Conditions are getting worse. Movement is delayed.",
     });
     expect(secondUpdateViewModel.updateSummary).toBe(null);
     expect(secondUpdateViewModel.liveAnnouncement).toBe(null);
-    expect(secondUpdateViewModel.currentnessMessage).toBe(
-      "Current signals refreshed in place without moving the shared read.",
-    );
+    expect(secondUpdateViewModel.currentnessMessage).toBe("Data refreshed in place.");
   });
 
   it("keeps board-facing copy concise enough for nearby-reference comprehension instead of explanatory prose", () => {
@@ -727,12 +726,12 @@ describe("dashboard presenter", () => {
           label: "Bus",
           state: "caution",
           disruptionScope: "locally-disrupted",
-          summary: "West End stops are moving, though spacing is uneven nearby.",
+          summary: "Nearby buses are slower than normal.",
           nuance: "Shelter queues are still bunching lightly.",
           sourceStatus: {
             state: "carried-forward",
             label: "Carried forward",
-            detail: "Bus is carried forward while live nearby detail narrows.",
+            detail: "Bus is showing the last available update.",
           },
           trust: createTrustSignal({
             state: "delayed",
@@ -744,12 +743,12 @@ describe("dashboard presenter", () => {
           label: "Tube and rail",
           state: "available",
           disruptionScope: "unaffected-readable",
-          summary: "Green Park and Piccadilly lines are still reading open nearby.",
+          summary: "Green Park and Piccadilly services are running normally.",
           nuance: "Station approaches remain readable.",
           sourceStatus: {
             state: "live",
             label: "Live",
-            detail: "Tube and rail is reading live nearby.",
+            detail: "Tube and rail is live.",
           },
           trust: createTrustSignal({
             state: "current",
@@ -766,12 +765,12 @@ describe("dashboard presenter", () => {
           label: "Bus",
           state: "available",
           disruptionScope: "unaffected-readable",
-          summary: "West End stops are moving evenly nearby.",
+          summary: "Nearby buses are running normally.",
           nuance: "Street queues have eased back into a readable rhythm.",
           sourceStatus: {
             state: "live",
             label: "Live",
-            detail: "Bus is reading live nearby.",
+            detail: "Bus is live.",
           },
           trust: createTrustSignal({
             state: "current",
@@ -783,12 +782,12 @@ describe("dashboard presenter", () => {
           label: "Tube and rail",
           state: "available",
           disruptionScope: "unaffected-readable",
-          summary: "Green Park and Piccadilly lines are still reading open nearby.",
+          summary: "Green Park and Piccadilly services are running normally.",
           nuance: "Station approaches remain readable.",
           sourceStatus: {
             state: "live",
             label: "Live",
-            detail: "Tube and rail is reading live nearby.",
+            detail: "Tube and rail is live.",
           },
           trust: createTrustSignal({
             state: "current",
@@ -821,7 +820,7 @@ describe("dashboard presenter", () => {
 
     expect(viewModel.overallTrendLabel).toBe(null);
     expect(viewModel.trendMessage).toBe(null);
-    expect(viewModel.currentnessMessage).toBe("Current signals refresh inside the same calm shared view.");
+    expect(viewModel.currentnessMessage).toBe("Board refreshes in place.");
   });
 
   it("elevates overall disruption without switching to advisory or takeover language", () => {
@@ -868,7 +867,7 @@ describe("dashboard presenter", () => {
     expect(viewModel.disruption.title).toBe("Disrupted across the Royal Institution threshold");
     expect(viewModel.disruption.detail).toBe("Tube and bus are under visible strain across the nearby departure picture.");
     expect(viewModel.nearbyModes.every((mode) => mode.disruptionScope === "overall-disrupted")).toBe(true);
-    expect(viewModel.nearbyModes.every((mode) => mode.emphasisLabel === "Disrupted across the picture")).toBe(true);
+    expect(viewModel.nearbyModes.every((mode) => mode.emphasisLabel === "Wider disruption")).toBe(true);
     expect(/best option|recommended|switch to|take buses instead|reroute now/i.test(viewModel.disruption.title)).toBe(false);
     expect(/warning banner|control room|ops console/i.test(viewModel.disruption.detail)).toBe(false);
   });
@@ -898,7 +897,7 @@ describe("dashboard presenter", () => {
     const publicSources = [screenSource, headerSource, modeCardSource].join("\n");
 
     expect(viewModel.disruption.title).toBe("Bus is disrupted nearby");
-    expect(viewModel.nearbyModes[0].emphasisLabel).toBe("Readable nearby");
+    expect(viewModel.nearbyModes[0].emphasisLabel).toBe("Running nearby");
     expect(viewModel.nearbyModes[1].emphasisLabel).toBe("Disrupted nearby");
     expect(screenSource).toMatch(/<AtmosphericHeader viewModel=\{viewModel\} \/>/);
     expect(screenSource).toMatch(/<ModeSummaryGrid viewModel=\{viewModel\} \/>/);
@@ -927,7 +926,7 @@ describe("dashboard presenter", () => {
     expect(headerSource).toMatch(/viewModel\.weatherStatus/);
     expect(headerSource).toMatch(/viewModel\.mobilityStatus/);
     expect(modeCardSource).toMatch(/mode\.sourceStatus/);
-    expect(localMapSource).toMatch(/local-map-panel__street-label/);
+    expect(localMapSource).toMatch(/local-map-panel__marker-layer/);
     expect(localMapSource).toMatch(/local-map-panel__district-label/);
     expect(localMapSource).toMatch(/local-map-panel__venue-pill/);
     expect(localMapSource).toMatch(/local-map-panel__overlay-card/);
@@ -955,18 +954,18 @@ describe("dashboard presenter", () => {
           weather: {
             state: "unavailable",
             label: "Unavailable",
-            detail: "Weather is temporarily unavailable for the foyer.",
+            detail: "Weather data is unavailable.",
           },
           mobility: {
             state: "live",
             label: "Live",
-            detail: "Movement is reading live for the foyer.",
+            detail: "Movement is live.",
           },
         },
         headerTrust: {
           weather: createTrustSignal({
             state: "unavailable",
-            detail: "Weather is temporarily unavailable for the foyer.",
+            detail: "Weather data is unavailable.",
           }),
           mobility: createTrustSignal({
             state: "current",
@@ -979,26 +978,26 @@ describe("dashboard presenter", () => {
           sourceStatus: {
             state: "unavailable",
             label: "Unavailable",
-            detail: "The local orientation stays simplified while richer locality detail is temporarily unavailable.",
+            detail: "Showing the simpler local map.",
           },
           venueAnchor: {
             key: "royal-institution",
             label: "Royal Institution",
-            x: 56,
-            y: 60,
+            x: 44,
+            y: 47,
           },
           nearbyReferences: [],
           selectedNearbyNodes: [
             {
               key: "green-park",
               label: "Green Park",
-              x: 72,
-              y: 36,
+              x: 54,
+              y: 30,
             },
           ],
-          orientationSummary: "Royal Institution and Green Park remain in the simplified local read.",
+          orientationSummary: "Simplified local orientation keeps the Royal Institution and Green Park visible.",
           localityEmphasis: null,
-          fallbackCopy: "The local orientation keeps the Royal Institution and Green Park visible while richer locality detail is temporarily unavailable.",
+          fallbackCopy: "Simplified local orientation keeps the Royal Institution and Green Park visible.",
         },
         nearbyModes: [
           {
@@ -1006,12 +1005,12 @@ describe("dashboard presenter", () => {
             label: "Tube and rail",
             state: "available",
             disruptionScope: "unaffected-readable",
-            summary: "Tube and rail remain readable nearby.",
+            summary: "Tube and rail are running normally.",
             nuance: "Station approaches remain clear enough to read.",
             sourceStatus: {
               state: "live",
               label: "Live",
-              detail: "Tube and rail is reading live nearby.",
+              detail: "Tube and rail is live.",
             },
             trust: createTrustSignal({
               state: "current",
@@ -1023,16 +1022,16 @@ describe("dashboard presenter", () => {
             label: "Bus",
             state: "caution",
             disruptionScope: "unaffected-readable",
-            summary: "Bus is temporarily unavailable in this nearby read.",
-            nuance: "The rest of the nearby picture remains readable.",
+            summary: "Bus data is unavailable.",
+            nuance: "Other nearby data is still shown.",
             sourceStatus: {
               state: "unavailable",
               label: "Unavailable",
-              detail: "Bus is temporarily unavailable in this nearby read.",
+              detail: "Bus data is unavailable.",
             },
             trust: createTrustSignal({
               state: "unavailable",
-              detail: "Bus is temporarily unavailable in this nearby read.",
+              detail: "Bus data is unavailable.",
             }),
           },
         ],
@@ -1043,7 +1042,7 @@ describe("dashboard presenter", () => {
     expect(viewModel.weatherStatus.state).toBe("unavailable");
     expect(viewModel.localMap.sourceStatus.state).toBe("unavailable");
     expect(viewModel.nearbyModes[1].sourceStatus.state).toBe("unavailable");
-    expect(viewModel.nearbyModes[1].trust.detail).toBe("Bus is temporarily unavailable in this nearby read.");
+    expect(viewModel.nearbyModes[1].trust.detail).toBe("Bus data is unavailable.");
     expect(/api|http|timeout|retry|provider|weatherapi|tfl/i.test(JSON.stringify(viewModel))).toBe(false);
   });
 });
