@@ -76,6 +76,23 @@ function createCurrentnessMessage() {
   return "Current signals refresh inside the same calm shared view.";
 }
 
+function createSupportLabel(supportLabel) {
+  const sentence = normalizeSentence(supportLabel);
+
+  if (!sentence) {
+    return "Shared signals align nearby.";
+  }
+
+  if (/weather and (mobility|movement) reinforce the same local read/i.test(sentence)) {
+    return "Weather and movement align nearby.";
+  }
+
+  return `${sentence
+    .replace(/\bthe same local read\b/gi, "the same nearby read")
+    .replace(/\s{2,}/g, " ")
+    .trim()}.`;
+}
+
 function createRecoveryCurrentnessMessage(recovery) {
   if (recovery?.phase === "recovering") {
     return "The public view is recovering and the shared picture is carried forward.";
@@ -442,7 +459,7 @@ export function presentDashboardSnapshot(snapshotInput, options = {}) {
     mobilityTrust: presentTrust(snapshot.headerTrust.mobility),
     weatherStatus: presentSourceStatus(snapshot.headerStatus.weather),
     mobilityStatus: presentSourceStatus(snapshot.headerStatus.mobility),
-    supportLabel: snapshot.supportLabel,
+    supportLabel: createSupportLabel(snapshot.supportLabel),
     nearbyModeHeading: "Nearby modes",
     nearbyModeIntro: "Compact local transport rows with one calm local cue where confidence narrows.",
     nearbyModes: Object.freeze(

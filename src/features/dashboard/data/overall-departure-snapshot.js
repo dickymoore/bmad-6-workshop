@@ -15,7 +15,7 @@ function createBaseSnapshot({
     weatherSummary: "Cold rain is moving across Mayfair and the street is reading a little slower.",
     mobilitySummary: "Nearby departures are still moving, with a tighter rhythm under the rain.",
     placeLabel: "Royal Institution, Albemarle Street",
-    supportLabel: "Weather and mobility reinforce the same local read.",
+    supportLabel: "Weather and movement align nearby.",
     disruptionEmphasis: {
       level: "none",
       headline: null,

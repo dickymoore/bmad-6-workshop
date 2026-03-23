@@ -1960,7 +1960,13 @@ a {
 }
 
 @media (min-width: 1024px) {
+  .dashboard-page {
+    overflow-y: hidden;
+  }
+
   .dashboard-shell--desktop {
+    height: calc(100vh - 48px);
+    min-height: calc(100vh - 48px);
     grid-template-rows: auto minmax(0, 1fr);
   }
 }
@@ -1971,6 +1977,8 @@ a {
   }
 
   .dashboard-shell--venue {
+    height: calc(100vh - 56px);
+    min-height: calc(100vh - 56px);
     gap: 18px;
   }
 }
@@ -1985,12 +1993,13 @@ a {
   }
 }
 
-@media (max-height: 820px) {
+@media (min-width: 1024px) and (max-height: 820px) {
   .dashboard-page {
     padding: 18px;
   }
 
   .dashboard-shell {
+    height: calc(100vh - 36px);
     min-height: calc(100vh - 36px);
     gap: 12px;
   }

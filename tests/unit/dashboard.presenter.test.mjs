@@ -676,6 +676,24 @@ describe("dashboard presenter", () => {
     );
   });
 
+  it("keeps board-facing copy concise enough for nearby-reference comprehension instead of explanatory prose", () => {
+    const viewModel = presentDashboardSnapshot(buildSnapshot());
+    const serialisedView = JSON.stringify(viewModel);
+
+    expect(viewModel.currentnessMessage.split(" ").length <= 10).toBe(true);
+    expect(viewModel.nearbyModes[0].summary.split(" ").length <= 10).toBe(true);
+    expect(viewModel.nearbyModes[1].summary.split(" ").length <= 16).toBe(true);
+    expect((viewModel.locality.summary?.split(" ").length ?? 0) <= 24).toBe(true);
+    expect((viewModel.localMap.localityEmphasis?.split(" ").length ?? 0) <= 24).toBe(true);
+    expect(viewModel.locality.references.map((reference) => reference.label)).toEqual([
+      "Green Park",
+      "Piccadilly / St James's Street",
+      "Albemarle Street",
+    ]);
+    expect(/recommended|best option|switch to|take\b|you should|from here, now/i.test(serialisedView)).toBe(false);
+    expect(/still reading|weather and movement reinforce the same local read/i.test(serialisedView)).toBe(false);
+  });
+
   it("surfaces nearby recovery text when a disrupted mode becomes readable again", () => {
     const previousSnapshot = buildSnapshot({
       publishedAt: "2026-03-19T08:00:00.000Z",

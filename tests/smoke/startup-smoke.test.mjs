@@ -406,6 +406,65 @@ test("story 5.4 redesigns the local map into a practical passive orientation aid
   assert.equal(/simplified local orientation keeps the Royal Institution/i.test(snapshot + presenter), true, "fallback copy should keep the Royal Institution anchor and usable nearby context");
 });
 
+test("story 5.5 keeps the public board attached to an explicit foyer-readability contract", () => {
+  const screenPath = join(root, "src", "features", "dashboard", "components", "DashboardScreen.tsx");
+  const modeGridPath = join(root, "src", "features", "dashboard", "components", "ModeSummaryGrid.tsx");
+  const localityPanelPath = join(root, "src", "features", "dashboard", "components", "LocalityReferencePanel.tsx");
+  const localMapPath = join(root, "src", "features", "dashboard", "components", "LocalMapFrame.tsx");
+  const presenterPath = join(root, "src", "features", "dashboard", "presenters", "dashboard-presenter.js");
+  const globalCssPath = join(root, "src", "app", "globals.css");
+  const validationArtifactPath = join(root, "docs", "sprint-artifacts", "5-5-public-board-readability-validation.md");
+
+  assert.equal(existsSync(validationArtifactPath), true, "expected a repo-owned Story 5.5 readability validation artifact");
+
+  const screen = readFileSync(screenPath, "utf8");
+  const modeGrid = readFileSync(modeGridPath, "utf8");
+  const localityPanel = readFileSync(localityPanelPath, "utf8");
+  const localMap = readFileSync(localMapPath, "utf8");
+  const presenter = readFileSync(presenterPath, "utf8");
+  const globalCss = readFileSync(globalCssPath, "utf8");
+  const validationArtifact = readFileSync(validationArtifactPath, "utf8");
+  const publicFeature = [screen, modeGrid, localityPanel, localMap, presenter, globalCss].join("\n");
+
+  assert.equal(
+    /foyer-readability|no-scroll|2-3 second|5-10 second|anti-repetition/i.test(validationArtifact),
+    true,
+    "validation artifact should capture the explicit Story 5.5 board-readability rubric",
+  );
+  assert.equal(
+    /Accepted only if|Epic 5 remains open|keep Epic 5 open|clarity failure|beauty failure/i.test(validationArtifact),
+    true,
+    "validation artifact should make failure conditions explicit rather than silently closing Epic 5",
+  );
+  assert.equal(
+    /dashboard-shell__header[\s\S]*dashboard-lower-grid__modes[\s\S]*dashboard-lower-grid__locality[\s\S]*dashboard-lower-grid__map/.test(screen),
+    true,
+    "canonical public route should still read as one stable header-to-modes-to-locality-to-map board",
+  );
+  assert.equal(
+    /@media \(min-width:\s*1024px\)\s*{[\s\S]*?\.dashboard-page\s*{[\s\S]*?overflow-y:\s*hidden;[\s\S]*?\.dashboard-shell--desktop\s*{[\s\S]*?height:\s*calc\(100vh - 48px\);[\s\S]*?grid-template-rows:\s*auto minmax\(0,\s*1fr\);/m.test(
+      globalCss,
+    ),
+    true,
+    "public board source should keep the supported desktop board pinned to a one-screen, no-scroll shell",
+  );
+  assert.equal(
+    /Local mode field|One-screen nearby read|Named nearby read|Nearby orientation/.test(modeGrid + localityPanel + localMap),
+    true,
+    "public board should keep concise board-facing labels across nearby rows, locality references, and map cues",
+  );
+  assert.equal(
+    /Route Planner|best option|recommended|switch to|take buses instead|reroute now|should choose|you should/i.test(publicFeature),
+    false,
+    "public board should stay non-advisory and avoid planner-like wording",
+  );
+  assert.equal(
+    /explanatory prose|repeated explanatory|board walkthrough|step-by-step explanation/i.test(publicFeature),
+    false,
+    "public board sources should not reframe the board around repeated explanatory prose",
+  );
+});
+
 test("story 2.5 keeps live reading stable during refreshes and motion changes", () => {
   const screenPath = join(root, "src", "features", "dashboard", "components", "DashboardScreen.tsx");
   const liveScreenPath = join(root, "src", "features", "dashboard", "components", "DashboardLiveScreen.tsx");

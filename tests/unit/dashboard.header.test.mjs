@@ -19,7 +19,7 @@ describe("story 5.1 header shell guardrails", () => {
     expect(/return status\.label;/.test(headerSource)).toBe(false);
   });
 
-  it("does not keep a duplicated visible board-update footer or clip vertical overflow", () => {
+  it("does not keep a duplicated visible board-update footer and only disables board scrolling on supported desktop layouts", () => {
     const headerSource = readFileSync(
       join(root, "src", "features", "dashboard", "components", "AtmosphericHeader.tsx"),
       "utf8",
@@ -28,6 +28,9 @@ describe("story 5.1 header shell guardrails", () => {
 
     expect(/atmospheric-header__currentness/.test(headerSource)).toBe(false);
     expect(cssSource).toMatch(/overflow-x:\s*hidden;\s*overflow-y:\s*auto;/);
+    expect(cssSource).toMatch(
+      /@media \(min-width:\s*1024px\)\s*{[\s\S]*?\.dashboard-page\s*{[\s\S]*?overflow-y:\s*hidden;/,
+    );
     expect(/\.dashboard-page\s*{\s*overflow:\s*hidden;/s.test(cssSource)).toBe(false);
   });
 });
