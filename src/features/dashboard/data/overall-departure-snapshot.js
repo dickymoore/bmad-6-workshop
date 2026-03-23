@@ -58,6 +58,42 @@ function createBaseSnapshot({
         x: 48,
         y: 58,
       },
+      nearbyReferences:
+        mapState === "fallback"
+          ? [
+              {
+                key: "green-park-station",
+                label: "Green Park",
+                kind: "station",
+                caption: "Jubilee, Piccadilly, Victoria",
+              },
+              {
+                key: "piccadilly-stop-r",
+                label: "Piccadilly / St James's Street",
+                kind: "stop",
+                caption: "Bus stop R",
+              },
+            ]
+          : [
+              {
+                key: "green-park-station",
+                label: "Green Park",
+                kind: "station",
+                caption: "Jubilee, Piccadilly, Victoria",
+              },
+              {
+                key: "piccadilly-stop-r",
+                label: "Piccadilly / St James's Street",
+                kind: "stop",
+                caption: "Bus stop R",
+              },
+              {
+                key: "albemarle-street",
+                label: "Albemarle Street",
+                kind: "corridor",
+                caption: "Royal Institution frontage",
+              },
+            ],
       selectedNearbyNodes:
         mapState === "fallback"
           ? [
@@ -97,10 +133,10 @@ function createBaseSnapshot({
       localityEmphasis:
         mapState === "fallback"
           ? {
-              label: "Royal Institution, Green Park, and Piccadilly remain the core local read.",
+              label: "Green Park station and the Piccadilly / St James's Street stop remain the core nearby read.",
             }
           : {
-              label: "Piccadilly and Green Park remain the clearest local corridor from the Royal Institution.",
+              label: "Green Park, the Piccadilly / St James's Street stop, and Albemarle Street frame the immediate local read.",
             },
       fallbackCopy:
         mapState === "fallback"

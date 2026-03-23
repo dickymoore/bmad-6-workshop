@@ -364,7 +364,8 @@ a {
 
 .dashboard-lower-grid {
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-columns: minmax(0, 1.18fr) minmax(260px, 0.72fr) minmax(0, 0.95fr);
+  align-items: stretch;
   gap: 24px;
 }
 
@@ -378,7 +379,8 @@ a {
     var(--panel-bg);
 }
 
-.mode-summary-panel {
+.mode-summary-panel,
+.locality-reference-panel {
   min-height: 240px;
   padding: 26px 28px;
   border: 1px solid var(--border);
@@ -391,6 +393,11 @@ a {
 
 .mode-summary-panel__heading,
 .mode-summary-panel__intro,
+.locality-reference-panel__heading,
+.locality-reference-panel__summary,
+.locality-reference-panel__item-label,
+.locality-reference-panel__item-caption,
+.locality-reference-panel__item-kind,
 .mode-summary-card__label,
 .mode-summary-card__state,
 .mode-summary-card__summary,
@@ -405,12 +412,82 @@ a {
   letter-spacing: -0.04em;
 }
 
+.locality-reference-panel__heading {
+  margin-top: 8px;
+  font-size: clamp(1.6rem, 2.4vw, 2.2rem);
+  letter-spacing: -0.04em;
+}
+
 .mode-summary-panel__intro {
   max-width: 44ch;
   margin-top: 12px;
   color: var(--muted);
   font-size: 1rem;
   line-height: 1.5;
+}
+
+.locality-reference-panel__summary {
+  max-width: 28ch;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 0.94rem;
+  line-height: 1.45;
+}
+
+.locality-reference-panel__list {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.locality-reference-panel__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 14px 13px;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(244, 239, 230, 0.92)),
+    rgba(255, 255, 255, 0.7);
+}
+
+.locality-reference-panel__item-label,
+.locality-reference-panel__item-caption,
+.locality-reference-panel__item-kind {
+  margin: 0;
+}
+
+.locality-reference-panel__item-label {
+  font-family: var(--font-headline), "Noto Serif", serif;
+  font-size: 1.02rem;
+  line-height: 1.1;
+}
+
+.locality-reference-panel__item-caption {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.35;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.locality-reference-panel__item-kind,
+.locality-reference-panel__summary-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(234, 232, 222, 0.72);
+  color: var(--muted);
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .mode-summary-grid {
@@ -1564,6 +1641,7 @@ a {
 }
 
 .mode-summary-panel,
+.locality-reference-panel,
 .local-map-panel {
   min-height: 0;
   padding: 22px 24px;
@@ -1581,7 +1659,15 @@ a {
   gap: 16px;
 }
 
+.locality-reference-panel__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
 .mode-summary-panel__heading,
+.locality-reference-panel__heading,
 .local-map-panel__heading {
   margin-top: 8px;
   font-family: var(--font-headline), "Noto Serif", serif;
@@ -1593,6 +1679,23 @@ a {
 .mode-summary-grid {
   gap: 12px;
   margin-top: 18px;
+}
+
+.locality-reference-panel__list {
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.locality-reference-panel__item {
+  padding: 12px 12px 11px;
+}
+
+.locality-reference-panel__item-label {
+  font-size: 1rem;
+}
+
+.locality-reference-panel__item-caption {
+  font-size: 0.72rem;
 }
 
 .mode-summary-card {
@@ -1849,7 +1952,7 @@ a {
 
 @media (min-width: 1024px) and (max-width: 1365px) {
   .dashboard-lower-grid {
-    grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr);
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 0.72fr) minmax(280px, 0.92fr);
   }
 
   .local-map-panel__graphic {
@@ -1877,6 +1980,7 @@ a {
 
   .atmospheric-header,
   .mode-summary-panel,
+  .locality-reference-panel,
   .local-map-panel {
     padding: 18px 20px;
   }
@@ -1890,6 +1994,7 @@ a {
   }
 
   .atmospheric-header__summary,
+  .locality-reference-panel__summary,
   .local-map-panel__intro {
     font-size: 0.9rem;
   }
@@ -1928,6 +2033,15 @@ a {
 
   .local-map-panel__graphic {
     min-height: 190px;
+  }
+
+  .locality-reference-panel__item-label {
+    font-size: 0.94rem;
+  }
+
+  .locality-reference-panel__item-caption,
+  .locality-reference-panel__item-kind {
+    font-size: 0.68rem;
   }
 }
 

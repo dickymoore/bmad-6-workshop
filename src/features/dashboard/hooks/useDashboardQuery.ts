@@ -71,6 +71,12 @@ export type DashboardApiResponse = {
         x: number;
         y: number;
       };
+      nearbyReferences: readonly {
+        key: string;
+        label: string;
+        kind: string;
+        caption: string;
+      }[];
       selectedNearbyNodes: readonly {
         key: string;
         label: string;

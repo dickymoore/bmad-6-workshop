@@ -342,6 +342,38 @@ test("story 5.2 replaces verbose nearby cards with compact RAG transport rows", 
   assert.equal(/card soup|dashboard-style cards|article card/i.test(publicFeature), false, "story 5.2 source should not describe the nearby area as card-style treatment");
 });
 
+test("story 5.3 adds concrete nearby station and locality references to the canonical board", () => {
+  const screenPath = join(root, "src", "features", "dashboard", "components", "DashboardScreen.tsx");
+  const localityPanelPath = join(root, "src", "features", "dashboard", "components", "LocalityReferencePanel.tsx");
+  const localMapPath = join(root, "src", "features", "dashboard", "components", "LocalMapFrame.tsx");
+  const presenterPath = join(root, "src", "features", "dashboard", "presenters", "dashboard-presenter.js");
+  const snapshotPath = join(root, "src", "features", "dashboard", "data", "overall-departure-snapshot.js");
+  const contractPath = join(root, "src", "lib", "contracts", "dashboard-snapshot.js");
+  const globalCssPath = join(root, "src", "app", "globals.css");
+
+  assert.equal(existsSync(localityPanelPath), true, "expected dedicated locality reference panel component");
+
+  const screen = readFileSync(screenPath, "utf8");
+  const localityPanel = readFileSync(localityPanelPath, "utf8");
+  const localMap = readFileSync(localMapPath, "utf8");
+  const presenter = readFileSync(presenterPath, "utf8");
+  const snapshot = readFileSync(snapshotPath, "utf8");
+  const contract = readFileSync(contractPath, "utf8");
+  const globalCss = readFileSync(globalCssPath, "utf8");
+  const publicFeature = [screen, localityPanel, localMap, presenter, snapshot].join("\n");
+
+  assert.equal(/dashboard-lower-grid__modes[\s\S]*dashboard-lower-grid__locality[\s\S]*dashboard-lower-grid__map/.test(screen), true, "board shell should insert a compact locality panel between nearby modes and map");
+  assert.equal(/LocalityReferencePanel|viewModel\.locality/.test(screen), true, "dashboard screen should wire the explicit locality panel from the presenter");
+  assert.equal(/nearbyReferences|kind|caption/.test(contract), true, "dashboard contract should model structured nearby locality references");
+  assert.equal(/Green Park|Piccadilly \/ St James's Street|Albemarle Street/.test(snapshot), true, "fixture snapshot should expose concrete nearby names for the Royal Institution context");
+  assert.equal(/Nearby references|Nearby stations and streets|kindLabel/.test(presenter + localityPanel), true, "presenter and panel should elevate explicit named references into the board shell");
+  assert.equal(/Nearby node/.test(presenter), false, "presenter should retire generic nearby-node labels as the primary locality language");
+  assert.equal(/route planner|best option|recommended|switch to|take buses instead|reroute now/i.test(publicFeature), false, "story 5.3 locality treatment must stay fact-only and non-planner-like");
+  assert.equal(/locality-reference-panel|dashboard-lower-grid__locality/.test(globalCss), true, "global styles should define the dedicated locality panel and shell slot");
+  assert.equal(/<button|<input|<form|<select|<textarea|href=/.test(localityPanel), false, "locality panel should remain passive and non-interactive");
+  assert.equal(/selectedNearbyNodes/.test(localMap), true, "map should remain the existing single local-map path rather than a replacement locality implementation");
+});
+
 test("story 2.5 keeps live reading stable during refreshes and motion changes", () => {
   const screenPath = join(root, "src", "features", "dashboard", "components", "DashboardScreen.tsx");
   const liveScreenPath = join(root, "src", "features", "dashboard", "components", "DashboardLiveScreen.tsx");

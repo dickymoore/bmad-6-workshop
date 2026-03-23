@@ -41,6 +41,18 @@ const MODE_DISRUPTION_LABELS = Object.freeze({
   "overall-disrupted": "Disrupted across the picture",
 });
 
+const LOCALITY_KIND_LABELS = Object.freeze({
+  station: "Station",
+  stop: "Stop",
+  corridor: "Street",
+});
+
+const FALLBACK_LOCALITY_REFERENCE = Object.freeze({
+  kind: "place",
+  kindLabel: "Nearby place",
+  caption: "Shown on the local frame",
+});
+
 const CANONICAL_MODE_ORDER = Object.freeze([
   "tube-rail",
   "bus",
@@ -357,6 +369,39 @@ function presentSourceStatus(sourceStatus) {
   });
 }
 
+function createLocalitySummary(references, localityEmphasis) {
+  if (localityEmphasis) {
+    return localityEmphasis;
+  }
+
+  if (references.length === 0) {
+    return null;
+  }
+
+  return `${references.map((reference) => reference.label).join(", ")} stay in the immediate local read.`;
+}
+
+function createLocalityReferences(localMap) {
+  if (localMap.nearbyReferences.length > 0) {
+    return localMap.nearbyReferences.map((reference) =>
+      Object.freeze({
+        ...reference,
+        kindLabel: LOCALITY_KIND_LABELS[reference.kind],
+      }),
+    );
+  }
+
+  return localMap.selectedNearbyNodes.map((node) =>
+    Object.freeze({
+      key: node.key,
+      label: node.label,
+      kind: FALLBACK_LOCALITY_REFERENCE.kind,
+      kindLabel: FALLBACK_LOCALITY_REFERENCE.kindLabel,
+      caption: FALLBACK_LOCALITY_REFERENCE.caption,
+    }),
+  );
+}
+
 export function presentDashboardSnapshot(snapshotInput, options = {}) {
   const snapshot = createDashboardSnapshot(snapshotInput);
   const previousSnapshot = options.previousSnapshot ? createDashboardSnapshot(options.previousSnapshot) : null;
@@ -366,6 +411,8 @@ export function presentDashboardSnapshot(snapshotInput, options = {}) {
     ? new Map(previousSnapshot.nearbyModes.map((mode) => [mode.key, mode]))
     : new Map();
   const orderedNearbyModes = orderNearbyModesForReading(snapshot.nearbyModes);
+  const nearbyReferences = createLocalityReferences(snapshot.localMap);
+  const nearbyReferenceByLabel = new Map(nearbyReferences.map((reference) => [reference.label, reference]));
 
   return Object.freeze({
     placeLabel: snapshot.placeLabel,
@@ -414,6 +461,12 @@ export function presentDashboardSnapshot(snapshotInput, options = {}) {
         }),
       ),
     ),
+    locality: Object.freeze({
+      title: "Nearby references",
+      heading: "Nearby stations and streets",
+      summary: createLocalitySummary(nearbyReferences, snapshot.localMap.localityEmphasis?.label ?? null),
+      references: Object.freeze(nearbyReferences),
+    }),
     localMap: Object.freeze({
       title: snapshot.localMap.title,
       ariaLabel: "Fixed local map anchored to the Royal Institution",
@@ -428,7 +481,7 @@ export function presentDashboardSnapshot(snapshotInput, options = {}) {
         snapshot.localMap.selectedNearbyNodes.map((node) =>
           Object.freeze({
             ...node,
-            caption: "Nearby node",
+            caption: nearbyReferenceByLabel.get(node.label)?.kindLabel ?? "Nearby place",
           }),
         ),
       ),

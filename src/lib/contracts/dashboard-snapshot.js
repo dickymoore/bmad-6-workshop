@@ -25,6 +25,12 @@ export const LOCAL_MAP_STATES = Object.freeze([
   "fallback",
 ]);
 
+export const LOCALITY_REFERENCE_KINDS = Object.freeze([
+  "station",
+  "stop",
+  "corridor",
+]);
+
 export const DISRUPTION_EMPHASIS_LEVELS = Object.freeze([
   "none",
   "local",
@@ -173,6 +179,35 @@ function normalizeMapPoint(point, fieldName) {
   });
 }
 
+function normalizeLocalityReference(reference, fieldName) {
+  if (!reference || typeof reference !== "object") {
+    throw new Error(`Dashboard locality field "${fieldName}" must be an object`);
+  }
+
+  const { key, label, kind, caption } = reference;
+
+  for (const [name, value] of Object.entries({ key, label, caption })) {
+    if (typeof value !== "string" || value.trim().length === 0) {
+      throw new Error(`Dashboard locality field "${fieldName}.${name}" must be a non-empty string`);
+    }
+
+    if (DASHBOARD_ADVISORY_LANGUAGE_PATTERN.test(value)) {
+      throw new Error(`Dashboard locality field "${fieldName}.${name}" must stay fact-only`);
+    }
+  }
+
+  if (!LOCALITY_REFERENCE_KINDS.includes(kind)) {
+    throw new Error(`Unsupported dashboard locality kind for "${fieldName}": ${kind}`);
+  }
+
+  return freezeSnapshot({
+    key: key.trim(),
+    label: label.trim(),
+    kind,
+    caption: caption.trim(),
+  });
+}
+
 function normalizeLocalMap(localMap) {
   if (!localMap || typeof localMap !== "object") {
     throw new Error('Dashboard snapshot field "localMap" must be an object');
@@ -183,6 +218,7 @@ function normalizeLocalMap(localMap) {
     state,
     sourceStatus,
     venueAnchor,
+    nearbyReferences,
     selectedNearbyNodes,
     localityEmphasis,
     fallbackCopy,
@@ -201,6 +237,16 @@ function normalizeLocalMap(localMap) {
   }
 
   const normalizedVenueAnchor = normalizeMapPoint(venueAnchor, "localMap.venueAnchor");
+
+  if (nearbyReferences != null && !Array.isArray(nearbyReferences)) {
+    throw new Error('Dashboard snapshot field "localMap.nearbyReferences" must be an array when present');
+  }
+
+  const normalizedNearbyReferences = Object.freeze(
+    (nearbyReferences ?? []).map((reference, index) =>
+      normalizeLocalityReference(reference, `localMap.nearbyReferences[${index}]`),
+    ),
+  );
 
   if (!Array.isArray(selectedNearbyNodes) || selectedNearbyNodes.length === 0) {
     throw new Error('Dashboard snapshot field "localMap.selectedNearbyNodes" must be a non-empty array');
@@ -256,6 +302,7 @@ function normalizeLocalMap(localMap) {
     state,
     sourceStatus: normalizeSourceStatus(sourceStatus, "localMap.sourceStatus"),
     venueAnchor: normalizedVenueAnchor,
+    nearbyReferences: normalizedNearbyReferences,
     selectedNearbyNodes: normalizedNearbyNodes,
     localityEmphasis:
       typeof localityEmphasis?.label === "string"

@@ -1,5 +1,6 @@
 import { AtmosphericHeader } from "@/features/dashboard/components/AtmosphericHeader";
 import { LocalMapFrame } from "@/features/dashboard/components/LocalMapFrame";
+import { LocalityReferencePanel } from "@/features/dashboard/components/LocalityReferencePanel";
 import { ModeSummaryGrid } from "@/features/dashboard/components/ModeSummaryGrid";
 
 type NearbyModeViewModel = {
@@ -77,6 +78,18 @@ type DashboardViewModel = {
   nearbyModeHeading: string;
   nearbyModeIntro: string;
   nearbyModes: readonly NearbyModeViewModel[];
+  locality: {
+    title: string;
+    heading: string;
+    summary: string | null;
+    references: readonly {
+      key: string;
+      label: string;
+      kind: string;
+      kindLabel: string;
+      caption: string;
+    }[];
+  };
   localMap: {
     title: string;
     ariaLabel: string;
@@ -135,6 +148,9 @@ export function DashboardScreen({ viewModel }: { viewModel: DashboardViewModel }
           <div className="dashboard-lower-grid" aria-label="Shared nearby departure structure">
             <div className="dashboard-lower-grid__modes" data-reading-zone="modes">
               <ModeSummaryGrid viewModel={viewModel} />
+            </div>
+            <div className="dashboard-lower-grid__locality" data-reading-zone="locality">
+              <LocalityReferencePanel viewModel={viewModel.locality} />
             </div>
             <div className="dashboard-lower-grid__map" data-reading-zone="map">
               <LocalMapFrame viewModel={viewModel.localMap} />

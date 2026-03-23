@@ -68,6 +68,26 @@ function buildSnapshot(overrides = {}) {
         x: 48,
         y: 58,
       },
+      nearbyReferences: [
+        {
+          key: "green-park-station",
+          label: "Green Park",
+          kind: "station",
+          caption: "Jubilee, Piccadilly, Victoria",
+        },
+        {
+          key: "piccadilly-stop-r",
+          label: "Piccadilly / St James's Street",
+          kind: "stop",
+          caption: "Bus stop R",
+        },
+        {
+          key: "albemarle-street",
+          label: "Albemarle Street",
+          kind: "corridor",
+          caption: "Royal Institution frontage",
+        },
+      ],
       selectedNearbyNodes: [
         {
           key: "green-park",
@@ -265,9 +285,80 @@ describe("dashboard presenter", () => {
     expect(viewModel.nearbyModes[1].nuance).toMatch(/carried forward|read with care/i);
     expect(/west end stops are moving/i.test(viewModel.nearbyModes[1].nuance)).toBe(false);
     expect(viewModel.nearbyModes[1].trust.detail).toMatch(/should be read with care/i);
+    expect(viewModel.locality.title).toBe("Nearby references");
+    expect(viewModel.locality.heading).toBe("Nearby stations and streets");
+    expect(viewModel.locality.summary).toMatch(/green park|piccadilly/i);
+    expect(viewModel.locality.references).toEqual([
+      {
+        key: "green-park-station",
+        label: "Green Park",
+        kind: "station",
+        kindLabel: "Station",
+        caption: "Jubilee, Piccadilly, Victoria",
+      },
+      {
+        key: "piccadilly-stop-r",
+        label: "Piccadilly / St James's Street",
+        kind: "stop",
+        kindLabel: "Stop",
+        caption: "Bus stop R",
+      },
+      {
+        key: "albemarle-street",
+        label: "Albemarle Street",
+        kind: "corridor",
+        kindLabel: "Street",
+        caption: "Royal Institution frontage",
+      },
+    ]);
+    expect(/nearby node|recommended|best route|take\b/i.test(viewModel.locality.summary ?? "")).toBe(false);
     expect(viewModel.localMap.sourceStatus.state).toBe("live");
     expect(viewModel.updateSummary).toBe(null);
     expect(viewModel.liveAnnouncement).toBe(null);
+  });
+
+  it("backfills locality references from map nodes when explicit panel data is absent", () => {
+    const viewModel = presentDashboardSnapshot(
+      buildSnapshot({
+        localMap: {
+          title: "Local frame",
+          state: "fallback",
+          sourceStatus: {
+            state: "carried-forward",
+            label: "Carried forward",
+            detail: "The local frame stays simplified while richer locality detail narrows.",
+          },
+          venueAnchor: {
+            key: "royal-institution",
+            label: "Royal Institution",
+            x: 48,
+            y: 58,
+          },
+          nearbyReferences: [],
+          selectedNearbyNodes: [
+            {
+              key: "green-park",
+              label: "Green Park",
+              x: 64,
+              y: 32,
+            },
+          ],
+          localityEmphasis: null,
+          fallbackCopy: "Simplified local frame while richer locality detail is unavailable.",
+        },
+      }),
+    );
+
+    expect(viewModel.locality.summary).toBe("Green Park stay in the immediate local read.");
+    expect(viewModel.locality.references).toEqual([
+      {
+        key: "green-park",
+        label: "Green Park",
+        kind: "place",
+        kindLabel: "Nearby place",
+        caption: "Shown on the local frame",
+      },
+    ]);
   });
 
   it("locks nearby rows to compact fact-only board copy and local narrowed-confidence cues", () => {
@@ -694,6 +785,10 @@ describe("dashboard presenter", () => {
       join(root, "src", "features", "dashboard", "components", "DashboardScreen.tsx"),
       "utf8",
     );
+    const localityPanelSource = readFileSync(
+      join(root, "src", "features", "dashboard", "components", "LocalityReferencePanel.tsx"),
+      "utf8",
+    );
     const headerSource = readFileSync(
       join(root, "src", "features", "dashboard", "components", "AtmosphericHeader.tsx"),
       "utf8",
@@ -709,10 +804,15 @@ describe("dashboard presenter", () => {
     expect(viewModel.nearbyModes[1].emphasisLabel).toBe("Disrupted nearby");
     expect(screenSource).toMatch(/<AtmosphericHeader viewModel=\{viewModel\} \/>/);
     expect(screenSource).toMatch(/<ModeSummaryGrid viewModel=\{viewModel\} \/>/);
+    expect(screenSource).toMatch(/<LocalityReferencePanel viewModel=\{viewModel\.locality\} \/>/);
     expect(screenSource).toMatch(/<LocalMapFrame viewModel=\{viewModel\.localMap\} \/>/);
     expect(screenSource).toMatch(/dashboard-masthead/);
     expect(screenSource).toMatch(/dashboard-lower-grid__modes/);
+    expect(screenSource).toMatch(/dashboard-lower-grid__locality/);
     expect(screenSource).toMatch(/dashboard-lower-grid__map/);
+    expect(localityPanelSource).toMatch(/viewModel\.references/);
+    expect(localityPanelSource).toMatch(/\{viewModel\.heading\}/);
+    expect(localityPanelSource).toMatch(/locality-reference-panel__list/);
     expect(headerSource).toMatch(/viewModel\.disruption\.hasSeriousDisruption/);
     expect(headerSource).toMatch(/viewModel\.disruption\.title/);
     expect(headerSource).toMatch(/viewModel\.disruption\.detail/);
