@@ -220,6 +220,7 @@ function normalizeLocalMap(localMap) {
     venueAnchor,
     nearbyReferences,
     selectedNearbyNodes,
+    orientationSummary,
     localityEmphasis,
     fallbackCopy,
   } = localMap;
@@ -267,6 +268,17 @@ function normalizeLocalMap(localMap) {
   );
 
   if (
+    orientationSummary != null &&
+    (typeof orientationSummary !== "string" || orientationSummary.trim().length === 0)
+  ) {
+    throw new Error('Dashboard snapshot field "localMap.orientationSummary" must be a non-empty string when present');
+  }
+
+  if (typeof orientationSummary === "string" && DASHBOARD_ADVISORY_LANGUAGE_PATTERN.test(orientationSummary)) {
+    throw new Error('Dashboard snapshot field "localMap.orientationSummary" must stay fact-only');
+  }
+
+  if (
     localityEmphasis != null &&
     (
       typeof localityEmphasis !== "object" ||
@@ -304,6 +316,7 @@ function normalizeLocalMap(localMap) {
     venueAnchor: normalizedVenueAnchor,
     nearbyReferences: normalizedNearbyReferences,
     selectedNearbyNodes: normalizedNearbyNodes,
+    orientationSummary: typeof orientationSummary === "string" ? orientationSummary.trim() : null,
     localityEmphasis:
       typeof localityEmphasis?.label === "string"
         ? freezeSnapshot({ label: localityEmphasis.label.trim() })

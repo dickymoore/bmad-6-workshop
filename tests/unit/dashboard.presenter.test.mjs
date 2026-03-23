@@ -14,6 +14,10 @@ import {
   getDashboardMetadata,
   presentDashboardSnapshot,
 } from "../../src/features/dashboard/presenters/dashboard-presenter.js";
+import {
+  createFixtureDashboardFallbackSnapshot,
+  createFixtureDashboardSnapshot,
+} from "../../src/features/dashboard/data/overall-departure-snapshot.js";
 
 const root = resolve(process.cwd());
 
@@ -55,18 +59,18 @@ function buildSnapshot(overrides = {}) {
       },
     },
     localMap: {
-      title: "Local frame",
+      title: "Local orientation",
       state: "default",
       sourceStatus: {
         state: "live",
         label: "Live",
-        detail: "The local frame is reading live for this foyer.",
+        detail: "The local orientation is reading live for this foyer.",
       },
       venueAnchor: {
         key: "royal-institution",
         label: "Royal Institution",
-        x: 48,
-        y: 58,
+        x: 56,
+        y: 60,
       },
       nearbyReferences: [
         {
@@ -92,18 +96,26 @@ function buildSnapshot(overrides = {}) {
         {
           key: "green-park",
           label: "Green Park",
-          x: 64,
-          y: 32,
+          x: 72,
+          y: 36,
         },
         {
-          key: "piccadilly-arcade",
-          label: "Piccadilly Arcade",
-          x: 34,
-          y: 61,
+          key: "piccadilly-stop-r",
+          label: "Piccadilly / St James's Street",
+          x: 46,
+          y: 76,
+        },
+        {
+          key: "albemarle-street",
+          label: "Albemarle Street",
+          x: 56,
+          y: 48,
         },
       ],
+      orientationSummary:
+        "Royal Institution sits on Albemarle Street with Green Park and the Piccadilly / St James's Street stop in the immediate local read.",
       localityEmphasis: {
-        label: "Piccadilly and Green Park remain the clearest local corridor.",
+        label: "Royal Institution sits on Albemarle Street with Green Park and the Piccadilly / St James's Street stop in the immediate local read.",
       },
       fallbackCopy: null,
     },
@@ -312,6 +324,17 @@ describe("dashboard presenter", () => {
       },
     ]);
     expect(/nearby node|recommended|best route|take\b/i.test(viewModel.locality.summary ?? "")).toBe(false);
+    expect(viewModel.localMap.title).toBe("Local orientation");
+    expect(viewModel.localMap.ariaLabel).toBe("Passive local orientation map anchored to the Royal Institution");
+    expect(viewModel.localMap.localityEmphasis).toBe(
+      "Royal Institution sits on Albemarle Street with Green Park and the Piccadilly / St James's Street stop in the immediate local read.",
+    );
+    expect(viewModel.localMap.selectedNearbyNodes.map((node) => node.label)).toEqual([
+      "Green Park",
+      "Piccadilly / St James's Street",
+      "Albemarle Street",
+    ]);
+    expect(viewModel.localMap.selectedNearbyNodes.map((node) => node.caption)).toEqual(["Station", "Stop", "Street"]);
     expect(viewModel.localMap.sourceStatus.state).toBe("live");
     expect(viewModel.updateSummary).toBe(null);
     expect(viewModel.liveAnnouncement).toBe(null);
@@ -321,18 +344,18 @@ describe("dashboard presenter", () => {
     const viewModel = presentDashboardSnapshot(
       buildSnapshot({
         localMap: {
-          title: "Local frame",
+          title: "Local orientation",
           state: "fallback",
           sourceStatus: {
             state: "carried-forward",
             label: "Carried forward",
-            detail: "The local frame stays simplified while richer locality detail narrows.",
+            detail: "The local orientation stays simplified while richer locality detail narrows.",
           },
           venueAnchor: {
             key: "royal-institution",
             label: "Royal Institution",
-            x: 48,
-            y: 58,
+            x: 56,
+            y: 60,
           },
           nearbyReferences: [],
           selectedNearbyNodes: [
@@ -343,13 +366,14 @@ describe("dashboard presenter", () => {
               y: 32,
             },
           ],
+          orientationSummary: "Green Park remains in the simplified local read.",
           localityEmphasis: null,
-          fallbackCopy: "Simplified local frame while richer locality detail is unavailable.",
+          fallbackCopy: "Simplified local orientation keeps Green Park visible around the Royal Institution.",
         },
       }),
     );
 
-    expect(viewModel.locality.summary).toBe("Green Park stay in the immediate local read.");
+    expect(viewModel.locality.summary).toBe("Green Park remains in the simplified local read.");
     expect(viewModel.locality.references).toEqual([
       {
         key: "green-park",
@@ -359,6 +383,30 @@ describe("dashboard presenter", () => {
         caption: "Shown on the local frame",
       },
     ]);
+    expect(viewModel.localMap.localityEmphasis).toBe("Green Park remains in the simplified local read.");
+    expect(viewModel.localMap.fallbackCopy).toBe(
+      "Simplified local orientation keeps Green Park visible around the Royal Institution.",
+    );
+  });
+
+  it("keeps fallback locality narrower than the live map while preserving the same anchor seam", () => {
+    const liveViewModel = presentDashboardSnapshot(createFixtureDashboardSnapshot());
+    const fallbackViewModel = presentDashboardSnapshot(createFixtureDashboardFallbackSnapshot());
+
+    expect(liveViewModel.locality.references.map((reference) => reference.label)).toEqual([
+      "Green Park",
+      "Piccadilly / St James's Street",
+      "Albemarle Street",
+    ]);
+    expect(fallbackViewModel.locality.references.map((reference) => reference.label)).toEqual([
+      "Green Park",
+      "Piccadilly / St James's Street",
+    ]);
+    expect(fallbackViewModel.localMap.selectedNearbyNodes.map((node) => node.label)).toEqual([
+      "Green Park",
+      "Piccadilly / St James's Street",
+    ]);
+    expect(fallbackViewModel.localMap.fallbackCopy).toMatch(/Royal Institution/);
   });
 
   it("locks nearby rows to compact fact-only board copy and local narrowed-confidence cues", () => {
@@ -483,37 +531,39 @@ describe("dashboard presenter", () => {
         }),
       },
       localMap: {
-        title: "Local frame",
+        title: "Local orientation",
         state: "fallback",
         sourceStatus: {
           state: "carried-forward",
           label: "Carried forward",
-          detail: "The local frame stays simplified while richer locality detail narrows.",
+          detail: "The local orientation stays simplified while richer locality detail narrows.",
         },
         venueAnchor: {
           key: "royal-institution",
           label: "Royal Institution",
-          x: 48,
-          y: 58,
+          x: 56,
+          y: 60,
         },
+        nearbyReferences: [],
         selectedNearbyNodes: [
           {
             key: "green-park",
             label: "Green Park",
-            x: 64,
-            y: 32,
+            x: 72,
+            y: 36,
           },
           {
-            key: "piccadilly-arcade",
-            label: "Piccadilly Arcade",
-            x: 34,
-            y: 61,
+            key: "piccadilly-stop-r",
+            label: "Piccadilly / St James's Street",
+            x: 46,
+            y: 76,
           },
         ],
+        orientationSummary: "Royal Institution, Green Park, and the Piccadilly / St James's Street stop remain in the simplified local read.",
         localityEmphasis: {
-          label: "Royal Institution, Green Park, and Piccadilly remain the core local read.",
+          label: "Royal Institution, Green Park, and the Piccadilly / St James's Street stop remain in the simplified local read.",
         },
-        fallbackCopy: "Simplified local frame while richer locality detail is unavailable.",
+        fallbackCopy: "Simplified local orientation keeps the Royal Institution, Green Park, and the Piccadilly / St James's Street stop visible.",
       },
       nearbyModes: [
         {
@@ -562,12 +612,14 @@ describe("dashboard presenter", () => {
       detail: "The departure picture is tightening. Movement is delayed and should be read with care.",
     });
     expect(viewModel.liveAnnouncement).toBe(
-      "Live update. Movement is delayed and should be read with care. Local frame stays fixed while richer locality detail narrows.",
+      "Live update. Movement is delayed and should be read with care. Local orientation stays fixed while richer locality detail narrows.",
     );
     expect(viewModel.nearbyModes[1].changeSummary).toBe(
       "Bus now reads caution. Bus is now reading disrupted within the nearby picture.",
     );
-    expect(viewModel.localMap.changeSummary).toBe("Local frame stays fixed while richer locality detail narrows.");
+    expect(viewModel.localMap.changeSummary).toBe(
+      "Local orientation stays fixed while richer locality detail narrows.",
+    );
   });
 
   it("keeps later live updates tied to real snapshot deltas instead of repeating current-state summaries", () => {
@@ -797,6 +849,10 @@ describe("dashboard presenter", () => {
       join(root, "src", "features", "dashboard", "components", "ModeSummaryCard.tsx"),
       "utf8",
     );
+    const localMapSource = readFileSync(
+      join(root, "src", "features", "dashboard", "components", "LocalMapFrame.tsx"),
+      "utf8",
+    );
     const publicSources = [screenSource, headerSource, modeCardSource].join("\n");
 
     expect(viewModel.disruption.title).toBe("Bus is disrupted nearby");
@@ -826,6 +882,10 @@ describe("dashboard presenter", () => {
     expect(headerSource).toMatch(/viewModel\.weatherStatus/);
     expect(headerSource).toMatch(/viewModel\.mobilityStatus/);
     expect(modeCardSource).toMatch(/mode\.sourceStatus/);
+    expect(localMapSource).toMatch(/local-map-panel__street-label/);
+    expect(localMapSource).toMatch(/Passive local orientation map anchored to the Royal Institution/);
+    expect(localMapSource).toMatch(/viewModel\.nearbyReferences/);
+    expect(/local-map-panel__corridor/.test(localMapSource)).toBe(false);
     expect(
       /warning banner|alert overlay|control room|ops console|Route Planner|best option|recommended|switch to|take buses instead|reroute now/i.test(
         publicSources,
@@ -865,29 +925,31 @@ describe("dashboard presenter", () => {
           }),
         },
         localMap: {
-          title: "Local frame",
+          title: "Local orientation",
           state: "fallback",
           sourceStatus: {
             state: "unavailable",
             label: "Unavailable",
-            detail: "The local frame stays simplified while richer locality detail is temporarily unavailable.",
+            detail: "The local orientation stays simplified while richer locality detail is temporarily unavailable.",
           },
           venueAnchor: {
             key: "royal-institution",
             label: "Royal Institution",
-            x: 48,
-            y: 58,
+            x: 56,
+            y: 60,
           },
+          nearbyReferences: [],
           selectedNearbyNodes: [
             {
               key: "green-park",
               label: "Green Park",
-              x: 64,
-              y: 32,
+              x: 72,
+              y: 36,
             },
           ],
+          orientationSummary: "Royal Institution and Green Park remain in the simplified local read.",
           localityEmphasis: null,
-          fallbackCopy: "The local frame stays simplified while richer locality detail is temporarily unavailable.",
+          fallbackCopy: "The local orientation keeps the Royal Institution and Green Park visible while richer locality detail is temporarily unavailable.",
         },
         nearbyModes: [
           {

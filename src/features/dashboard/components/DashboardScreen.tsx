@@ -115,6 +115,13 @@ type DashboardViewModel = {
       y: number;
       caption: string;
     }[];
+    nearbyReferences: readonly {
+      key: string;
+      label: string;
+      kind: string;
+      kindLabel: string;
+      caption: string;
+    }[];
     localityEmphasis: string | null;
     fallbackCopy: string | null;
     changeSummary: string | null;

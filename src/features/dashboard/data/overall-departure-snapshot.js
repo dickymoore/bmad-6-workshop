@@ -43,20 +43,20 @@ function createBaseSnapshot({
       }),
     },
     localMap: {
-      title: "Local frame",
+      title: "Local orientation",
       state: mapState,
       sourceStatus: createSourceStatus({
         state: mapState === "fallback" ? "carried-forward" : "live",
         detail:
           mapState === "fallback"
-            ? "The local frame stays simplified while richer locality detail narrows."
-            : "The local frame is reading live for this foyer.",
+            ? "The local orientation stays simplified while richer locality detail narrows."
+            : "The local orientation is reading live for this foyer.",
       }),
       venueAnchor: {
         key: "royal-institution",
         label: "Royal Institution",
-        x: 48,
-        y: 58,
+        x: 56,
+        y: 60,
       },
       nearbyReferences:
         mapState === "fallback"
@@ -100,47 +100,51 @@ function createBaseSnapshot({
               {
                 key: "green-park",
                 label: "Green Park",
-                x: 64,
-                y: 32,
+                x: 72,
+                y: 36,
               },
               {
-                key: "piccadilly-arcade",
-                label: "Piccadilly Arcade",
-                x: 34,
-                y: 61,
+                key: "piccadilly-stop-r",
+                label: "Piccadilly / St James's Street",
+                x: 46,
+                y: 76,
               },
             ]
           : [
               {
                 key: "green-park",
                 label: "Green Park",
-                x: 64,
-                y: 32,
+                x: 72,
+                y: 36,
               },
               {
-                key: "piccadilly-arcade",
-                label: "Piccadilly Arcade",
-                x: 34,
-                y: 61,
+                key: "piccadilly-stop-r",
+                label: "Piccadilly / St James's Street",
+                x: 46,
+                y: 76,
               },
               {
-                key: "burlington-gardens",
-                label: "Burlington Gardens",
-                x: 42,
-                y: 24,
+                key: "albemarle-street",
+                label: "Albemarle Street",
+                x: 56,
+                y: 48,
               },
             ],
+      orientationSummary:
+        mapState === "fallback"
+          ? "Royal Institution, Green Park, and the Piccadilly / St James's Street stop remain in the simplified local read."
+          : "Royal Institution sits on Albemarle Street with Green Park and the Piccadilly / St James's Street stop in the immediate local read.",
       localityEmphasis:
         mapState === "fallback"
           ? {
-              label: "Green Park station and the Piccadilly / St James's Street stop remain the core nearby read.",
+              label: "Royal Institution, Green Park, and the Piccadilly / St James's Street stop remain in the simplified local read.",
             }
           : {
-              label: "Green Park, the Piccadilly / St James's Street stop, and Albemarle Street frame the immediate local read.",
+              label: "Royal Institution sits on Albemarle Street with Green Park and the Piccadilly / St James's Street stop in the immediate local read.",
             },
       fallbackCopy:
         mapState === "fallback"
-          ? "Simplified local frame while richer locality detail is unavailable."
+          ? "Simplified local orientation keeps the Royal Institution, Green Park, and the Piccadilly / St James's Street stop visible."
           : null,
     },
     nearbyModes: [

@@ -66,6 +66,6 @@ development_status:
   5-1-reframe-the-public-display-around-a-one-screen-status-first-board: done
   5-2-replace-verbose-mode-cards-with-compact-rag-transport-rows: done
   5-3-add-concrete-nearby-station-and-locality-references: done
-  5-4-redesign-the-local-map-for-practical-usefulness: backlog
+  5-4-redesign-the-local-map-for-practical-usefulness: done
   5-5-revalidate-the-public-screen-against-board-readability-criteria: backlog
   epic-5-retrospective: optional

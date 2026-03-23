@@ -164,7 +164,7 @@ test("story 1.5 public route composes the Royal Institution dashboard feature wi
   assert.equal(/export const dynamic = "force-dynamic"/.test(page), true, "public route should stay server-rendered at request time");
   assert.equal(/getDashboardApiResponse|Cache-Control|Response\.json/.test(apiRoute), true, "dashboard API route should expose same-origin JSON without provider internals");
   assert.equal(/ModeSummaryGrid|ModeSummaryCard/.test(screen + modeGrid), true, "public route should include shared-reading mode summaries");
-  assert.equal(/LocalMapFrame|Green Park|Piccadilly Arcade|Local frame/i.test(publicFeature), true, "public route should include fixed local-map locality cues");
+  assert.equal(/LocalMapFrame|Green Park|Piccadilly \/ St James's Street|Local orientation/i.test(publicFeature), true, "public route should include fixed local-map locality cues");
   assert.equal(/QueryClientProvider|useDashboardQuery|refetchInterval/.test(liveScreen + hook), true, "live path should poll through a dedicated query boundary");
   assert.equal(/"@tanstack\/react-query"\s*:/.test(tsconfig), false, "tsconfig should not alias react-query away from the installed package");
   assert.equal(/@\/lib\/vendor\/tanstack-react-query/.test(liveScreen + hook), true, "query compatibility wiring should be explicit in source");
@@ -200,7 +200,7 @@ test("story 1.5 public route composes the Royal Institution dashboard feature wi
   assert.equal(/sourceStatus/.test(contract + presenter + header + modeCard + localMap), true, "provider-failure source evidence should stay canonical from contract through public UI");
   assert.equal(/disruption-callout|mode-summary-card--overall-disrupted|mode-summary-card__emphasis/.test(header + modeCard), true, "public UI should render calm structural disruption emphasis without a takeover");
   assert.equal(/warning banner|alert overlay|control room|ops console|reroute now|take buses instead/i.test(publicCopySources), false, "story 2.3 should avoid alert-surface and operational language");
-  assert.equal(/<svg|role="img"|aria-label="Fixed local map anchored to the Royal Institution"/.test(localMap), true, "local map should render as a passive framed graphic");
+  assert.equal(/<svg|role="img"|aria-label="Passive local orientation map anchored to the Royal Institution"/.test(localMap), true, "local map should render as a passive framed graphic");
 });
 
 test("story 1.6 keeps the public display locked to venue-sized layout pillars and explicit verification evidence", () => {
@@ -372,6 +372,38 @@ test("story 5.3 adds concrete nearby station and locality references to the cano
   assert.equal(/locality-reference-panel|dashboard-lower-grid__locality/.test(globalCss), true, "global styles should define the dedicated locality panel and shell slot");
   assert.equal(/<button|<input|<form|<select|<textarea|href=/.test(localityPanel), false, "locality panel should remain passive and non-interactive");
   assert.equal(/selectedNearbyNodes/.test(localMap), true, "map should remain the existing single local-map path rather than a replacement locality implementation");
+});
+
+test("story 5.4 redesigns the local map into a practical passive orientation aid", () => {
+  const screenPath = join(root, "src", "features", "dashboard", "components", "DashboardScreen.tsx");
+  const localMapPath = join(root, "src", "features", "dashboard", "components", "LocalMapFrame.tsx");
+  const presenterPath = join(root, "src", "features", "dashboard", "presenters", "dashboard-presenter.js");
+  const snapshotPath = join(root, "src", "features", "dashboard", "data", "overall-departure-snapshot.js");
+  const contractPath = join(root, "src", "lib", "contracts", "dashboard-snapshot.js");
+  const globalCssPath = join(root, "src", "app", "globals.css");
+
+  const screen = readFileSync(screenPath, "utf8");
+  const localMap = readFileSync(localMapPath, "utf8");
+  const presenter = readFileSync(presenterPath, "utf8");
+  const snapshot = readFileSync(snapshotPath, "utf8");
+  const contract = readFileSync(contractPath, "utf8");
+  const globalCss = readFileSync(globalCssPath, "utf8");
+  const passivePublicSources = [screen, localMap, presenter, snapshot].join("\n");
+
+  assert.equal(/Passive local orientation map anchored to the Royal Institution/.test(localMap + presenter), true, "map should advertise a passive orientation surface anchored to the venue");
+  assert.equal(/orientationSummary/.test(contract + presenter + snapshot), true, "snapshot and presenter should carry a narrow orientation summary seam");
+  assert.equal(/Green Park|Piccadilly \/ St James's Street|Albemarle Street/.test(snapshot), true, "fixture map should preserve the same Royal Institution locality references");
+  assert.equal(/local-map-panel__street-label|local-map-panel__road|local-map-panel__block/.test(localMap + globalCss), true, "map source should read as a conventional static street surface");
+  assert.equal(/local-map-panel__corridor/.test(localMap + globalCss), false, "decorative corridor emphasis should be retired");
+  assert.equal(/dashboard-lower-grid__locality[\s\S]*dashboard-lower-grid__map/.test(screen), true, "board composition should still keep the locality panel and map in the canonical lower grid");
+  assert.equal(
+    /<button|<input|<form|<select|<textarea|href=|onClick=|\bpan\b|\bzoom\b|\btoggle\b|\btabs?\b/i.test(
+      passivePublicSources,
+    ),
+    false,
+    "map redesign should stay passive and non-interactive",
+  );
+  assert.equal(/simplified local orientation keeps the Royal Institution/i.test(snapshot + presenter), true, "fallback copy should keep the Royal Institution anchor and usable nearby context");
 });
 
 test("story 2.5 keeps live reading stable during refreshes and motion changes", () => {

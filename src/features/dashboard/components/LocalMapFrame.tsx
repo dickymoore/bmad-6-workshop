@@ -19,6 +19,13 @@ type LocalMapViewModel = {
   };
   venueAnchor: LocalMapMarker;
   selectedNearbyNodes: readonly LocalMapMarker[];
+  nearbyReferences: readonly {
+    key: string;
+    label: string;
+    kind: string;
+    kindLabel: string;
+    caption: string;
+  }[];
   localityEmphasis: string | null;
   fallbackCopy: string | null;
   changeSummary: string | null;
@@ -26,6 +33,20 @@ type LocalMapViewModel = {
 
 function markerClassName(marker: LocalMapMarker, isAnchor = false) {
   return isAnchor ? "local-map-panel__marker local-map-panel__marker--anchor" : "local-map-panel__marker";
+}
+
+function renderMapLabel(label: string) {
+  const parts = label.split(" / ");
+
+  if (parts.length === 1) {
+    return label;
+  }
+
+  return parts.map((part, index) => (
+    <tspan key={`${label}-${part}`} x="0" dy={index === 0 ? 0 : 4.8}>
+      {part}
+    </tspan>
+  ));
 }
 
 export function LocalMapFrame({ viewModel }: { viewModel: LocalMapViewModel }) {
@@ -41,7 +62,7 @@ export function LocalMapFrame({ viewModel }: { viewModel: LocalMapViewModel }) {
       <div className="local-map-panel__header">
         <div>
           <p className="dashboard-reserved__label">{viewModel.title}</p>
-          <h2 className="local-map-panel__heading">Nearby stations</h2>
+          <h2 className="local-map-panel__heading">Nearby orientation</h2>
         </div>
         <p className={`local-map-panel__state local-map-panel__state--${viewModel.state}`}>
           {viewModel.stateLabel}
@@ -53,52 +74,53 @@ export function LocalMapFrame({ viewModel }: { viewModel: LocalMapViewModel }) {
       <div className={`local-map-panel__surface local-map-panel__surface--${viewModel.state}`}>
         <div className="local-map-panel__map-wrap">
           <svg
-            aria-label="Fixed local map anchored to the Royal Institution"
+            aria-label="Passive local orientation map anchored to the Royal Institution"
             className="local-map-panel__graphic"
             role="img"
-            viewBox="0 0 100 100"
+            viewBox="0 0 160 160"
           >
-            <title>Fixed local map anchored to the Royal Institution</title>
-            <rect className="local-map-panel__frame" x="2" y="2" width="96" height="96" rx="11" />
-            <path
-              className="local-map-panel__street local-map-panel__street--primary"
-              d="M12 72 C28 60, 36 57, 50 55 S74 49, 88 42"
-            />
-            <path
-              className="local-map-panel__street"
-              d="M18 20 C30 28, 40 31, 56 33 S76 36, 90 28"
-            />
-            <path
-              className="local-map-panel__street"
-              d="M28 12 C34 28, 38 43, 40 88"
-            />
-            <path
-              className="local-map-panel__street"
-              d="M70 10 C66 28, 63 42, 62 84"
-            />
+            <title>Passive local orientation map anchored to the Royal Institution</title>
+            <rect className="local-map-panel__frame" x="8" y="8" width="144" height="144" rx="18" />
+            <rect className="local-map-panel__block" x="20" y="18" width="44" height="38" rx="8" />
+            <rect className="local-map-panel__block" x="96" y="18" width="44" height="38" rx="8" />
+            <rect className="local-map-panel__block" x="20" y="96" width="44" height="40" rx="8" />
+            <rect className="local-map-panel__block" x="104" y="100" width="32" height="32" rx="8" />
+            <path className="local-map-panel__road" d="M78 18 L102 18 L102 140 L78 140 Z" />
+            <path className="local-map-panel__road local-map-panel__road--primary" d="M18 90 L142 90" />
+            <path className="local-map-panel__road" d="M18 62 L142 62" />
+            <path className="local-map-panel__road" d="M44 18 L44 140" />
+            <text className="local-map-panel__street-label" x="112" y="80">
+              Piccadilly
+            </text>
+            <text className="local-map-panel__street-label local-map-panel__street-label--primary" x="90" y="46">
+              Albemarle Street
+            </text>
             {isFallback ? null : (
-              <ellipse className="local-map-panel__corridor" cx="52" cy="46" rx="28" ry="16" />
+              <text className="local-map-panel__street-label" x="48" y="54">
+                Burlington Gardens
+              </text>
             )}
 
             {viewModel.selectedNearbyNodes.map((node) => (
               <g
                 key={node.key}
                 className={markerClassName(node)}
-                style={{ transform: `translate(${node.x}px, ${node.y}px)` }}
+                transform={`translate(${node.x} ${node.y})`}
               >
                 <circle r="3.4" />
-                <text x="0" y="-6.6">
-                  {node.label}
+                <text x="0" y="-8.4">
+                  {renderMapLabel(node.label)}
                 </text>
               </g>
             ))}
 
             <g
               className={markerClassName(viewModel.venueAnchor, true)}
-              style={{ transform: `translate(${viewModel.venueAnchor.x}px, ${viewModel.venueAnchor.y}px)` }}
+              transform={`translate(${viewModel.venueAnchor.x} ${viewModel.venueAnchor.y})`}
             >
+              <circle className="local-map-panel__anchor-ring" r="7.2" />
               <circle r="4.8" />
-              <text x="0" y="-8.2">
+              <text x="0" y="-10.2">
                 {viewModel.venueAnchor.label}
               </text>
             </g>
@@ -113,10 +135,13 @@ export function LocalMapFrame({ viewModel }: { viewModel: LocalMapViewModel }) {
             <span>{viewModel.venueAnchor.label}</span>
           </p>
           <ul className="local-map-panel__legend-list">
-            {viewModel.selectedNearbyNodes.map((node) => (
-              <li key={node.key}>
-                <span className="local-map-panel__legend-label">{node.caption}</span>
-                <span>{node.label}</span>
+            {viewModel.nearbyReferences.map((reference) => (
+              <li key={reference.key}>
+                <span>
+                  <span className="local-map-panel__legend-label">{reference.kindLabel}</span>
+                  <span className="local-map-panel__legend-value">{reference.label}</span>
+                </span>
+                <span>{reference.caption}</span>
               </li>
             ))}
           </ul>

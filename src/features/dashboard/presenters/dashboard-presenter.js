@@ -14,8 +14,8 @@ const MODE_STATE_LABELS = Object.freeze({
 });
 
 const LOCAL_MAP_STATE_LABELS = Object.freeze({
-  default: "Default local frame",
-  fallback: "Fallback local frame",
+  default: "Live local read",
+  fallback: "Simplified local read",
 });
 
 const TREND_LABELS = Object.freeze({
@@ -191,7 +191,7 @@ function createModeChangeSummary(previousMode, nextMode) {
   }
 
   if (previousMode.sourceStatus.state !== nextMode.sourceStatus.state) {
-    changes.push(nextMode.sourceStatus.detail);
+      changes.push(nextMode.sourceStatus.detail);
   }
 
   if (
@@ -212,8 +212,8 @@ function createMapChangeSummary(previousSnapshot, nextSnapshot) {
   if (previousSnapshot.localMap.state !== nextSnapshot.localMap.state) {
     return (
       nextSnapshot.localMap.state === "fallback"
-        ? "Local frame stays fixed while richer locality detail narrows."
-        : "Local frame returns to the fuller live locality read."
+        ? "Local orientation stays fixed while richer locality detail narrows."
+        : "Local orientation returns to the fuller live locality read."
     );
   }
 
@@ -252,7 +252,7 @@ function createCurrentStateUpdateSummary(snapshot) {
   }
 
   if (snapshot.localMap.state === "fallback") {
-    const mapSummary = "Local frame stays fixed while richer locality detail narrows.";
+    const mapSummary = "Local orientation stays fixed while richer locality detail narrows.";
     changes.push(mapSummary);
     announcementChanges.push(mapSummary);
   } else if (snapshot.localMap.sourceStatus.state !== "live") {
@@ -464,18 +464,21 @@ export function presentDashboardSnapshot(snapshotInput, options = {}) {
     locality: Object.freeze({
       title: "Nearby references",
       heading: "Nearby stations and streets",
-      summary: createLocalitySummary(nearbyReferences, snapshot.localMap.localityEmphasis?.label ?? null),
+      summary: createLocalitySummary(
+        nearbyReferences,
+        snapshot.localMap.orientationSummary ?? snapshot.localMap.localityEmphasis?.label ?? null,
+      ),
       references: Object.freeze(nearbyReferences),
     }),
     localMap: Object.freeze({
       title: snapshot.localMap.title,
-      ariaLabel: "Fixed local map anchored to the Royal Institution",
+      ariaLabel: "Passive local orientation map anchored to the Royal Institution",
       state: snapshot.localMap.state,
       stateLabel: LOCAL_MAP_STATE_LABELS[snapshot.localMap.state],
       sourceStatus: presentSourceStatus(snapshot.localMap.sourceStatus),
       venueAnchor: Object.freeze({
         ...snapshot.localMap.venueAnchor,
-        caption: "Anchor",
+        caption: "Royal Institution anchor",
       }),
       selectedNearbyNodes: Object.freeze(
         snapshot.localMap.selectedNearbyNodes.map((node) =>
@@ -485,7 +488,9 @@ export function presentDashboardSnapshot(snapshotInput, options = {}) {
           }),
         ),
       ),
-      localityEmphasis: snapshot.localMap.localityEmphasis?.label ?? null,
+      nearbyReferences: Object.freeze(nearbyReferences),
+      localityEmphasis:
+        snapshot.localMap.orientationSummary ?? snapshot.localMap.localityEmphasis?.label ?? null,
       fallbackCopy: snapshot.localMap.fallbackCopy,
       changeSummary: createMapChangeSummary(previousSnapshot, snapshot),
     }),

@@ -39,18 +39,18 @@
     }
   },
   "localMap": {
-    "title": "Local frame",
+    "title": "Local orientation",
     "state": "default",
     "sourceStatus": {
       "state": "live",
       "label": "Live",
-      "detail": "The local frame is reading live for this foyer."
+      "detail": "The local orientation is reading live for this foyer."
     },
     "venueAnchor": {
       "key": "royal-institution",
       "label": "Royal Institution",
-      "x": 48,
-      "y": 58
+      "x": 56,
+      "y": 60
     },
     "nearbyReferences": [
       {
@@ -76,24 +76,25 @@
       {
         "key": "green-park",
         "label": "Green Park",
-        "x": 64,
-        "y": 32
+        "x": 72,
+        "y": 36
       },
       {
-        "key": "piccadilly-arcade",
-        "label": "Piccadilly Arcade",
-        "x": 34,
-        "y": 61
+        "key": "piccadilly-stop-r",
+        "label": "Piccadilly / St James's Street",
+        "x": 46,
+        "y": 76
       },
       {
-        "key": "burlington-gardens",
-        "label": "Burlington Gardens",
-        "x": 42,
-        "y": 24
+        "key": "albemarle-street",
+        "label": "Albemarle Street",
+        "x": 56,
+        "y": 48
       }
     ],
+    "orientationSummary": "Royal Institution sits on Albemarle Street with Green Park and the Piccadilly / St James's Street stop in the immediate local read.",
     "localityEmphasis": {
-      "label": "Green Park, the Piccadilly / St James's Street stop, and Albemarle Street frame the immediate local read."
+      "label": "Royal Institution sits on Albemarle Street with Green Park and the Piccadilly / St James's Street stop in the immediate local read."
     },
     "fallbackCopy": null
   },

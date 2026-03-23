@@ -689,33 +689,52 @@ a {
 }
 
 .local-map-panel__frame,
-.local-map-panel__street,
-.local-map-panel__corridor {
+.local-map-panel__road,
+.local-map-panel__block,
+.local-map-panel__anchor-ring {
   fill: none;
 }
 
 .local-map-panel__frame {
   stroke: rgba(38, 45, 42, 0.1);
+  stroke-width: 1.1;
+}
+
+.local-map-panel__block {
+  fill: rgba(220, 215, 205, 0.55);
+  stroke: rgba(122, 116, 105, 0.16);
+  stroke-width: 0.7;
+}
+
+.local-map-panel__road {
+  fill: rgba(248, 246, 240, 0.96);
+  stroke: rgba(124, 119, 110, 0.24);
+  stroke-linecap: round;
+  stroke-linejoin: round;
   stroke-width: 0.8;
 }
 
-.local-map-panel__street {
-  stroke: rgba(89, 99, 94, 0.26);
-  stroke-linecap: round;
-  stroke-width: 1.2;
-}
-
-.local-map-panel__street--primary {
-  stroke: rgba(53, 93, 82, 0.32);
+.local-map-panel__road--primary {
+  stroke: rgba(53, 93, 82, 0.28);
   stroke-width: 1.6;
 }
 
-.local-map-panel__corridor {
-  fill: rgba(53, 93, 82, 0.09);
+.local-map-panel__street-label {
+  fill: var(--muted);
+  font-family: var(--font-body), Inter, sans-serif;
+  font-size: 5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-.local-map-panel__surface--fallback .local-map-panel__corridor {
-  fill: rgba(135, 105, 59, 0.08);
+.local-map-panel__street-label--primary {
+  fill: var(--accent);
+  font-weight: 700;
+}
+
+.local-map-panel__anchor-ring {
+  stroke: rgba(166, 69, 66, 0.28);
+  stroke-width: 1.6;
 }
 
 .local-map-panel__marker {
@@ -731,7 +750,7 @@ a {
 .local-map-panel__marker text {
   fill: var(--text);
   font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
-  font-size: 4.4px;
+  font-size: 4px;
   font-weight: 700;
   text-anchor: middle;
 }
@@ -1915,11 +1934,17 @@ a {
 }
 
 .local-map-panel__legend-label {
+  display: block;
   color: var(--muted);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+.local-map-panel__legend-value {
+  display: block;
+  margin-top: 4px;
 }
 
 .local-map-panel__footer {
