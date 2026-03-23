@@ -40,10 +40,9 @@ const MAP_VIEWBOX = Object.freeze({
   width: 1000,
   height: 840,
 });
-const MAP_SCALE_LEVEL = 15;
+const MAP_SCALE_LEVEL = 17;
 const MAP_TILE_SIZE = 256;
-const MAP_TILE_X_RANGE = Object.freeze([16369, 16370, 16371, 16372, 16373]);
-const MAP_TILE_Y_RANGE = Object.freeze([10894, 10895, 10896, 10897]);
+const MAP_TILE_GRID_PADDING = 1;
 
 const MAP_COORDINATES_BY_KEY = Object.freeze({
   "royal-institution": { lat: 51.5097496, lng: -0.1423309 },
@@ -64,7 +63,7 @@ function getMarkerPositioning(key: string) {
 }
 
 function toWorldPoint(pointLat: number, pointLng: number) {
-  const scale = 256 * 2 ** 15;
+  const scale = 256 * 2 ** MAP_SCALE_LEVEL;
   const sine = Math.min(Math.max(Math.sin((pointLat * Math.PI) / 180), -0.9999), 0.9999);
 
   return {
@@ -100,8 +99,16 @@ function markerPositionStyle(marker: LocalMapMarker) {
 }
 
 function buildMapTiles() {
-  return MAP_TILE_X_RANGE.flatMap((tileX) =>
-    MAP_TILE_Y_RANGE.map((tileY) => ({
+  const minTileX = Math.floor((MAP_CENTER_POINT.x - MAP_VIEWBOX.width / 2) / MAP_TILE_SIZE) - MAP_TILE_GRID_PADDING;
+  const maxTileX = Math.floor((MAP_CENTER_POINT.x + MAP_VIEWBOX.width / 2) / MAP_TILE_SIZE) + MAP_TILE_GRID_PADDING;
+  const minTileY = Math.floor((MAP_CENTER_POINT.y - MAP_VIEWBOX.height / 2) / MAP_TILE_SIZE) - MAP_TILE_GRID_PADDING;
+  const maxTileY = Math.floor((MAP_CENTER_POINT.y + MAP_VIEWBOX.height / 2) / MAP_TILE_SIZE) + MAP_TILE_GRID_PADDING;
+
+  const tileXRange = Array.from({ length: maxTileX - minTileX + 1 }, (_, index) => minTileX + index);
+  const tileYRange = Array.from({ length: maxTileY - minTileY + 1 }, (_, index) => minTileY + index);
+
+  return tileXRange.flatMap((tileX) =>
+    tileYRange.map((tileY) => ({
       key: `${tileX}-${tileY}`,
       src: `/map-tiles/${MAP_SCALE_LEVEL}/${tileX}-${tileY}.png`,
       x: (tileX * MAP_TILE_SIZE - MAP_CENTER_POINT.x) + MAP_VIEWBOX.width / 2,

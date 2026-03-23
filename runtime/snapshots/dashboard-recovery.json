@@ -1,7 +1,7 @@
 {
-  "phase": "recovering",
-  "recoveredAt": "2026-03-23T19:32:06.057Z",
-  "recoverySource": "stored-snapshot",
-  "livePublicationResumed": false,
-  "resumedAt": null
+  "phase": "live",
+  "recoveredAt": "2026-03-23T19:40:15.681Z",
+  "recoverySource": "live-publish",
+  "livePublicationResumed": true,
+  "resumedAt": "2026-03-23T19:43:43.180Z"
 }

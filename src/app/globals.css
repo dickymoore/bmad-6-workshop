@@ -3015,7 +3015,7 @@ a {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: flex-start;
-  gap: 8px;
+  gap: 6px;
 }
 
 .atmospheric-header__kicker {
@@ -3029,7 +3029,7 @@ a {
 }
 
 .atmospheric-header__headline {
-  max-width: 19ch;
+  max-width: 28ch;
   font-size: 1.72rem;
   line-height: 1.08;
   letter-spacing: -0.035em;
