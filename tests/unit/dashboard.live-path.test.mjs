@@ -422,7 +422,7 @@ describe("dashboard live path", () => {
     assert.match(hookSource, /refetchOnWindowFocus:\s*false/);
     assert.match(hookSource, /refetchOnReconnect:\s*true/);
     assert.match(liveScreenSource, /QueryClientProvider/);
-    assert.match(liveScreenSource, /const \{ data, previousData \} = useDashboardQuery/);
+    assert.match(liveScreenSource, /const \{ data, previousData, isFetching \} = useDashboardQuery/);
     assert.match(liveScreenSource, /const previousSnapshot =/);
     assert.match(liveScreenSource, /previousData\?\.data\.publishedAt && previousData\.data\.publishedAt !== response\.data\.publishedAt/);
     assert.match(liveScreenSource, /const hasUpdatedSinceLoad = response\.data\.publishedAt !== initialResponse\.data\.publishedAt/);

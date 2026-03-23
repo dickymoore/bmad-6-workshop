@@ -246,18 +246,18 @@ function deriveDisruptionEmphasis({ overallState, nearbyModes }) {
 
 function createMixedSupportLabel({ weatherStatus, mobilityStatus }) {
   if (weatherStatus.state === "live" && mobilityStatus.state === "live") {
-    return "Weather and movement still reinforce the same local read.";
+    return "Weather and movement are live.";
   }
 
   if (weatherStatus.state === "live" && mobilityStatus.state !== "live") {
-    return "Weather remains live while movement detail narrows nearby.";
+    return "Weather is live, movement is partial.";
   }
 
   if (weatherStatus.state !== "live" && mobilityStatus.state === "live") {
-    return "Movement remains live while weather detail narrows nearby.";
+    return "Movement is live, weather is partial.";
   }
 
-  return "The shared picture stays readable while live detail narrows.";
+  return "Live detail is partial.";
 }
 
 function createLocalMap({ baseSnapshot, storedSnapshot, tflOverview }) {

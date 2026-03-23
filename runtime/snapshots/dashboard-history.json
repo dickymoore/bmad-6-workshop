@@ -1,6 +1,6 @@
 [
   {
-    "publishedAt": "2026-03-23T14:36:49.201Z",
+    "publishedAt": "2026-03-23T16:11:49.200Z",
     "overallState": "watchful",
     "nearbyModes": [
       {
@@ -22,7 +22,7 @@
     ]
   },
   {
-    "publishedAt": "2026-03-23T14:37:49.198Z",
+    "publishedAt": "2026-03-23T16:12:49.203Z",
     "overallState": "watchful",
     "nearbyModes": [
       {
@@ -44,7 +44,7 @@
     ]
   },
   {
-    "publishedAt": "2026-03-23T14:38:49.189Z",
+    "publishedAt": "2026-03-23T16:13:49.198Z",
     "overallState": "watchful",
     "nearbyModes": [
       {
@@ -66,7 +66,7 @@
     ]
   },
   {
-    "publishedAt": "2026-03-23T14:39:49.188Z",
+    "publishedAt": "2026-03-23T16:14:49.202Z",
     "overallState": "watchful",
     "nearbyModes": [
       {
@@ -88,7 +88,7 @@
     ]
   },
   {
-    "publishedAt": "2026-03-23T14:40:49.182Z",
+    "publishedAt": "2026-03-23T16:15:49.203Z",
     "overallState": "watchful",
     "nearbyModes": [
       {
@@ -110,7 +110,7 @@
     ]
   },
   {
-    "publishedAt": "2026-03-23T14:41:49.190Z",
+    "publishedAt": "2026-03-23T16:16:49.196Z",
     "overallState": "watchful",
     "nearbyModes": [
       {
@@ -132,7 +132,7 @@
     ]
   },
   {
-    "publishedAt": "2026-03-23T14:42:49.208Z",
+    "publishedAt": "2026-03-23T16:17:49.208Z",
     "overallState": "watchful",
     "nearbyModes": [
       {
@@ -154,7 +154,7 @@
     ]
   },
   {
-    "publishedAt": "2026-03-23T14:43:31.938Z",
+    "publishedAt": "2026-03-23T16:18:49.210Z",
     "overallState": "watchful",
     "nearbyModes": [
       {
@@ -176,7 +176,7 @@
     ]
   },
   {
-    "publishedAt": "2026-03-23T14:43:32.506Z",
+    "publishedAt": "2026-03-23T16:19:49.206Z",
     "overallState": "watchful",
     "nearbyModes": [
       {
@@ -198,7 +198,7 @@
     ]
   },
   {
-    "publishedAt": "2026-03-23T14:43:31.218Z",
+    "publishedAt": "2026-03-23T16:20:49.189Z",
     "overallState": "watchful",
     "nearbyModes": [
       {
@@ -220,7 +220,7 @@
     ]
   },
   {
-    "publishedAt": "2026-03-23T14:44:32.523Z",
+    "publishedAt": "2026-03-23T16:21:17.198Z",
     "overallState": "watchful",
     "nearbyModes": [
       {
@@ -242,7 +242,7 @@
     ]
   },
   {
-    "publishedAt": "2026-03-23T14:45:32.519Z",
+    "publishedAt": "2026-03-23T16:21:47.678Z",
     "overallState": "watchful",
     "nearbyModes": [
       {
@@ -264,7 +264,7 @@
     ]
   },
   {
-    "publishedAt": "2026-03-23T14:46:32.539Z",
+    "publishedAt": "2026-03-23T16:22:18.188Z",
     "overallState": "watchful",
     "nearbyModes": [
       {
@@ -286,7 +286,7 @@
     ]
   },
   {
-    "publishedAt": "2026-03-23T14:47:32.521Z",
+    "publishedAt": "2026-03-23T16:22:53.057Z",
     "overallState": "watchful",
     "nearbyModes": [
       {
@@ -308,7 +308,7 @@
     ]
   },
   {
-    "publishedAt": "2026-03-23T14:48:32.526Z",
+    "publishedAt": "2026-03-23T16:22:55.818Z",
     "overallState": "watchful",
     "nearbyModes": [
       {
@@ -330,7 +330,7 @@
     ]
   },
   {
-    "publishedAt": "2026-03-23T14:49:32.531Z",
+    "publishedAt": "2026-03-23T16:23:34.434Z",
     "overallState": "watchful",
     "nearbyModes": [
       {
@@ -352,7 +352,7 @@
     ]
   },
   {
-    "publishedAt": "2026-03-23T14:50:32.525Z",
+    "publishedAt": "2026-03-23T16:23:34.960Z",
     "overallState": "watchful",
     "nearbyModes": [
       {
@@ -374,7 +374,51 @@
     ]
   },
   {
-    "publishedAt": "2026-03-23T14:51:32.527Z",
+    "publishedAt": "2026-03-23T16:24:18.193Z",
+    "overallState": "watchful",
+    "nearbyModes": [
+      {
+        "key": "tube-rail",
+        "state": "available"
+      },
+      {
+        "key": "bus",
+        "state": "available"
+      },
+      {
+        "key": "roads",
+        "state": "caution"
+      },
+      {
+        "key": "cycles-scooters",
+        "state": "caution"
+      }
+    ]
+  },
+  {
+    "publishedAt": "2026-03-23T16:25:04.509Z",
+    "overallState": "watchful",
+    "nearbyModes": [
+      {
+        "key": "tube-rail",
+        "state": "available"
+      },
+      {
+        "key": "bus",
+        "state": "available"
+      },
+      {
+        "key": "roads",
+        "state": "caution"
+      },
+      {
+        "key": "cycles-scooters",
+        "state": "caution"
+      }
+    ]
+  },
+  {
+    "publishedAt": "2026-03-23T16:25:09.098Z",
     "overallState": "watchful",
     "nearbyModes": [
       {

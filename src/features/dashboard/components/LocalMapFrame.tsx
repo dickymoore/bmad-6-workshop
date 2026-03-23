@@ -31,6 +31,10 @@ type LocalMapViewModel = {
   changeSummary: string | null;
 };
 
+const GOOGLE_MAP_EMBED_SRC =
+  process.env.NEXT_PUBLIC_PUBLIC_BOARD_GOOGLE_MAP_EMBED_URL ??
+  "//www.google.com/maps?output=embed&q=The+Royal+Institution+of+Great+Britain+21+Albemarle+Street+London+W1S+4BS&z=16";
+
 function markerClassName(marker: LocalMapMarker, isAnchor = false) {
   return isAnchor ? "local-map-panel__marker local-map-panel__marker--anchor" : "local-map-panel__marker";
 }
@@ -51,12 +55,14 @@ function renderMapLabel(label: string) {
 
 export function LocalMapFrame({ viewModel }: { viewModel: LocalMapViewModel }) {
   const isFallback = viewModel.state === "fallback";
+  const primaryReference = viewModel.nearbyReferences[0] ?? null;
   const narrative =
     (isFallback ? viewModel.fallbackCopy : viewModel.localityEmphasis) ??
     viewModel.localityEmphasis ??
     viewModel.fallbackCopy ??
     "Royal Institution locality held in a fixed nearby frame.";
-  const overlayLabel = isFallback ? "Simplified local read" : "Mayfair transit hub";
+  const overlayLabel = isFallback ? "Simplified local read" : primaryReference?.label ?? "Local map";
+  const overlayCopy = isFallback ? viewModel.sourceStatus.detail : primaryReference?.caption ?? narrative;
 
   return (
     <section className="local-map-panel" aria-label={viewModel.ariaLabel}>
@@ -69,6 +75,16 @@ export function LocalMapFrame({ viewModel }: { viewModel: LocalMapViewModel }) {
       </div>
 
       <div className={`local-map-panel__surface local-map-panel__surface--${viewModel.state}`}>
+        <iframe
+          aria-hidden="true"
+          className="local-map-panel__embed"
+          loading="eager"
+          referrerPolicy="no-referrer-when-downgrade"
+          src={GOOGLE_MAP_EMBED_SRC}
+          tabIndex={-1}
+          title="Google Maps local context for the Royal Institution"
+        />
+        <div className="local-map-panel__map-wash" aria-hidden="true" />
         <p className="local-map-panel__district-label">Albemarle Street District</p>
         <svg
           aria-label="Passive local orientation map anchored to the Royal Institution"
@@ -78,14 +94,6 @@ export function LocalMapFrame({ viewModel }: { viewModel: LocalMapViewModel }) {
         >
           <title>Passive local orientation map anchored to the Royal Institution</title>
           <rect className="local-map-panel__frame" x="8" y="8" width="144" height="144" rx="18" />
-          <rect className="local-map-panel__block" x="20" y="18" width="44" height="38" rx="8" />
-          <rect className="local-map-panel__block" x="96" y="18" width="44" height="38" rx="8" />
-          <rect className="local-map-panel__block" x="20" y="96" width="44" height="40" rx="8" />
-          <rect className="local-map-panel__block" x="104" y="100" width="32" height="32" rx="8" />
-          <path className="local-map-panel__road" d="M78 18 L102 18 L102 140 L78 140 Z" />
-          <path className="local-map-panel__road local-map-panel__road--primary" d="M18 90 L142 90" />
-          <path className="local-map-panel__road" d="M18 62 L142 62" />
-          <path className="local-map-panel__road" d="M44 18 L44 140" />
           <text className="local-map-panel__street-label" x="112" y="80">
             Piccadilly
           </text>
@@ -127,7 +135,7 @@ export function LocalMapFrame({ viewModel }: { viewModel: LocalMapViewModel }) {
 
         <div className="local-map-panel__overlay-card">
           <p className="local-map-panel__overlay-label">{overlayLabel}</p>
-          <p className="local-map-panel__overlay-copy">{isFallback ? viewModel.sourceStatus.detail : narrative}</p>
+          <p className="local-map-panel__overlay-copy">{overlayCopy}</p>
         </div>
       </div>
 

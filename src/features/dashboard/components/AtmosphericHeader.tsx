@@ -45,6 +45,12 @@ type DashboardViewModel = {
     isLive: boolean;
   };
   supportLabel: string;
+  liveMeta: {
+    lastUpdatedLabel: string;
+    refreshCountdownSeconds: number;
+    refreshIntervalSeconds: number;
+    isRefreshing: boolean;
+  };
 };
 
 const PUBLIC_STATUS = Object.freeze({
@@ -102,7 +108,9 @@ export function AtmosphericHeader({ viewModel }: { viewModel: DashboardViewModel
   const dominantCue = getDominantCue(viewModel);
   const motionNote = getSignalNote(viewModel.mobilityStatus, viewModel.mobilityTrust);
   const weatherNote = getSignalNote(viewModel.weatherStatus, viewModel.weatherTrust);
-  const boardUpdate = viewModel.updateSummary?.detail ?? viewModel.currentnessMessage;
+  const refreshLabel = viewModel.liveMeta.isRefreshing
+    ? "Refreshing now"
+    : `Refreshing in ${viewModel.liveMeta.refreshCountdownSeconds}s`;
 
   return (
     <header
@@ -112,11 +120,20 @@ export function AtmosphericHeader({ viewModel }: { viewModel: DashboardViewModel
       <div className="atmospheric-header__body">
         <div className="atmospheric-header__status-band">
           <div className="atmospheric-header__copy">
-            <p className="atmospheric-header__kicker">{viewModel.stateKicker}</p>
+            <p className="atmospheric-header__kicker">Summary</p>
             <h1 className="atmospheric-header__headline" id="overall-departure-state">
-              {publicStatus.headline}
+              {dominantCue}
             </h1>
-            <p className="atmospheric-header__summary">{dominantCue}</p>
+            <div className="atmospheric-header__meta-row" aria-label="Board refresh timing">
+              <p className="atmospheric-header__meta">Last updated {viewModel.liveMeta.lastUpdatedLabel}</p>
+              <p
+                className={`atmospheric-header__meta atmospheric-header__meta--refresh${
+                  viewModel.liveMeta.isRefreshing ? " atmospheric-header__meta--refreshing" : ""
+                }`}
+              >
+                {refreshLabel}
+              </p>
+            </div>
           </div>
 
           <div className={`atmospheric-header__status-pill atmospheric-header__status-pill--${viewModel.overallState}`}>
@@ -152,7 +169,7 @@ export function AtmosphericHeader({ viewModel }: { viewModel: DashboardViewModel
           <article className="signal-card signal-card--board">
             <p className="signal-card__label">{viewModel.updateSummary?.label ?? "Board cue"}</p>
             <p className="signal-card__value">{viewModel.overallTrendLabel ?? "Stable read"}</p>
-            <p className="signal-card__meta">{boardUpdate}</p>
+            <p className="signal-card__meta">{viewModel.currentnessMessage}</p>
           </article>
         </div>
       </div>

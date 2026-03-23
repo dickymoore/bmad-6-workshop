@@ -80,11 +80,27 @@ function createSupportLabel(supportLabel) {
   const sentence = normalizeSentence(supportLabel);
 
   if (!sentence) {
-    return "Shared signals align nearby.";
+    return "Live detail is partial.";
   }
 
-  if (/weather and (mobility|movement) reinforce the same local read/i.test(sentence)) {
-    return "Weather and movement align nearby.";
+  if (/weather and (mobility|movement) (still )?(reinforce the same local read|align nearby)/i.test(sentence)) {
+    return "Weather and movement are live.";
+  }
+
+  if (/movement remains live while weather detail narrows nearby/i.test(sentence)) {
+    return "Movement is live, weather is partial.";
+  }
+
+  if (/weather remains live while movement detail narrows nearby/i.test(sentence)) {
+    return "Weather is live, movement is partial.";
+  }
+
+  if (/shared picture (stays readable|is carried forward) while live detail narrows/i.test(sentence)) {
+    return "Live detail is partial.";
+  }
+
+  if (/picture stays readable while live detail reconnects/i.test(sentence)) {
+    return "Live detail is reconnecting.";
   }
 
   return `${sentence

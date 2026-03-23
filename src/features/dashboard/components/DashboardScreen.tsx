@@ -133,6 +133,12 @@ type DashboardViewModel = {
     fallbackCopy: string | null;
     changeSummary: string | null;
   };
+  liveMeta: {
+    lastUpdatedLabel: string;
+    refreshCountdownSeconds: number;
+    refreshIntervalSeconds: number;
+    isRefreshing: boolean;
+  };
 };
 
 export function DashboardScreen({ viewModel }: { viewModel: DashboardViewModel }) {

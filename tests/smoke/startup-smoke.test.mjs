@@ -201,6 +201,7 @@ test("story 1.5 public route composes the Royal Institution dashboard feature wi
   assert.equal(/disruption-callout|mode-summary-card--overall-disrupted|mode-summary-card__emphasis/.test(header + modeCard), true, "public UI should render calm structural disruption emphasis without a takeover");
   assert.equal(/warning banner|alert overlay|control room|ops console|reroute now|take buses instead/i.test(publicCopySources), false, "story 2.3 should avoid alert-surface and operational language");
   assert.equal(/<svg|role="img"|aria-label="Passive local orientation map anchored to the Royal Institution"/.test(localMap), true, "local map should render as a passive framed graphic");
+  assert.equal(/google\.com\/maps|local-map-panel__embed/.test(localMap), true, "local map should support a Google-backed base layer without losing venue overlays");
 });
 
 test("story 1.6 keeps the public display locked to venue-sized layout pillars and explicit verification evidence", () => {
@@ -307,7 +308,7 @@ test("story 5.1 reframes the public display as a one-screen status-first board s
     "layout should preserve the approved font pairing through repo-owned font variables, whether defaulted in CSS or loaded via next/font",
   );
   assert.equal(/dashboard-masthead|Albemarle Pulse|The Royal Institution/.test(screen), true, "screen should add the new board masthead");
-  assert.equal(/PUBLIC_STATUS|Services: Good|signal-card/.test(header), true, "header should expose a status-first board treatment");
+  assert.equal(/PUBLIC_STATUS|Services: Good|signal-card|Refreshing in/.test(header), true, "header should expose a status-first board treatment with live refresh cues");
   assert.equal(/atmospheric-header__currentness/.test(header), false, "header should avoid a duplicated visible board-update footer");
   assert.equal(/Nearby mode status|W1S wayfinding/.test(modeGrid), true, "nearby mode section should shift to compact board language");
   assert.equal(
@@ -589,7 +590,7 @@ test("story 2.5 keeps live reading stable during refreshes and motion changes", 
   const publicFeature = [screen, liveScreen, header, modeCard, localMap].join("\n");
 
   assert.equal(/data-live-shell="calm-fixed"|data-reading-zone="header"|data-reading-zone="modes"|data-reading-zone="map"/.test(screen), true, "stable reading-order hooks should stay explicit in the public shell");
-  assert.equal(/const \{ data, previousData \} = useDashboardQuery|const previousSnapshot =|previousData\?\.data\.publishedAt && previousData\.data\.publishedAt !== response\.data\.publishedAt|const hasUpdatedSinceLoad = response\.data\.publishedAt !== initialResponse\.data\.publishedAt|presentDashboardSnapshot\(response\.data,\s*\{\s*[\r\n]+\s*previousSnapshot,\s*[\r\n]+\s*hasUpdatedSinceLoad,/.test(liveScreen), true, "live boundary should keep update meaning route-local without remounting the shell");
+  assert.equal(/const \{ data, previousData, isFetching \} = useDashboardQuery|const previousSnapshot =|previousData\?\.data\.publishedAt && previousData\.data\.publishedAt !== response\.data\.publishedAt|const hasUpdatedSinceLoad = response\.data\.publishedAt !== initialResponse\.data\.publishedAt|presentDashboardSnapshot\(response\.data,\s*\{\s*[\r\n]+\s*previousSnapshot,\s*[\r\n]+\s*hasUpdatedSinceLoad,/.test(liveScreen), true, "live boundary should keep update meaning route-local without remounting the shell");
   assert.equal(/refetchIntervalInBackground:\s*true|refetchOnReconnect:\s*true/.test(hook), true, "query hook should preserve the existing shell during background refresh");
   assert.equal(/orderNearbyModesForReading|createUpdateSummary|changeSummary/.test(presenter), true, "presenter should own stable ordering and calm text-first change meaning");
   assert.equal(/aria-live="polite"/.test(header), true, "header should keep a narrowly scoped polite live region");

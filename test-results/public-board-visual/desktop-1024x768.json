@@ -1,0 +1,99 @@
+{
+  "innerHeight": 768,
+  "documentScrollHeight": 768,
+  "bodyScrollHeight": 768,
+  "shell": {
+    "rect": {
+      "top": 14,
+      "bottom": 752,
+      "height": 738
+    },
+    "backgroundColor": "rgba(0, 0, 0, 0)",
+    "boxShadow": "none"
+  },
+  "masthead": {
+    "fontFamily": "\"Noto Serif\", \"Noto Serif Fallback\", \"Noto Serif\", serif"
+  },
+  "headline": {
+    "fontFamily": "\"Noto Serif\", \"Noto Serif Fallback\", \"Noto Serif\", serif"
+  },
+  "body": {
+    "fontFamily": "Inter, \"Inter Fallback\", Inter, sans-serif"
+  },
+  "gutterPx": 12,
+  "zones": [
+    {
+      "selector": ".dashboard-lower-grid__modes",
+      "exists": true,
+      "x": 16,
+      "y": 54,
+      "width": 588,
+      "height": 568,
+      "backgroundColor": "rgba(0, 0, 0, 0)",
+      "borderColor": "rgb(37, 37, 32)",
+      "boxShadow": "none"
+    },
+    {
+      "selector": ".dashboard-lower-grid__locality",
+      "exists": true,
+      "x": 616,
+      "y": 445,
+      "width": 392,
+      "height": 218,
+      "backgroundColor": "rgba(0, 0, 0, 0)",
+      "borderColor": "rgb(37, 37, 32)",
+      "boxShadow": "none"
+    },
+    {
+      "selector": ".dashboard-lower-grid__map",
+      "exists": true,
+      "x": 616,
+      "y": 54,
+      "width": 392,
+      "height": 290,
+      "backgroundColor": "rgba(0, 0, 0, 0)",
+      "borderColor": "rgb(37, 37, 32)",
+      "boxShadow": "none"
+    }
+  ],
+  "surfaceSamples": [
+    {
+      "selector": ".atmospheric-header",
+      "exists": true,
+      "backgroundColor": "rgba(252, 249, 243, 0.96)",
+      "borderColor": "rgb(37, 37, 32)",
+      "boxShadow": "none"
+    },
+    {
+      "selector": ".mode-summary-card",
+      "exists": true,
+      "backgroundColor": "rgba(255, 255, 255, 0.88)",
+      "borderColor": "rgb(37, 37, 32)",
+      "boxShadow": "rgba(186, 186, 176, 0.2) 0px 1px 0px 0px"
+    },
+    {
+      "selector": ".locality-reference-panel__item",
+      "exists": true,
+      "backgroundColor": "rgba(252, 249, 243, 0.96)",
+      "borderColor": "rgb(37, 37, 32)",
+      "boxShadow": "none"
+    },
+    {
+      "selector": ".local-map-panel__overlay-card",
+      "exists": true,
+      "backgroundColor": "rgba(255, 252, 247, 0.9)",
+      "borderColor": "rgb(37, 37, 32)",
+      "boxShadow": "rgba(56, 56, 49, 0.08) 0px 8px 22px 0px"
+    }
+  ],
+  "referenceChecks": {
+    "codeHtmlContract": {
+      "expectedHeadlineFont": "Noto Serif",
+      "expectedBodyFont": "Inter",
+      "expectedDominanceRatio": 1.4,
+      "actualDominanceRatio": 1.5,
+      "gutterPx": 12
+    },
+    "screenReference": null
+  }
+}
