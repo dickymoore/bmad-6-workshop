@@ -297,9 +297,29 @@ describe("dashboard presenter", () => {
     expect(viewModel.nearbyModes[1].nuance).toMatch(/carried forward|read with care/i);
     expect(/west end stops are moving/i.test(viewModel.nearbyModes[1].nuance)).toBe(false);
     expect(viewModel.nearbyModes[1].trust.detail).toMatch(/should be read with care/i);
-    expect(viewModel.locality.title).toBe("Nearby references");
-    expect(viewModel.locality.heading).toBe("Nearby stations and streets");
+    expect(viewModel.locality.title).toBe("Nearby");
+    expect(viewModel.locality.heading).toBe("Nearby stations");
     expect(viewModel.locality.summary).toMatch(/green park|piccadilly/i);
+    expect(viewModel.contextTiles).toEqual([
+      {
+        key: "bus",
+        label: "Bus",
+        value: "Caution",
+        tone: "caution",
+      },
+      {
+        key: "roads",
+        label: "Roads",
+        value: "Readable",
+        tone: "caution",
+      },
+      {
+        key: "weather",
+        label: "Weather",
+        value: "Rain",
+        tone: "available",
+      },
+    ]);
     expect(viewModel.locality.references).toEqual([
       {
         key: "green-park-station",
@@ -307,6 +327,7 @@ describe("dashboard presenter", () => {
         kind: "station",
         kindLabel: "Station",
         caption: "Jubilee, Piccadilly, Victoria",
+        lineTokens: ["victoria", "jubilee", "piccadilly"],
       },
       {
         key: "piccadilly-stop-r",
@@ -314,6 +335,7 @@ describe("dashboard presenter", () => {
         kind: "stop",
         kindLabel: "Stop",
         caption: "Bus stop R",
+        lineTokens: ["piccadilly", "bus"],
       },
       {
         key: "albemarle-street",
@@ -321,6 +343,7 @@ describe("dashboard presenter", () => {
         kind: "corridor",
         kindLabel: "Street",
         caption: "Royal Institution frontage",
+        lineTokens: ["station"],
       },
     ]);
     expect(/nearby node|recommended|best route|take\b/i.test(viewModel.locality.summary ?? "")).toBe(false);
@@ -381,6 +404,7 @@ describe("dashboard presenter", () => {
         kind: "place",
         kindLabel: "Nearby place",
         caption: "Shown on the local frame",
+        lineTokens: ["station"],
       },
     ]);
     expect(viewModel.localMap.localityEmphasis).toBe("Green Park remains in the simplified local read.");
@@ -880,12 +904,15 @@ describe("dashboard presenter", () => {
     expect(screenSource).toMatch(/<ModeSummaryGrid viewModel=\{viewModel\} \/>/);
     expect(screenSource).toMatch(/<LocalityReferencePanel viewModel=\{viewModel\.locality\} \/>/);
     expect(screenSource).toMatch(/<LocalMapFrame viewModel=\{viewModel\.localMap\} \/>/);
+    expect(screenSource).toMatch(/viewModel\.contextTiles\.map/);
+    expect(/weatherBoardCue|busMode|roadsMode/.test(screenSource)).toBe(false);
     expect(screenSource).toMatch(/dashboard-masthead/);
     expect(screenSource).toMatch(/dashboard-lower-grid__modes/);
     expect(screenSource).toMatch(/dashboard-lower-grid__locality/);
     expect(screenSource).toMatch(/dashboard-lower-grid__map/);
     expect(localityPanelSource).toMatch(/viewModel\.references/);
     expect(localityPanelSource).toMatch(/\{viewModel\.heading\}/);
+    expect(localityPanelSource).toMatch(/reference\.lineTokens\.map/);
     expect(localityPanelSource).toMatch(/locality-reference-panel__list/);
     expect(headerSource).toMatch(/viewModel\.disruption\.hasSeriousDisruption/);
     expect(headerSource).toMatch(/viewModel\.disruption\.title/);
@@ -901,8 +928,12 @@ describe("dashboard presenter", () => {
     expect(headerSource).toMatch(/viewModel\.mobilityStatus/);
     expect(modeCardSource).toMatch(/mode\.sourceStatus/);
     expect(localMapSource).toMatch(/local-map-panel__street-label/);
+    expect(localMapSource).toMatch(/local-map-panel__district-label/);
+    expect(localMapSource).toMatch(/local-map-panel__venue-pill/);
+    expect(localMapSource).toMatch(/local-map-panel__overlay-card/);
     expect(localMapSource).toMatch(/Passive local orientation map anchored to the Royal Institution/);
-    expect(localMapSource).toMatch(/viewModel\.nearbyReferences/);
+    expect(localMapSource).toMatch(/viewModel\.selectedNearbyNodes\.map/);
+    expect(localMapSource).toMatch(/viewModel\.venueAnchor\.label/);
     expect(/local-map-panel__corridor/.test(localMapSource)).toBe(false);
     expect(
       /warning banner|alert overlay|control room|ops console|Route Planner|best option|recommended|switch to|take buses instead|reroute now/i.test(

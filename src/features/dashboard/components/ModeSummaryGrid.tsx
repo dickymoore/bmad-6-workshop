@@ -36,6 +36,9 @@ export function ModeSummaryGrid({
 }: {
   viewModel: ModeSummaryGridViewModel;
 }) {
+  const primaryModes = viewModel.nearbyModes.slice(0, 3);
+  const secondaryModes = viewModel.nearbyModes.slice(3);
+
   return (
     <section
       className="mode-summary-panel"
@@ -46,21 +49,46 @@ export function ModeSummaryGrid({
         <div>
           <p className="dashboard-reserved__label">{viewModel.nearbyModeHeading}</p>
           <h2 className="mode-summary-panel__heading" id="nearby-mode-heading">
-            Local mode field
+            Nearby mode status
           </h2>
         </div>
-        <p className="mode-summary-panel__summary">One-screen nearby read</p>
+        <p className="mode-summary-panel__summary">W1S wayfinding</p>
       </div>
       <p className="sr-only" id="nearby-mode-intro">
         {viewModel.nearbyModeIntro}
       </p>
       <ul className="mode-summary-panel__rows mode-summary-grid" aria-label="Nearby departure mode summaries">
-        {viewModel.nearbyModes.map((mode) => (
+        {primaryModes.map((mode) => (
           <li key={mode.key} className="mode-summary-grid__row">
             <ModeSummaryCard mode={mode} />
           </li>
         ))}
       </ul>
+      {secondaryModes.length ? (
+        <section className="mode-summary-panel__secondary" aria-label="Additional nearby modes">
+          <div className="mode-summary-panel__secondary-header">
+            <h3 className="mode-summary-panel__secondary-title">Micromobility</h3>
+          </div>
+          <div className="mode-summary-panel__secondary-grid">
+            {secondaryModes.map((mode) => (
+              <article
+                key={mode.key}
+                className={`mode-summary-panel__secondary-card mode-summary-panel__secondary-card--${mode.state}`}
+                aria-label={mode.label}
+              >
+                <div>
+                  <p className="mode-summary-panel__secondary-label">{mode.label}</p>
+                  <p className="mode-summary-panel__secondary-caption">{mode.sourceStatus.label}</p>
+                </div>
+                <div className="mode-summary-panel__secondary-reading">
+                  <p className="mode-summary-panel__secondary-value">{mode.stateLabel}</p>
+                  <p className="mode-summary-panel__secondary-meta">{mode.sourceStatus.label}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
     </section>
   );
 }

@@ -734,7 +734,7 @@ So that the repo's done state matches real review completion.
 
 ## Epic 5: Public Display Clarity and Visual Redesign
 
-The public-facing display becomes a clear, beautiful, one-screen information board with obvious status hierarchy, concrete local references, practical map usefulness, and room-scale readability that meets the product's actual foyer-standard.
+The public-facing display becomes a clear, beautiful, one-screen information board that also achieves close visual parity with the approved design-reference set on the canonical live public route, while preserving obvious status hierarchy, concrete local references, practical map usefulness, and room-scale readability at the target foyer viewport.
 
 **FRs covered:** Corrective delivery across Epic 1 public-display readability, locality framing, shared-read usability, and real-screen validation expectations.
 
@@ -834,3 +834,48 @@ So that the screen is only treated as acceptable when it is actually clear, beau
 **When** the board is assessed for presentation readiness
 **Then** it is accepted only if it reads like a clear public information board
 **And** any remaining clarity or beauty failure keeps Epic 5 open.
+
+### Story 5.6: Close the Live Public Board Gap to the Approved Design Reference
+
+As a stakeholder reviewing the live public route,
+I want the canonical public board to match the approved design reference closely,
+So that the shipped screen looks like the intended Civic Editorial board rather than a looser adaptation.
+
+**FRs implemented:** Cross-cutting corrective delivery for visual hierarchy, tonal layering, masthead structure, section zoning, and map/panel parity on the canonical public route.
+
+**Acceptance Criteria:**
+
+**Given** `docs/design-inputs/code.html` and `docs/design-inputs/screen.png` are the approved design baseline
+**When** the live public route is reviewed at the target foyer viewport
+**Then** the masthead, status-first header, left/right section balance, nearby-mode treatment, nearby-stations layer, and passive local-map treatment align closely with that baseline
+**And** any remaining differences are limited to truth-preserving content substitutions or implementation-safe adaptation rather than broad visual drift.
+
+**Given** the public board is updated for parity
+**When** the implementation is reviewed
+**Then** the work remains inside the canonical public route, presenter, component, and global-CSS seams
+**And** no parallel prototype, alternate board runtime, or Tailwind-only screen is introduced.
+
+### Story 5.7: Validate Design-Reference Parity with Playwright Screenshots
+
+As the product team,
+I want repeatable screenshot-based validation against the approved design reference,
+So that final acceptance is evidence-backed on the live public route rather than inferred from source inspection.
+
+**FRs implemented:** Corrective delivery for visual-acceptance evidence and canonical-route screenshot validation.
+
+**Acceptance Criteria:**
+
+**Given** the required browser dependencies are available
+**When** visual validation runs on the canonical public route
+**Then** Playwright captures the live public board at the approved viewport
+**And** screenshot evidence is stored in the sprint-artifact set for review.
+
+**Given** screenshot evidence exists
+**When** the live board is compared against `docs/design-inputs/code.html` and `docs/design-inputs/screen.png`
+**Then** acceptance passes only if the board achieves close visual parity in layout hierarchy, typography pairing, spacing rhythm, tonal layering, and major section placement
+**And** fact-only product behavior and passive-map constraints remain intact.
+
+**Given** screenshot capture fails or parity remains materially off-target
+**When** Epic 5 is reviewed
+**Then** Epic 5 remains open
+**And** product acceptance and release handoff remain blocked.

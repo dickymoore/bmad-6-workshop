@@ -78,6 +78,12 @@ type DashboardViewModel = {
   nearbyModeHeading: string;
   nearbyModeIntro: string;
   nearbyModes: readonly NearbyModeViewModel[];
+  contextTiles: readonly {
+    key: string;
+    label: string;
+    value: string;
+    tone: string;
+  }[];
   locality: {
     title: string;
     heading: string;
@@ -88,6 +94,7 @@ type DashboardViewModel = {
       kind: string;
       kindLabel: string;
       caption: string;
+      lineTokens: readonly string[];
     }[];
   };
   localMap: {
@@ -141,23 +148,42 @@ export function DashboardScreen({ viewModel }: { viewModel: DashboardViewModel }
           <div className="dashboard-masthead" aria-label="Board masthead">
             <div className="dashboard-masthead__brand">
               <p className="dashboard-masthead__venue">The Royal Institution</p>
-              <p className="dashboard-masthead__product">Albemarle Pulse</p>
+              <span className="dashboard-masthead__divider" aria-hidden="true" />
+              <p className="dashboard-masthead__eyebrow">Albemarle Pulse</p>
             </div>
-            <p className={`dashboard-masthead__live dashboard-masthead__live--${viewModel.overallState}`}>
+            <p className={`dashboard-masthead__status dashboard-masthead__status--${viewModel.overallState}`}>
               <span className="dashboard-masthead__live-dot" aria-hidden="true" />
-              <span>{viewModel.updateSummary ? "Live update" : "Live status"}</span>
+              <span>Live status</span>
             </p>
           </div>
-          <AtmosphericHeader viewModel={viewModel} />
+          <p className="dashboard-masthead__district">{viewModel.placeLabel}</p>
         </div>
 
-        <div className="dashboard-shell__body">
-          <div className="dashboard-lower-grid" aria-label="Shared nearby departure structure">
+        <div className="dashboard-shell__body dashboard-shell__body--editorial">
+          <div
+            className="dashboard-lower-grid dashboard-lower-grid--editorial"
+            aria-label="Shared nearby departure structure"
+          >
             <div className="dashboard-lower-grid__modes" data-reading-zone="modes">
+              <AtmosphericHeader viewModel={viewModel} />
               <ModeSummaryGrid viewModel={viewModel} />
             </div>
             <div className="dashboard-lower-grid__locality" data-reading-zone="locality">
-              <LocalityReferencePanel viewModel={viewModel.locality} />
+              <div className="dashboard-secondary-stack">
+                <LocalityReferencePanel viewModel={viewModel.locality} />
+                <section className="dashboard-context-strip" aria-label="Secondary public cues">
+                  {viewModel.contextTiles.map((tile, index) => (
+                    <article
+                      key={tile.key}
+                      className={`dashboard-context-strip__tile dashboard-context-strip__tile--${tile.tone}`}
+                      data-divider={index === 1 ? "mid" : undefined}
+                    >
+                      <p className="dashboard-context-strip__label">{tile.label}</p>
+                      <p className="dashboard-context-strip__value">{tile.value}</p>
+                    </article>
+                  ))}
+                </section>
+              </div>
             </div>
             <div className="dashboard-lower-grid__map" data-reading-zone="map">
               <LocalMapFrame viewModel={viewModel.localMap} />

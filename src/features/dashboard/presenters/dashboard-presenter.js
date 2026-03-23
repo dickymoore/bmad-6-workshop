@@ -188,6 +188,58 @@ function joinChangeFragments(fragments) {
   return uniqueFragments.slice(0, 2).join(" ");
 }
 
+function createWeatherBoardCue(weatherSummary, weatherStatus) {
+  const summary = weatherSummary.toLowerCase();
+
+  if (summary.includes("rain")) {
+    return "Rain";
+  }
+
+  if (summary.includes("cloud")) {
+    return "Cloudy";
+  }
+
+  if (summary.includes("sun")) {
+    return "Clear";
+  }
+
+  if (summary.includes("wind")) {
+    return "Wind";
+  }
+
+  return weatherStatus.label;
+}
+
+function pickContextMode(nearbyModes, key, fallbackIndex) {
+  return nearbyModes.find((mode) => mode.key === key) ?? nearbyModes.at(fallbackIndex) ?? null;
+}
+
+function createContextTiles(nearbyModes, weatherSummary, weatherStatus) {
+  const busMode = pickContextMode(nearbyModes, "bus", 1);
+  const roadsMode = pickContextMode(nearbyModes, "roads", 2);
+
+  return Object.freeze([
+    Object.freeze({
+      key: "bus",
+      label: busMode?.label ?? "Bus",
+      value: busMode?.stateLabel ?? "Available",
+      tone: busMode?.state ?? "available",
+    }),
+    Object.freeze({
+      key: "roads",
+      label: roadsMode?.label ?? "Roads",
+      value: roadsMode?.stateLabel ?? "Readable",
+      tone: roadsMode?.state ?? "caution",
+    }),
+    Object.freeze({
+      key: "weather",
+      label: "Weather",
+      value: createWeatherBoardCue(weatherSummary, weatherStatus),
+      tone: weatherStatus.isLive ? "available" : "caution",
+    }),
+  ]);
+}
+
 function createModeChangeSummary(previousMode, nextMode) {
   if (!previousMode) {
     return null;
@@ -208,7 +260,7 @@ function createModeChangeSummary(previousMode, nextMode) {
   }
 
   if (previousMode.sourceStatus.state !== nextMode.sourceStatus.state) {
-      changes.push(nextMode.sourceStatus.detail);
+    changes.push(nextMode.sourceStatus.detail);
   }
 
   if (
@@ -398,12 +450,40 @@ function createLocalitySummary(references, localityEmphasis) {
   return `${references.map((reference) => reference.label).join(", ")} stay in the immediate local read.`;
 }
 
+function createLocalityLineTokens(reference) {
+  const lineTokens = [];
+  const tokenSource = `${reference.label} ${reference.caption}`.toLowerCase();
+
+  if (tokenSource.includes("victoria")) {
+    lineTokens.push("victoria");
+  }
+
+  if (tokenSource.includes("jubilee")) {
+    lineTokens.push("jubilee");
+  }
+
+  if (tokenSource.includes("piccadilly")) {
+    lineTokens.push("piccadilly");
+  }
+
+  if (tokenSource.includes("bus stop")) {
+    lineTokens.push("bus");
+  }
+
+  if (lineTokens.length > 0) {
+    return Object.freeze([...new Set(lineTokens)]);
+  }
+
+  return Object.freeze([reference.kind === "stop" ? "bus" : "station"]);
+}
+
 function createLocalityReferences(localMap) {
   if (localMap.nearbyReferences.length > 0) {
     return localMap.nearbyReferences.map((reference) =>
       Object.freeze({
         ...reference,
         kindLabel: LOCALITY_KIND_LABELS[reference.kind],
+        lineTokens: createLocalityLineTokens(reference),
       }),
     );
   }
@@ -415,6 +495,7 @@ function createLocalityReferences(localMap) {
       kind: FALLBACK_LOCALITY_REFERENCE.kind,
       kindLabel: FALLBACK_LOCALITY_REFERENCE.kindLabel,
       caption: FALLBACK_LOCALITY_REFERENCE.caption,
+      lineTokens: Object.freeze(["station"]),
     }),
   );
 }
@@ -428,8 +509,26 @@ export function presentDashboardSnapshot(snapshotInput, options = {}) {
     ? new Map(previousSnapshot.nearbyModes.map((mode) => [mode.key, mode]))
     : new Map();
   const orderedNearbyModes = orderNearbyModesForReading(snapshot.nearbyModes);
+  const presentedWeatherStatus = presentSourceStatus(snapshot.headerStatus.weather);
+  const presentedMobilityStatus = presentSourceStatus(snapshot.headerStatus.mobility);
   const nearbyReferences = createLocalityReferences(snapshot.localMap);
   const nearbyReferenceByLabel = new Map(nearbyReferences.map((reference) => [reference.label, reference]));
+  const presentedNearbyModes = Object.freeze(
+    orderedNearbyModes.map((mode) =>
+      Object.freeze({
+        ...mode,
+        summary: createCompactModeSummary(mode),
+        nuance: createModeSupportLine(mode),
+        sourceStatus: presentSourceStatus(mode.sourceStatus),
+        trust: presentTrust(mode.trust),
+        stateLabel: MODE_STATE_LABELS[mode.state],
+        disruptionScope: mode.disruptionScope,
+        emphasisLabel: MODE_DISRUPTION_LABELS[mode.disruptionScope],
+        isDisrupted: mode.disruptionScope !== "unaffected-readable",
+        changeSummary: createModeChangeSummary(previousModesByKey.get(mode.key), mode),
+      }),
+    ),
+  );
 
   return Object.freeze({
     placeLabel: snapshot.placeLabel,
@@ -457,30 +556,16 @@ export function presentDashboardSnapshot(snapshotInput, options = {}) {
     mobilitySummary: snapshot.mobilitySummary,
     weatherTrust: presentTrust(snapshot.headerTrust.weather),
     mobilityTrust: presentTrust(snapshot.headerTrust.mobility),
-    weatherStatus: presentSourceStatus(snapshot.headerStatus.weather),
-    mobilityStatus: presentSourceStatus(snapshot.headerStatus.mobility),
+    weatherStatus: presentedWeatherStatus,
+    mobilityStatus: presentedMobilityStatus,
     supportLabel: createSupportLabel(snapshot.supportLabel),
     nearbyModeHeading: "Nearby modes",
     nearbyModeIntro: "Compact local transport rows with one calm local cue where confidence narrows.",
-    nearbyModes: Object.freeze(
-      orderedNearbyModes.map((mode) =>
-        Object.freeze({
-          ...mode,
-          summary: createCompactModeSummary(mode),
-          nuance: createModeSupportLine(mode),
-          sourceStatus: presentSourceStatus(mode.sourceStatus),
-          trust: presentTrust(mode.trust),
-          stateLabel: MODE_STATE_LABELS[mode.state],
-          disruptionScope: mode.disruptionScope,
-          emphasisLabel: MODE_DISRUPTION_LABELS[mode.disruptionScope],
-          isDisrupted: mode.disruptionScope !== "unaffected-readable",
-          changeSummary: createModeChangeSummary(previousModesByKey.get(mode.key), mode),
-        }),
-      ),
-    ),
+    nearbyModes: presentedNearbyModes,
+    contextTiles: createContextTiles(presentedNearbyModes, snapshot.weatherSummary, presentedWeatherStatus),
     locality: Object.freeze({
-      title: "Nearby references",
-      heading: "Nearby stations and streets",
+      title: "Nearby",
+      heading: "Nearby stations",
       summary: createLocalitySummary(
         nearbyReferences,
         snapshot.localMap.orientationSummary ?? snapshot.localMap.localityEmphasis?.label ?? null,

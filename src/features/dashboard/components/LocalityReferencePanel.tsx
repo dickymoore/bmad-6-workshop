@@ -4,6 +4,7 @@ type LocalityReferenceViewModel = {
   kind: string;
   kindLabel: string;
   caption: string;
+  lineTokens: readonly string[];
 };
 
 type LocalityReferencePanelViewModel = {
@@ -18,6 +19,8 @@ export function LocalityReferencePanel({
 }: {
   viewModel: LocalityReferencePanelViewModel;
 }) {
+  const visibleReferences = viewModel.references.filter((reference) => reference.kind !== "corridor").slice(0, 2);
+
   return (
     <section className="locality-reference-panel" aria-labelledby="locality-reference-heading">
       <div className="locality-reference-panel__header">
@@ -27,20 +30,33 @@ export function LocalityReferencePanel({
             {viewModel.heading}
           </h2>
         </div>
-        <p className="locality-reference-panel__summary-label">Named nearby read</p>
+        <p className="locality-reference-panel__summary-label">Close read</p>
       </div>
-      {viewModel.summary ? <p className="locality-reference-panel__summary">{viewModel.summary}</p> : null}
       <ul className="locality-reference-panel__list" aria-label="Concrete nearby references">
-        {viewModel.references.map((reference) => (
+        {visibleReferences.map((reference) => (
           <li key={reference.key} className="locality-reference-panel__item">
-            <div>
-              <p className="locality-reference-panel__item-label">{reference.label}</p>
-              <p className="locality-reference-panel__item-caption">{reference.caption}</p>
+            <div className="locality-reference-panel__item-primary">
+              <span className="locality-reference-panel__item-walk" aria-hidden="true">
+                W
+              </span>
+              <div>
+                <p className="locality-reference-panel__item-label">{reference.label}</p>
+                <div className="locality-reference-panel__item-lines" aria-hidden="true">
+                  {reference.lineTokens.map((line) => (
+                    <span
+                      key={`${reference.key}-${line}`}
+                      className={`locality-reference-panel__item-line locality-reference-panel__item-line--${line}`}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
-            <p className="locality-reference-panel__item-kind">{reference.kindLabel}</p>
+            <p className="locality-reference-panel__item-kind">{reference.caption}</p>
           </li>
         ))}
       </ul>
+      {viewModel.summary ? <p className="sr-only">{viewModel.summary}</p> : null}
+      <p className="sr-only">{viewModel.heading}</p>
     </section>
   );
 }

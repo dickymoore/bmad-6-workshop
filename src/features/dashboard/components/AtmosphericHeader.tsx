@@ -109,25 +109,22 @@ export function AtmosphericHeader({ viewModel }: { viewModel: DashboardViewModel
       className={`atmospheric-header atmospheric-header--${viewModel.disruption.level}`}
       aria-labelledby="overall-departure-state"
     >
-      <div className="atmospheric-header__eyebrow">
-        <p className="atmospheric-header__place">{viewModel.placeLabel}</p>
-        <p className="atmospheric-header__board-label">{viewModel.stateKicker}</p>
-      </div>
-
       <div className="atmospheric-header__body">
-        <div className="atmospheric-header__primary">
+        <div className="atmospheric-header__status-band">
           <div className="atmospheric-header__copy">
-            <p className="atmospheric-header__kicker">{viewModel.overallTrendLabel ?? "Current board read"}</p>
+            <p className="atmospheric-header__kicker">{viewModel.stateKicker}</p>
             <h1 className="atmospheric-header__headline" id="overall-departure-state">
               {publicStatus.headline}
             </h1>
             <p className="atmospheric-header__summary">{dominantCue}</p>
           </div>
 
-          <div className={`status-chip status-chip--${viewModel.overallState}`}>
-            <span className="status-chip__dot" aria-hidden="true" />
-            <span className="status-chip__meta">Status</span>
-            <span className="status-chip__label">{publicStatus.boardLabel}</span>
+          <div className={`atmospheric-header__status-pill atmospheric-header__status-pill--${viewModel.overallState}`}>
+            <span className="atmospheric-header__status-dot" aria-hidden="true" />
+            <div>
+              <p className="atmospheric-header__status-label">Status</p>
+              <p className="atmospheric-header__status-value">{publicStatus.boardLabel}</p>
+            </div>
           </div>
         </div>
 
@@ -139,7 +136,7 @@ export function AtmosphericHeader({ viewModel }: { viewModel: DashboardViewModel
           </div>
         ) : null}
 
-        <div className="atmospheric-header__signal-grid" aria-label="Board status summary">
+        <div className="atmospheric-header__signal-strip" aria-label="Board status summary">
           <article className="signal-card signal-card--mobility">
             <p className="signal-card__label">Movement</p>
             <p className="signal-card__value">{viewModel.mobilityStatus.label}</p>

@@ -301,17 +301,20 @@ test("story 5.1 reframes the public display as a one-screen status-first board s
   const globalCss = readFileSync(globalCssPath, "utf8");
   const publicFeature = [screen, header, modeGrid, localMap].join("\n");
 
-  assert.equal(/next\/font\/google/.test(layout), false, "layout should avoid live Google font fetches in the network-restricted workspace");
   assert.equal(
-    /CSS fallbacks|--font-body:\s*"Inter"|--font-headline:\s*"Noto Serif"/.test(layout + globalCss),
+    /next\/font\/google|CSS fallbacks|--font-body:\s*"Inter"|--font-headline:\s*"Noto Serif"/.test(layout + globalCss),
     true,
-    "layout should preserve the approved font pairing through local CSS fallbacks",
+    "layout should preserve the approved font pairing through repo-owned font variables, whether defaulted in CSS or loaded via next/font",
   );
   assert.equal(/dashboard-masthead|Albemarle Pulse|The Royal Institution/.test(screen), true, "screen should add the new board masthead");
   assert.equal(/PUBLIC_STATUS|Services: Good|signal-card/.test(header), true, "header should expose a status-first board treatment");
   assert.equal(/atmospheric-header__currentness/.test(header), false, "header should avoid a duplicated visible board-update footer");
-  assert.equal(/Local mode field|One-screen nearby read/.test(modeGrid), true, "nearby mode section should shift to compact board language");
-  assert.equal(/Nearby stations|local-map-panel__map-badge/.test(localMap), true, "locality panel should surface nearby stations more clearly");
+  assert.equal(/Nearby mode status|W1S wayfinding/.test(modeGrid), true, "nearby mode section should shift to compact board language");
+  assert.equal(
+    /local-map-panel__district-label|local-map-panel__venue-pill/.test(localMap),
+    true,
+    "map treatment should surface the anchored district and venue more clearly",
+  );
   assert.equal(/overflow-y:\s*auto|grid-template-rows:\s*auto minmax\(0,\s*1fr\)|dashboard-masthead|signal-card/.test(globalCss), true, "global styles should enforce the compact board shell without clipping vertical overflow");
   assert.equal(
     /Route Planner|best option|recommended|switch to|take buses instead|reroute now/i.test(publicFeature),
@@ -335,7 +338,11 @@ test("story 5.2 replaces verbose nearby cards with compact RAG transport rows", 
   const publicFeature = [screen, modeGrid, modeCard, presenter, globalCss].join("\n");
 
   assert.equal(/dashboard-shell__header[\s\S]*dashboard-lower-grid__modes[\s\S]*dashboard-lower-grid__map/.test(screen), true, "canonical shell order should remain header, nearby rows, then map");
-  assert.equal(/Local mode field|compact local transport rows/i.test(modeGrid + presenter), true, "nearby mode section should describe compact board rows");
+  assert.equal(
+    /Nearby mode status|W1S wayfinding|Readable nearby|Disrupted nearby/i.test(modeGrid + presenter),
+    true,
+    "nearby mode section should describe compact board rows",
+  );
   assert.equal(/mode-summary-card__status-rag|mode-summary-card__meta-chip|mode-summary-card__rail/.test(modeCard), true, "row component should expose explicit RAG, support, and rail cues");
   assert.equal(/mode-summary-grid__row|mode-summary-panel__rows|mode-summary-row/.test(globalCss), true, "global styles should define compact row layout semantics");
   assert.equal(/route planner|best option|recommended|switch to|take buses instead|reroute now/i.test(publicFeature), false, "story 5.2 nearby rows must stay fact-only and non-planner-like");
@@ -366,7 +373,11 @@ test("story 5.3 adds concrete nearby station and locality references to the cano
   assert.equal(/LocalityReferencePanel|viewModel\.locality/.test(screen), true, "dashboard screen should wire the explicit locality panel from the presenter");
   assert.equal(/nearbyReferences|kind|caption/.test(contract), true, "dashboard contract should model structured nearby locality references");
   assert.equal(/Green Park|Piccadilly \/ St James's Street|Albemarle Street/.test(snapshot), true, "fixture snapshot should expose concrete nearby names for the Royal Institution context");
-  assert.equal(/Nearby references|Nearby stations and streets|kindLabel/.test(presenter + localityPanel), true, "presenter and panel should elevate explicit named references into the board shell");
+  assert.equal(
+    /title:\s*"Nearby"|heading:\s*"Stations and streets"|kindLabel/.test(presenter + localityPanel),
+    true,
+    "presenter and panel should elevate explicit named references into the board shell",
+  );
   assert.equal(/Nearby node/.test(presenter), false, "presenter should retire generic nearby-node labels as the primary locality language");
   assert.equal(/route planner|best option|recommended|switch to|take buses instead|reroute now/i.test(publicFeature), false, "story 5.3 locality treatment must stay fact-only and non-planner-like");
   assert.equal(/locality-reference-panel|dashboard-lower-grid__locality/.test(globalCss), true, "global styles should define the dedicated locality panel and shell slot");
@@ -442,14 +453,14 @@ test("story 5.5 keeps the public board attached to an explicit foyer-readability
     "canonical public route should still read as one stable header-to-modes-to-locality-to-map board",
   );
   assert.equal(
-    /@media \(min-width:\s*1024px\)\s*{[\s\S]*?\.dashboard-page\s*{[\s\S]*?overflow-y:\s*hidden;[\s\S]*?\.dashboard-shell--desktop\s*{[\s\S]*?height:\s*calc\(100vh - 48px\);[\s\S]*?grid-template-rows:\s*auto minmax\(0,\s*1fr\);/m.test(
+    /@media \(min-width:\s*1024px\)\s*{[\s\S]*?\.dashboard-page\s*{[\s\S]*?min-height:\s*100dvh;[\s\S]*?height:\s*100dvh;[\s\S]*?overflow:\s*hidden;[\s\S]*?\.dashboard-shell--desktop\s*{[\s\S]*?height:\s*100%;[\s\S]*?min-height:\s*0;[\s\S]*?grid-template-rows:\s*auto minmax\(0,\s*1fr\);/m.test(
       globalCss,
     ),
     true,
     "public board source should keep the supported desktop board pinned to a one-screen, no-scroll shell",
   );
   assert.equal(
-    /Local mode field|One-screen nearby read|Named nearby read|Nearby orientation/.test(modeGrid + localityPanel + localMap),
+    /Nearby mode status|W1S wayfinding|Close read|Albemarle Street district/.test(modeGrid + localityPanel + localMap),
     true,
     "public board should keep concise board-facing labels across nearby rows, locality references, and map cues",
   );
@@ -462,6 +473,94 @@ test("story 5.5 keeps the public board attached to an explicit foyer-readability
     /explanatory prose|repeated explanatory|board walkthrough|step-by-step explanation/i.test(publicFeature),
     false,
     "public board sources should not reframe the board around repeated explanatory prose",
+  );
+});
+
+test("story 5.6 tightens the canonical live board toward the approved design-reference layout", () => {
+  const packageJsonPath = join(root, "package.json");
+  const layoutPath = join(root, "src", "app", "layout.tsx");
+  const screenPath = join(root, "src", "features", "dashboard", "components", "DashboardScreen.tsx");
+  const headerPath = join(root, "src", "features", "dashboard", "components", "AtmosphericHeader.tsx");
+  const localityPanelPath = join(root, "src", "features", "dashboard", "components", "LocalityReferencePanel.tsx");
+  const localMapPath = join(root, "src", "features", "dashboard", "components", "LocalMapFrame.tsx");
+  const globalCssPath = join(root, "src", "app", "globals.css");
+
+  const packageJson = readFileSync(packageJsonPath, "utf8");
+  const layout = readFileSync(layoutPath, "utf8");
+  const screen = readFileSync(screenPath, "utf8");
+  const header = readFileSync(headerPath, "utf8");
+  const localityPanel = readFileSync(localityPanelPath, "utf8");
+  const localMap = readFileSync(localMapPath, "utf8");
+  const globalCss = readFileSync(globalCssPath, "utf8");
+  const publicFeature = [screen, header, localityPanel, localMap, globalCss].join("\n");
+
+  assert.equal(
+    /dashboard-shell__body--editorial|dashboard-lower-grid--editorial/.test(screen + globalCss),
+    true,
+    "editorial parity should add an explicit two-column shell adaptation rather than leaving the old three-card adaptation untouched",
+  );
+  assert.equal(
+    /grid-template-areas:\s*"modes map"\s*"modes locality"|grid-template-areas:\s*"header header"\s*"modes map"\s*"modes locality"/.test(
+      globalCss,
+    ),
+    true,
+    "editorial parity should place modes in the primary column with map above locality in the secondary stack",
+  );
+  assert.equal(
+    /dashboard-masthead__eyebrow|dashboard-masthead__status|atmospheric-header__status-band|atmospheric-header__signal-strip/.test(
+      screen + header,
+    ),
+    true,
+    "masthead and hero should expose a more explicit editorial status-band structure",
+  );
+  assert.equal(
+    /next\/font\/google|Inter\(\{|Noto_Serif\(\{|--font-body|--font-headline/.test(layout),
+    true,
+    "story 5.6 should self-host the approved serif and sans pairing through next/font rather than CSS-only fallbacks",
+  );
+  assert.equal(
+    /--surface-base|--surface-low|--surface-high|--surface-highest/.test(globalCss),
+    true,
+    "global board styles should define explicit tonal-layering tokens for the Civic Editorial treatment",
+  );
+  assert.equal(
+    /border:\s*1px solid var\(--border\)/.test(globalCss),
+    false,
+    "story 5.6 should retire the broad 1px var(--border) panel-sectioning pattern from the public board styles",
+  );
+  assert.equal(
+    /local-map-panel__district-label|local-map-panel__overlay-card|local-map-panel__venue-pill/.test(localMap),
+    true,
+    "map source should adopt the approved framed-overlay treatment instead of the older legend-heavy card adaptation",
+  );
+  assert.equal(
+    /local-map-panel__legend/.test(localMap),
+    false,
+    "story 5.6 map should stop rendering the side legend inside the map panel now that nearby references have their own editorial panel",
+  );
+  assert.equal(
+    /@media \(min-width:\s*1024px\)\s*{[\s\S]*?\.dashboard-page\s*{[\s\S]*?min-height:\s*100dvh;[\s\S]*?height:\s*100dvh;[\s\S]*?overflow:\s*hidden;[\s\S]*?\.dashboard-shell--desktop\s*{[\s\S]*?height:\s*100%;[\s\S]*?min-height:\s*0;[\s\S]*?grid-template-rows:\s*auto minmax\(0,\s*1fr\);/m.test(
+      globalCss,
+    ),
+    true,
+    "story 5.6 should pin the supported desktop board to a real viewport-height shell instead of a permissive scroll layout",
+  );
+  assert.equal(
+    /@media \(min-width:\s*1024px\) and \(max-height:\s*820px\)\s*{[\s\S]*?\.dashboard-shell\s*{[\s\S]*?height:\s*100%;[\s\S]*?min-height:\s*0;[\s\S]*?gap:\s*10px;[\s\S]*?\.dashboard-secondary-stack\s*{[\s\S]*?gap:\s*12px;[\s\S]*?\.local-map-panel__surface\s*{[\s\S]*?aspect-ratio:\s*1 \/ 0\.74;/m.test(
+      globalCss,
+    ),
+    true,
+    "story 5.6 should keep a compact-height fallback that actively shrinks the right column and map instead of only hiding overflow",
+  );
+  assert.equal(
+    /tailwindcss/.test(packageJson),
+    false,
+    "parity work should stay inside the repo's existing bespoke CSS/runtime path",
+  );
+  assert.equal(
+    /Route Planner|best option|recommended|switch to|take buses instead|reroute now/i.test(publicFeature),
+    false,
+    "design parity should not reintroduce advisory or planner-like public copy",
   );
 });
 

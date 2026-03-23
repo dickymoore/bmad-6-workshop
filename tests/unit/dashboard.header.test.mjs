@@ -29,8 +29,7 @@ describe("story 5.1 header shell guardrails", () => {
     expect(/atmospheric-header__currentness/.test(headerSource)).toBe(false);
     expect(cssSource).toMatch(/overflow-x:\s*hidden;\s*overflow-y:\s*auto;/);
     expect(cssSource).toMatch(
-      /@media \(min-width:\s*1024px\)\s*{[\s\S]*?\.dashboard-page\s*{[\s\S]*?overflow-y:\s*hidden;/,
+      /@media \(min-width:\s*1024px\)\s*{[\s\S]*?\.dashboard-page\s*{[\s\S]*?min-height:\s*100dvh;[\s\S]*?height:\s*100dvh;[\s\S]*?overflow:\s*hidden;/,
     );
-    expect(/\.dashboard-page\s*{\s*overflow:\s*hidden;/s.test(cssSource)).toBe(false);
   });
 });

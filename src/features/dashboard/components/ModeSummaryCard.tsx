@@ -26,6 +26,7 @@ type NearbyModeViewModel = {
 export function ModeSummaryCard({ mode }: { mode: NearbyModeViewModel }) {
   const boardStateLabel =
     mode.state === "available" ? "Green" : mode.state === "caution" ? "Amber" : "Red";
+  const compactSummary = mode.isDisrupted ? mode.emphasisLabel : mode.stateLabel;
   const metaLabels = [mode.stateLabel, mode.sourceStatus.label];
 
   if (mode.trust.isNarrowed) {
@@ -36,7 +37,7 @@ export function ModeSummaryCard({ mode }: { mode: NearbyModeViewModel }) {
     metaLabels.push(mode.emphasisLabel);
   }
 
-  const uniqueMetaLabels = [...new Set(metaLabels)];
+  const uniqueMetaLabels = [...new Set(metaLabels)].slice(0, 2);
 
   return (
     <article
@@ -45,14 +46,15 @@ export function ModeSummaryCard({ mode }: { mode: NearbyModeViewModel }) {
       data-mode-key={mode.key}
     >
       <span className="mode-summary-card__rail" aria-hidden="true" />
-      <div className="mode-summary-grid__row">
+      <div className="mode-summary-card__reading">
         <div className="mode-summary-card__header">
           <p className="mode-summary-card__label">{mode.label}</p>
-          <p className="mode-summary-card__summary">{mode.summary}</p>
+          <p className="mode-summary-card__state">{mode.isDisrupted ? mode.emphasisLabel : mode.stateLabel}</p>
+          <p className="mode-summary-card__summary">{compactSummary}</p>
         </div>
         <p className={`mode-summary-card__status mode-summary-card__status--${mode.state}`}>
           <span className="mode-summary-card__status-rag">{boardStateLabel}</span>
-          <span>{mode.stateLabel}</span>
+          <span className="mode-summary-card__status-copy">{mode.stateLabel}</span>
         </p>
       </div>
       {mode.nuance ? <p className="mode-summary-card__nuance">{mode.nuance}</p> : null}
