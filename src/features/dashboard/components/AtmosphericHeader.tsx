@@ -47,7 +47,63 @@ type DashboardViewModel = {
   supportLabel: string;
 };
 
+const PUBLIC_STATUS = Object.freeze({
+  calm: {
+    headline: "Services: Good",
+    boardLabel: "Green",
+  },
+  watchful: {
+    headline: "Services: Watchful",
+    boardLabel: "Amber",
+  },
+  strained: {
+    headline: "Services: Delayed",
+    boardLabel: "Amber",
+  },
+  disrupted: {
+    headline: "Services: Disrupted",
+    boardLabel: "Red",
+  },
+});
+
+function getPublicStatus(overallState: string) {
+  return PUBLIC_STATUS[overallState as keyof typeof PUBLIC_STATUS] ?? PUBLIC_STATUS.watchful;
+}
+
+function getDominantCue(viewModel: DashboardViewModel) {
+  if (viewModel.disruption.hasSeriousDisruption) {
+    return viewModel.disruption.detail ?? viewModel.disruption.title ?? viewModel.supportLabel;
+  }
+
+  return viewModel.supportLabel;
+}
+
+function getSignalNote(
+  status: { state: string; isLive: boolean; label: string },
+  trust: { label: string; confidence: string },
+) {
+  if (!status.isLive) {
+    if (status.state === "unavailable") {
+      return "Awaiting live read";
+    }
+
+    return trust.confidence === "narrowed" ? trust.label : "Last live read";
+  }
+
+  if (trust.confidence === "narrowed") {
+    return trust.label;
+  }
+
+  return "Current";
+}
+
 export function AtmosphericHeader({ viewModel }: { viewModel: DashboardViewModel }) {
+  const publicStatus = getPublicStatus(viewModel.overallState);
+  const dominantCue = getDominantCue(viewModel);
+  const motionNote = getSignalNote(viewModel.mobilityStatus, viewModel.mobilityTrust);
+  const weatherNote = getSignalNote(viewModel.weatherStatus, viewModel.weatherTrust);
+  const boardUpdate = viewModel.updateSummary?.detail ?? viewModel.currentnessMessage;
+
   return (
     <header
       className={`atmospheric-header atmospheric-header--${viewModel.disruption.level}`}
@@ -55,17 +111,26 @@ export function AtmosphericHeader({ viewModel }: { viewModel: DashboardViewModel
     >
       <div className="atmospheric-header__eyebrow">
         <p className="atmospheric-header__place">{viewModel.placeLabel}</p>
-        <p className={`status-chip status-chip--${viewModel.overallState}`}>
-          <span className="status-chip__dot" aria-hidden="true" />
-          <span className="status-chip__label">{viewModel.overallState}</span>
-        </p>
+        <p className="atmospheric-header__board-label">{viewModel.stateKicker}</p>
       </div>
 
       <div className="atmospheric-header__body">
-        <p className="atmospheric-header__kicker">{viewModel.stateKicker}</p>
-        <h1 className="atmospheric-header__headline" id="overall-departure-state">
-          {viewModel.stateHeadline}
-        </h1>
+        <div className="atmospheric-header__primary">
+          <div className="atmospheric-header__copy">
+            <p className="atmospheric-header__kicker">{viewModel.overallTrendLabel ?? "Current board read"}</p>
+            <h1 className="atmospheric-header__headline" id="overall-departure-state">
+              {publicStatus.headline}
+            </h1>
+            <p className="atmospheric-header__summary">{dominantCue}</p>
+          </div>
+
+          <div className={`status-chip status-chip--${viewModel.overallState}`}>
+            <span className="status-chip__dot" aria-hidden="true" />
+            <span className="status-chip__meta">Status</span>
+            <span className="status-chip__label">{publicStatus.boardLabel}</span>
+          </div>
+        </div>
+
         {viewModel.disruption.hasSeriousDisruption ? (
           <div className={`disruption-callout disruption-callout--${viewModel.disruption.level}`}>
             <p className="disruption-callout__label">{viewModel.disruption.label}</p>
@@ -73,45 +138,33 @@ export function AtmosphericHeader({ viewModel }: { viewModel: DashboardViewModel
             <p className="disruption-callout__detail">{viewModel.disruption.detail}</p>
           </div>
         ) : null}
-        {viewModel.overallTrendLabel ? (
-          <p className="atmospheric-header__trend" aria-label={`Trend ${viewModel.overallTrendLabel.toLowerCase()}`}>
-            <span className={`trust-chip trust-chip--${viewModel.overallTrend ?? "steady"}`}>{viewModel.overallTrendLabel}</span>
-            <span>{viewModel.trendMessage}</span>
-          </p>
-        ) : null}
-        <p className="atmospheric-header__summary atmospheric-header__summary--weather">
-          {viewModel.weatherSummary}
-        </p>
-        <p className={`atmospheric-header__trust atmospheric-header__trust--weather atmospheric-header__trust--source-${viewModel.weatherStatus.state}`}>
-          {viewModel.weatherStatus.detail}
-        </p>
-        <p className="atmospheric-header__trust atmospheric-header__trust--weather">{viewModel.weatherTrust.detail}</p>
-        <p className="atmospheric-header__summary atmospheric-header__summary--mobility">
-          {viewModel.mobilitySummary}
-        </p>
-        <p className={`atmospheric-header__trust atmospheric-header__trust--mobility atmospheric-header__trust--source-${viewModel.mobilityStatus.state}`}>
-          {viewModel.mobilityStatus.detail}
-        </p>
-        <p className="atmospheric-header__trust atmospheric-header__trust--mobility">{viewModel.mobilityTrust.detail}</p>
+
+        <div className="atmospheric-header__signal-grid" aria-label="Board status summary">
+          <article className="signal-card signal-card--mobility">
+            <p className="signal-card__label">Movement</p>
+            <p className="signal-card__value">{viewModel.mobilityStatus.label}</p>
+            <p className="signal-card__meta">{motionNote}</p>
+          </article>
+
+          <article className="signal-card signal-card--weather">
+            <p className="signal-card__label">Weather</p>
+            <p className="signal-card__value">{viewModel.weatherStatus.label}</p>
+            <p className="signal-card__meta">{weatherNote}</p>
+          </article>
+
+          <article className="signal-card signal-card--board">
+            <p className="signal-card__label">{viewModel.updateSummary?.label ?? "Board cue"}</p>
+            <p className="signal-card__value">{viewModel.overallTrendLabel ?? "Stable read"}</p>
+            <p className="signal-card__meta">{boardUpdate}</p>
+          </article>
+        </div>
       </div>
 
-      <div className="atmospheric-header__footer" aria-label="trust cues">
-        <div className="atmospheric-header__footer-copy">
-          <p className="atmospheric-header__currentness">{viewModel.currentnessMessage}</p>
-          {viewModel.updateSummary ? (
-            <p className="atmospheric-header__update">
-              <span className="atmospheric-header__update-label">{viewModel.updateSummary.label}</span>
-              <span>{viewModel.updateSummary.detail}</span>
-            </p>
-          ) : null}
-          {viewModel.liveAnnouncement ? (
-            <p className="sr-only" aria-live="polite">
-              {viewModel.liveAnnouncement}
-            </p>
-          ) : null}
-        </div>
-        <p className="atmospheric-header__support">{viewModel.supportLabel}</p>
-      </div>
+      {viewModel.liveAnnouncement ? (
+        <p className="sr-only" aria-live="polite">
+          {viewModel.liveAnnouncement}
+        </p>
+      ) : null}
     </header>
   );
 }

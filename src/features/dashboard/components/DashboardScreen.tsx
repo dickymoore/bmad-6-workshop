@@ -118,6 +118,16 @@ export function DashboardScreen({ viewModel }: { viewModel: DashboardViewModel }
         data-live-shell="calm-fixed"
       >
         <div className="dashboard-shell__header" data-reading-zone="header">
+          <div className="dashboard-masthead" aria-label="Board masthead">
+            <div className="dashboard-masthead__brand">
+              <p className="dashboard-masthead__venue">The Royal Institution</p>
+              <p className="dashboard-masthead__product">Albemarle Pulse</p>
+            </div>
+            <p className={`dashboard-masthead__live dashboard-masthead__live--${viewModel.overallState}`}>
+              <span className="dashboard-masthead__live-dot" aria-hidden="true" />
+              <span>{viewModel.updateSummary ? "Live update" : "Live status"}</span>
+            </p>
+          </div>
           <AtmosphericHeader viewModel={viewModel} />
         </div>
 

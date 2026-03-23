@@ -9,8 +9,10 @@ workflowType: 'prd'
 workflow: 'edit'
 date: 2026-03-18
 author: Workshop
-lastEdited: 2026-03-18
+lastEdited: 2026-03-20
 editHistory:
+  - date: 2026-03-20
+    changes: 'Tightened the public-display MVP bar around one-screen board readability, explicit public-signage status grammar, concrete nearby references, and map usefulness after stakeholder UX rejection of the live screen.'
   - date: 2026-03-18
     changes: 'Improved measurability and SMART quality across success criteria, functional requirements, and non-functional requirements; restored concise why-now rationale; tightened requirement language for laptop-run MVP use.'
   - date: 2026-03-18
@@ -64,9 +66,10 @@ This classification reflects that Albemarle Pulse is a new browser-based product
 
 ### User Success
 
-Users succeed when Albemarle Pulse gives them a trustworthy departure read without requiring route planning or fragmented app-checking. For MVP validation:
-- after a 2-3 second room-scale read, users can identify the overall departure state as calm, watchful, strained, or disrupted and can tell whether any trust cue is narrowing confidence
-- after 5-10 seconds of closer reading, users can identify at least one broadly viable nearby mode without opening another app
+Users succeed when Albemarle Pulse works like a clear public information board rather than a verbose dashboard. For MVP validation:
+- on the target venue screen, the default public view fits within one screen without scrolling at normal browser zoom
+- after a 2-3 second room-scale read, users can identify the overall departure status, whether any warning is present, and which nearby option currently looks most usable
+- after 5-10 seconds of closer reading, users can identify concrete nearby references such as named stations, stops, or local corridors without decoding long prose
 - pairs or small groups can reach the same situational read from the shared screen without one person translating private app data
 - staff can answer departure-related questions by referring to the screen rather than reconstructing the picture from separate tools
 
@@ -91,7 +94,10 @@ Technical success means the screen stays live, trustworthy, and calm under real 
 
 The most important outcomes remain architectural and ambient, but they should be tested through explicit checks:
 - **overall-state comprehension:** in observed use, users can correctly name the displayed overall state after one far read
-- **orientation time:** room-scale orientation happens within 2-3 seconds and close-up confirmation within 5-10 seconds
+- **warning recognition:** in observed use, users can tell whether the board is broadly green / amber / red in public-signage terms, even when the underlying wording remains more nuanced
+- **orientation time:** room-scale orientation happens within 2-3 seconds and close-up confirmation within 5-10 seconds without requiring stacked sentence reading
+- **one-screen readability:** the default public view fits on the target display without scroll and preserves its primary hierarchy at normal browser zoom
+- **local-reference comprehension:** unfamiliar users can name at least one nearby station, stop, or corridor shown on the board after a short close read
 - **shared readability:** pairs or small groups can discuss the same departure state and viable nearby modes from a single screen
 - **degraded-state comprehension:** when one source is stale or unavailable, users can identify what is degraded and what remains trustworthy
 - **display adoption:** pilot observation shows regular glance behavior before exit and routine staff reference during departure moments
@@ -101,7 +107,7 @@ The most important outcomes remain architectural and ambient, but they should be
 
 ### MVP - Minimum Viable Product
 
-The MVP is one calm foyer display centered on the Royal Institution. It includes an atmospheric conditions header, a fixed local map, fact-only mode summaries, selective freshness cues, honest disruption handling, and calm live updates. Its purpose is to provide a shared, glanceable departure picture from here, now. It explicitly does not include route planning, recommendations, dense operational detail, or anything that changes the main screen's role from composed public instrument to dashboard or planner.
+The MVP is one calm foyer display centered on the Royal Institution that works like a clear public information board rather than a prose-heavy dashboard. It must fit within one screen at the target venue viewport and prioritize labels, symbols, compact status language, and obvious public-signage red / amber / green emphasis over explanatory sentences. It includes a status-first summary, compact fact-only nearby mode rows, concrete nearby station or stop references, a recognisable local orientation map, selective freshness cues, honest disruption handling, and calm live updates. It explicitly does not include route planning, prescriptive recommendations, dense operational detail, or anything that changes the main screen's role from composed public instrument to dashboard or planner.
 
 ### Growth Features (Post-MVP)
 
@@ -288,11 +294,13 @@ The smallest credible MVP team is one developer supported by part-time product/d
 - Venue-side operator trust path: lightweight operational confirmation that the screen is live, stable, and safe to trust in the building
 
 **Must-Have Capabilities:**
-- atmospheric conditions header
-- fact-only mode summaries
-- fixed local map
+- status-first overall summary bar
+- compact nearby mode rows with clear public-signage status emphasis
+- concrete nearby stations, stops, or corridor references
+- recognisable local orientation map
 - selective freshness cues
 - honest disruption and trend handling
+- compact alerts for degraded or worsening conditions
 - calm live updates
 
 These are day-1 deal-breakers for MVP. If any are missing, the product no longer proves its core value or its differentiating form.
@@ -302,7 +310,7 @@ These are day-1 deal-breakers for MVP. If any are missing, the product no longer
 - source monitoring can remain basic
 - degraded-source handling can be simple, provided it is honest and legible
 - secondary detail views are omitted entirely
-- the map can be restrained and location-specific without deep custom styling
+- the map can use a restrained conventional treatment if that communicates nearby relevance more clearly than an abstract custom frame
 - operational trust checks should be lightweight and visible rather than implemented as a full admin layer
 
 ### Post-MVP Features

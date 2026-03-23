@@ -67,6 +67,14 @@ The most important action to get right is understanding, within seconds, whether
 
 This means Albemarle Pulse is fundamentally an ambient public display rather than an interactive transport tool. Its value starts before deliberate use. The experience should feel like a composed part of the foyer that already contains the answer users were about to reconstruct for themselves across several private apps.
 
+### Public-Board Constraints
+
+The default target display view must be fully legible without scrolling at the approved public-screen viewport. The first read must be status-first rather than paragraph-first, and every major display zone should work to a strict copy budget so the screen behaves like an information board instead of a stack of explanatory cards.
+
+Repeated trust, freshness, or carried-forward wording should collapse into one concise cue per affected area. Concrete nearby references such as station names, stop names, or named local corridors should appear wherever they improve comprehension for unfamiliar users.
+
+Status emphasis must be instantly visible through color, label, and structural prominence rather than inferred from several lines of text. If a viewer has to read multiple stacked sentences to understand one state, the composition has failed.
+
 ### Platform Strategy
 
 The MVP should be designed as a non-interactive ambient viewing experience in a controlled browser environment on a laptop driving a fixed landscape public display. Public users should not need touch, click, scroll, or any direct interaction to get value from the product.
@@ -241,11 +249,13 @@ The implementation should start with lightweight UI primitives rather than a vis
 The system should focus on the limited set of elements the product truly needs:
 - typography for room-scale and near-distance reading
 - spacing and layout rhythm for stable hierarchy
-- status tokens for calm, trustworthy condition signaling
+- status tokens with obvious public-signage green / amber / red emphasis
 - motion rules for absorbed live updates
-- atmospheric header patterns
-- mode summary patterns
-- map framing patterns
+- top summary and status-bar patterns
+- compact nearby mode-row patterns
+- nearby station and stop listing patterns
+- compact alert and trust-cue patterns
+- recognisable local map-treatment patterns
 - freshness and trust cue patterns
 
 This keeps the system narrow and product-specific. The goal is not to build a reusable enterprise design system, but to define a disciplined display language for one high-value screen.
@@ -255,10 +265,12 @@ This keeps the system narrow and product-specific. The goal is not to build a re
 Customization should be led by design tokens first, components second. The foundational layer should define the product's visual and behavioral grammar through custom tokens for type scale, spacing, color, contrast, status states, motion timing, and surface treatment.
 
 On top of those tokens, Albemarle Pulse should use bespoke display patterns rather than generic app components. The most important patterns to define early are:
-- atmospheric conditions header
-- overall state and trend language
-- fact-only mode summary blocks
-- fixed local map container and overlays
+- top summary and overall-status bar
+- overall state, trend, and warning language
+- compact nearby mode rows with explicit RAG states
+- nearby stations and locality panel
+- fixed local map container or conventional orientation treatment
+- compact alert and degraded-confidence blocks
 - freshness and degraded-trust indicators
 - room-scale versus close-read hierarchy rules
 
@@ -412,7 +424,7 @@ This base should be refined with:
 - the stronger local frame and venue-specific spatial identity of **Direction 03**
 - only a light touch of the serenity found in **Direction 05**
 
-The final direction should keep the strong atmospheric header, generous whitespace, light civic palette, and calm first impression of Direction 01 while making the fixed local map feel more architecturally framed and clearly part of the product's locality story.
+The final direction should keep the strong atmospheric header, generous whitespace, light civic palette, and calm first impression of Direction 01 while making the local orientation aid immediately useful and clearly part of the product's locality story.
 
 The following directions or qualities should be explicitly avoided:
 - **Direction 04**'s report-like density and operational-board feeling
@@ -427,7 +439,7 @@ Borrowing from Direction 02 ensures the screen remains publicly legible and inst
 
 Several specific design decisions follow from this rationale:
 - the atmospheric header should remain strong, but it must not overpower the fixed local map
-- the map should feel architecturally framed rather than cartographic or exploratory
+- the map should feel recognisable and useful in seconds, even if that means using a more conventional map treatment instead of architectural abstraction
 - status and trust cues should stay quiet in tone but unmistakable in meaning
 - whitespace should remain generous enough to preserve composure and room-scale readability
 - the overall screen should feel like a calm foyer instrument that belongs in the building
@@ -440,7 +452,7 @@ Implementation should treat Direction 01 as the primary composition blueprint an
 
 The next design and implementation work should focus on:
 - refining the atmospheric header-to-map relationship so both feel important but non-competitive
-- increasing the architectural framing and locality cues around the fixed map without turning it into a dominant cartographic surface
+- increasing locality usefulness around the map, and preferring conventional clarity over a stylized framed treatment when the current map is hard to read
 - strengthening the public-signage clarity of mode summaries, labels, and status states
 - tuning trust and freshness cues so they remain restrained but impossible to miss when confidence narrows
 - preserving the light civic palette, large display typography, and generous spacing as non-negotiable visual foundations
@@ -522,9 +534,10 @@ flowchart TD
 Across these flows, several journey patterns should remain consistent:
 
 - **Far read before near read:** the screen must always communicate the broad state first, then reward closer inspection with confirming detail.
+- **No-scroll first impression:** the full public board must fit on the target screen without scrolling in its default state.
 - **Shared public interpretation:** the main surface should support individuals, groups, and staff using the same visible information at the same time.
 - **Trust narrows locally, not globally:** when one signal is weaker, confidence should reduce precisely in that area without undermining the whole display.
-- **Locality explained once:** the fixed Royal Institution map should anchor place clearly without becoming a dominant exploratory surface.
+- **Concrete locality over abstraction:** stations, stops, and local corridors should be named explicitly where that makes the board easier to follow.
 - **Decision by inference, not advice:** the screen helps users conclude what looks viable without prescribing a route or mode.
 
 ### Flow Optimization Principles
@@ -560,9 +573,12 @@ These primitives are sufficient for structural consistency, spacing, accessibili
 
 **Gap analysis**
 The product needs a set of custom components that are specific to the foyer-display experience and are not well served by a standard app-oriented component library:
-- atmospheric header
-- mode summary block
-- fixed local map frame
+- top summary / status bar
+- nearby mode row
+- nearby stations panel
+- best-looking nearby option now summary
+- compact alert block
+- fixed local map frame or conventional local orientation panel
 - freshness / trust cue
 - degraded-source confirmation
 - section framing / layout shell
@@ -599,13 +615,13 @@ These components are essential because the core UX depends on room-scale readabi
 
 **Avoid:** Hero graphics, decorative weather theatrics, emotional copy, advertising energy, or art-installation behavior.
 
-#### Mode Summary Block
+#### Nearby Mode Row
 
-**Purpose:** Give each nearby mode a fast fact-only viability read without drifting into route planning.
+**Purpose:** Give each nearby mode a fast fact-only viability read with explicit public-signage emphasis and minimal prose.
 
-**Usage:** Repeated for the core nearby modes as the main close-up confirmation layer.
+**Usage:** Repeated for the core nearby modes as the main close-up confirmation layer, especially tube and rail, bus, roads, and any other enabled nearby mode.
 
-**Anatomy:** Mode label, concise state label, short factual note, optional trust or freshness nuance, and restrained status marker.
+**Anatomy:** Mode label, concise state label, clear RAG-style status marker, short factual note, and one optional trust or freshness cue.
 
 **States:**
 - available
@@ -616,16 +632,58 @@ These components are essential because the core UX depends on room-scale readabi
 - freshness / confidence nuance
 
 **Variants:**
-- standard mode block
-- slightly expanded emphasis block for the most relevant local modes
+- standard compact row
+- emphasis row for the strongest nearby read
 
 **Accessibility:** State must be readable without color alone; copy must stay concise; hierarchy must support quick group scanning.
 
-**Content Guidelines:** Focus on local viability and broad condition; keep detail selective and relevant to departure from here.
+**Content Guidelines:** Focus on local viability and broad condition; keep detail selective and relevant to departure from here; prefer short labels over sentences.
 
 **Interaction Behavior:** No route selection, ranking, or expansion on the public screen.
 
-**Avoid:** Best-route language, leaderboard ranking, dense live-board detail, citywide sprawl, or exact planning logic.
+**Avoid:** Open-ended prose cards, best-route language, leaderboard ranking, dense live-board detail, citywide sprawl, or exact planning logic.
+
+#### Nearby Stations Panel
+
+**Purpose:** Make locality understandable to unfamiliar users by listing concrete nearby stations, stops, or named corridors.
+
+**Usage:** Appears as part of the main close-read layer near the mode field and map.
+
+**Anatomy:** Panel title, two to five named nearby references, and short supporting locality labels where needed.
+
+**Accessibility:** Names must be readable quickly at close range; the panel should support group discussion without requiring transport fluency.
+
+**Content Guidelines:** Prefer real station, stop, or corridor names over abstract locality phrasing.
+
+**Avoid:** Generic "nearby node" wording with no concrete transport reference.
+
+#### Best-Looking Nearby Option Now Summary
+
+**Purpose:** Surface the clearest current nearby read without drifting into route advice.
+
+**Usage:** Appears once in the board as a compact summarizing block beneath or beside the top status bar.
+
+**Anatomy:** Short title, dominant nearby mode or corridor label, and one factual supporting phrase.
+
+**Accessibility:** Must read as an informational emphasis, not as a prescriptive instruction.
+
+**Content Guidelines:** State what currently looks clearest or strongest nearby; do not tell users what to choose.
+
+**Avoid:** Recommendation language, routing advice, or planner tone.
+
+#### Compact Alert Block
+
+**Purpose:** Surface disruption, degraded confidence, or stale data in one concise place instead of repeating the same warning across multiple cards.
+
+**Usage:** Appears only when a warning materially changes interpretation.
+
+**Anatomy:** Alert label, short scope statement, and one bounded supporting line.
+
+**Accessibility:** Severity must be clear through wording and structure as well as color.
+
+**Content Guidelines:** One warning, one scope, one explanation.
+
+**Avoid:** Paragraph-length explanations or duplicated warning sentences.
 
 #### Fixed Local Map Frame
 
@@ -633,7 +691,7 @@ These components are essential because the core UX depends on room-scale readabi
 
 **Usage:** Persistent map reference on the main screen, explaining locality once and supporting the rest of the display spatially.
 
-**Anatomy:** Architecturally framed fixed map surface, Royal Institution anchor, nearby nodes or corridors, selective status overlays where needed.
+**Anatomy:** Fixed local map or conventional orientation surface, Royal Institution anchor, nearby stations, stops, or corridors, and selective status overlays where needed.
 
 **States:**
 - normal
@@ -641,16 +699,17 @@ These components are essential because the core UX depends on room-scale readabi
 - low-confidence / fallback if a layer is unavailable
 
 **Variants:**
-- default framed map
+- default fixed map
 - simplified fallback map
+- conventional static-map treatment when clearer than a bespoke frame
 
 **Accessibility:** Must remain visually secondary to the overall state while still providing clear locality cues; labels and markers must stay legible without dense detail.
 
-**Content Guidelines:** Show only the geography needed to support nearby departure decisions; keep the map calm and non-exploratory.
+**Content Guidelines:** Show only the geography needed to support nearby departure decisions; keep the map calm and non-exploratory, but prefer recognisable clarity over stylized abstraction.
 
 **Interaction Behavior:** Fixed display only; no public pan, zoom, or route drawing.
 
-**Avoid:** Generic city-map treatment, pan/zoom behavior, route lines, turn-by-turn cues, or cartographic dominance.
+**Avoid:** Unclear abstract framing, pan/zoom behavior, route lines, turn-by-turn cues, or cartographic dominance.
 
 #### Freshness / Trust Cue
 
@@ -738,7 +797,9 @@ Component behavior should be driven by public-display needs:
 - distance readability before close-up density
 - passive state communication before interaction
 - local trust clarification before global warning
-- architectural framing before card-style segmentation
+- board clarity before card-style segmentation
+
+The component set should explicitly avoid open-ended prose cards, repeated trust sentences, and stacked explanatory copy where a short label, station name, symbol, or status phrase would communicate faster.
 
 Accessibility must be treated as part of every component definition. Because the main audience is viewing rather than interacting, the most important accessibility behaviors are high contrast, non-color status encoding, restrained motion, plain-language state labels, and clear hierarchy. Keyboard support should focus on staff-only setup and recovery surfaces rather than public display components.
 
@@ -749,18 +810,26 @@ The component set should remain deliberately small. If a new component does not 
 **Phase 1 - Core Components**
 - Atmospheric Header
   Needed for the room-scale first read and the main departure thesis.
-- Mode Summary Block
-  Needed for the close-up factual confirmation and mode comparison.
+- Top Summary / Status Bar
+  Needed to make the first read status-first and unmistakable at room scale.
+- Nearby Mode Row
+  Needed for compact close-up factual confirmation and mode comparison.
 - Section Framing / Layout Shell
   Needed to establish the overall architectural hierarchy of the screen.
 
 **Phase 2 - Locality and Trust Components**
+- Nearby Stations Panel
+  Needed to expose concrete local references to unfamiliar users.
 - Fixed Local Map Frame
-  Needed to anchor the screen physically to the Royal Institution and explain locality once.
+  Needed to anchor the screen physically to the Royal Institution with practical orientation value.
+- Best-Looking Nearby Option Now Summary
+  Needed to surface the clearest nearby read without route advice.
 - Freshness / Trust Cue
   Needed to keep confidence visible without cluttering the whole interface.
 
 **Phase 3 - Degradation and Stress Handling**
+- Compact Alert Block
+  Needed to keep warnings bounded, scannable, and non-repetitive.
 - Degraded-Source Confirmation
   Needed to preserve honesty and usability under partial or failing source conditions.
 - Heightened-strain shell adjustments
@@ -898,6 +967,8 @@ Albemarle Pulse should use a display-first responsive strategy with usable deskt
 
 A secondary desktop adaptation should exist so the product remains usable in nearby desktop-browser contexts, especially for design review, validation, or local operation. This adaptation should preserve the same overall hierarchy and visual language, not become a different interface pattern.
 
+The default public-screen composition must fit without scrolling at the approved target viewport. Height-constrained fallback behavior may tighten spacing and remove non-essential support text, but it must not rely on vertical page scrolling to complete the primary read.
+
 Tablet and mobile are explicitly out of scope for the MVP. They may be technically viewable later, but they are not designed surfaces in the first release and should not drive layout or information-priority decisions.
 
 ### Breakpoint Strategy
@@ -907,11 +978,11 @@ The breakpoint model should be custom and display-first rather than based on sta
 **Primary display target**
 - `1366px+` width
 - fixed landscape orientation
-- full foyer-display composition with atmospheric header, mode field, map frame, and trust layers
+- full foyer-display composition with top summary, mode field, nearby locality cues, map frame, and trust layers on one screen
 
 **Compact landscape fallback**
 - activated when height is constrained on the laptop or similar display surface
-- preserves the same composition but tightens vertical spacing, reduces non-essential support text, and protects the far-read hierarchy
+- preserves the same composition but tightens vertical spacing, reduces non-essential support text, and protects the far-read hierarchy without introducing scroll
 
 **Secondary desktop adaptation**
 - around `1024px+`
@@ -955,6 +1026,11 @@ Testing should validate both viewing distances:
 - room-scale first read
 - close-up factual confirmation
 
+It should also validate public-board clarity explicitly:
+- unfamiliar viewers can identify the overall status, any warning, and at least one concrete nearby reference in under 10 seconds
+- the default composition fits without scroll at the target display viewport
+- no component relies on stacked prose to communicate a single state
+
 It should also explicitly test degraded-source and fallback states, because those are part of the product's core trust model rather than edge-case polish.
 
 ### Implementation Guidelines
@@ -964,6 +1040,7 @@ Responsive implementation should preserve one canonical public-display layout ra
 **Responsive implementation rules**
 - preserve reading order across all supported desktop/display sizes
 - protect the atmospheric header, mode summaries, and local map as the core layout pillars
+- preserve no-scroll composition at the target public-display viewport
 - reduce support detail before reducing primary hierarchy
 - use relative sizing and spacing carefully, but keep the display feeling deliberate rather than fluid in a generic web-app sense
 

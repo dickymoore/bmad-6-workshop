@@ -731,3 +731,106 @@ So that the repo's done state matches real review completion.
 **When** Epic 4 is reviewed for completion
 **Then** release-readiness can be treated as evidence-backed
 **And** any story without complete closure evidence remains open.
+
+## Epic 5: Public Display Clarity and Visual Redesign
+
+The public-facing display becomes a clear, beautiful, one-screen information board with obvious status hierarchy, concrete local references, practical map usefulness, and room-scale readability that meets the product's actual foyer-standard.
+
+**FRs covered:** Corrective delivery across Epic 1 public-display readability, locality framing, shared-read usability, and real-screen validation expectations.
+
+### Story 5.1: Reframe the Public Display Around a One-Screen Status-First Board
+
+As a visitor preparing to leave,
+I want the public display to read as a one-screen status-first board,
+So that I can understand the departure picture without scrolling or decoding paragraphs.
+
+**FRs implemented:** Cross-cutting correction for overall hierarchy, no-scroll composition, and first-read status clarity.
+
+**Acceptance Criteria:**
+
+**Given** the screen is shown on the target foyer display
+**When** the default public view loads
+**Then** the core display fits within one screen without scrolling
+**And** the overall status, one dominant warning or reassurance cue, nearby mode field, locality reference, and map are all visible in one coherent composition.
+
+**Given** a user looks from across the room
+**When** they scan the screen for 2-3 seconds
+**Then** the top summary makes the overall state immediately clear
+**And** the hierarchy reads status-first rather than paragraph-first.
+
+### Story 5.2: Replace Verbose Mode Cards with Compact RAG Transport Rows
+
+As a visitor preparing to leave,
+I want nearby transport modes shown as compact rows with explicit status emphasis,
+So that I can compare them quickly like a public board rather than reading repeated prose.
+
+**FRs implemented:** Corrective delivery for nearby mode comparison, status grammar, and close-read transport clarity.
+
+**Acceptance Criteria:**
+
+**Given** the public display shows nearby modes
+**When** tube, rail, bus, roads, and any other enabled modes are rendered
+**Then** each mode uses compact row-style presentation with obvious red / amber / green emphasis
+**And** long descriptive copy is replaced by concise labels and one bounded supporting line where needed.
+
+**Given** a mode is degraded or stale
+**When** confidence narrows
+**Then** the row shows that clearly without duplicating the same warning across the whole board.
+
+### Story 5.3: Add Concrete Nearby Station and Locality References
+
+As a visitor unfamiliar with the area,
+I want the board to show concrete nearby stations, stops, and local corridors,
+So that I can understand what "nearby" means without local knowledge or guesswork.
+
+**FRs implemented:** Corrective delivery for locality comprehension and mixed-audience readability.
+
+**Acceptance Criteria:**
+
+**Given** the board is read at close range
+**When** a visitor inspects the locality layer
+**Then** named nearby stations, stops, or corridors are visible
+**And** abstract locality labels no longer carry the main comprehension burden.
+
+**Given** a small group is sharing the screen
+**When** they discuss what looks usable nearby
+**Then** they can refer to concrete local names rather than paraphrasing vague prose.
+
+### Story 5.4: Redesign the Local Map for Practical Usefulness
+
+As a visitor preparing to leave,
+I want the map to help me orient locally in seconds,
+So that the map earns its space on the board instead of reading as a decorative abstraction.
+
+**FRs implemented:** Corrective delivery for local orientation and map usefulness.
+
+**Acceptance Criteria:**
+
+**Given** the map is rendered on the main public board
+**When** a user inspects it
+**Then** it clearly supports nearby orientation around the Royal Institution
+**And** a more conventional static-map treatment is preferred over bespoke framing if that is easier to read.
+
+**Given** the map is present alongside status and mode information
+**When** the board is read as a whole
+**Then** the map supports the locality story without dominating the composition.
+
+### Story 5.5: Revalidate the Public Screen Against Board-Readability Criteria
+
+As the product team,
+I want the redesigned public display validated against explicit board-readability criteria,
+So that the screen is only treated as acceptable when it is actually clear, beautiful, and usable in the foyer context.
+
+**FRs implemented:** Corrective delivery for real-screen validation, acceptance evidence, and stakeholder readability review.
+
+**Acceptance Criteria:**
+
+**Given** the redesigned public screen is ready for review
+**When** it is tested on the target display context
+**Then** the default view is no-scroll, the overall status is legible at room scale, and concrete nearby references are understandable within 10 seconds
+**And** repeated explanatory prose no longer drives comprehension.
+
+**Given** stakeholder review is rerun
+**When** the board is assessed for presentation readiness
+**Then** it is accepted only if it reads like a clear public information board
+**And** any remaining clarity or beauty failure keeps Epic 5 open.

@@ -274,7 +274,7 @@ test("story 1.6 keeps the public display locked to venue-sized layout pillars an
     "public display should document reduced-motion-safe behavior in CSS",
   );
   assert.equal(
-    /mobile|drawer|tab|planner|touch/i.test(publicFeature),
+    /\bmobile\b|\bdrawer\b|\btab\b|\bplanner\b|\btouch\b/i.test(publicFeature),
     false,
     "public display should not collapse into mobile-first or planner-like patterns",
   );
@@ -283,6 +283,63 @@ test("story 1.6 keeps the public display locked to venue-sized layout pillars an
     true,
     "verification notes should make venue-sized validation explicit in the artifact set",
   );
+});
+
+test("story 5.1 reframes the public display as a one-screen status-first board shell", () => {
+  const layoutPath = join(root, "src", "app", "layout.tsx");
+  const screenPath = join(root, "src", "features", "dashboard", "components", "DashboardScreen.tsx");
+  const headerPath = join(root, "src", "features", "dashboard", "components", "AtmosphericHeader.tsx");
+  const modeGridPath = join(root, "src", "features", "dashboard", "components", "ModeSummaryGrid.tsx");
+  const localMapPath = join(root, "src", "features", "dashboard", "components", "LocalMapFrame.tsx");
+  const globalCssPath = join(root, "src", "app", "globals.css");
+
+  const layout = readFileSync(layoutPath, "utf8");
+  const screen = readFileSync(screenPath, "utf8");
+  const header = readFileSync(headerPath, "utf8");
+  const modeGrid = readFileSync(modeGridPath, "utf8");
+  const localMap = readFileSync(localMapPath, "utf8");
+  const globalCss = readFileSync(globalCssPath, "utf8");
+  const publicFeature = [screen, header, modeGrid, localMap].join("\n");
+
+  assert.equal(/next\/font\/google/.test(layout), false, "layout should avoid live Google font fetches in the network-restricted workspace");
+  assert.equal(
+    /CSS fallbacks|--font-body:\s*"Inter"|--font-headline:\s*"Noto Serif"/.test(layout + globalCss),
+    true,
+    "layout should preserve the approved font pairing through local CSS fallbacks",
+  );
+  assert.equal(/dashboard-masthead|Albemarle Pulse|The Royal Institution/.test(screen), true, "screen should add the new board masthead");
+  assert.equal(/PUBLIC_STATUS|Services: Good|signal-card/.test(header), true, "header should expose a status-first board treatment");
+  assert.equal(/atmospheric-header__currentness/.test(header), false, "header should avoid a duplicated visible board-update footer");
+  assert.equal(/Local mode field|One-screen nearby read/.test(modeGrid), true, "nearby mode section should shift to compact board language");
+  assert.equal(/Nearby stations|local-map-panel__map-badge/.test(localMap), true, "locality panel should surface nearby stations more clearly");
+  assert.equal(/overflow-y:\s*auto|grid-template-rows:\s*auto minmax\(0,\s*1fr\)|dashboard-masthead|signal-card/.test(globalCss), true, "global styles should enforce the compact board shell without clipping vertical overflow");
+  assert.equal(
+    /Route Planner|best option|recommended|switch to|take buses instead|reroute now/i.test(publicFeature),
+    false,
+    "story 5.1 should stay fact-only even while reframing the board",
+  );
+});
+
+test("story 5.2 replaces verbose nearby cards with compact RAG transport rows", () => {
+  const screenPath = join(root, "src", "features", "dashboard", "components", "DashboardScreen.tsx");
+  const modeGridPath = join(root, "src", "features", "dashboard", "components", "ModeSummaryGrid.tsx");
+  const modeCardPath = join(root, "src", "features", "dashboard", "components", "ModeSummaryCard.tsx");
+  const presenterPath = join(root, "src", "features", "dashboard", "presenters", "dashboard-presenter.js");
+  const globalCssPath = join(root, "src", "app", "globals.css");
+
+  const screen = readFileSync(screenPath, "utf8");
+  const modeGrid = readFileSync(modeGridPath, "utf8");
+  const modeCard = readFileSync(modeCardPath, "utf8");
+  const presenter = readFileSync(presenterPath, "utf8");
+  const globalCss = readFileSync(globalCssPath, "utf8");
+  const publicFeature = [screen, modeGrid, modeCard, presenter, globalCss].join("\n");
+
+  assert.equal(/dashboard-shell__header[\s\S]*dashboard-lower-grid__modes[\s\S]*dashboard-lower-grid__map/.test(screen), true, "canonical shell order should remain header, nearby rows, then map");
+  assert.equal(/Local mode field|compact local transport rows/i.test(modeGrid + presenter), true, "nearby mode section should describe compact board rows");
+  assert.equal(/mode-summary-card__status-rag|mode-summary-card__meta-chip|mode-summary-card__rail/.test(modeCard), true, "row component should expose explicit RAG, support, and rail cues");
+  assert.equal(/mode-summary-grid__row|mode-summary-panel__rows|mode-summary-row/.test(globalCss), true, "global styles should define compact row layout semantics");
+  assert.equal(/route planner|best option|recommended|switch to|take buses instead|reroute now/i.test(publicFeature), false, "story 5.2 nearby rows must stay fact-only and non-planner-like");
+  assert.equal(/card soup|dashboard-style cards|article card/i.test(publicFeature), false, "story 5.2 source should not describe the nearby area as card-style treatment");
 });
 
 test("story 2.5 keeps live reading stable during refreshes and motion changes", () => {

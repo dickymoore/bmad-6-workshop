@@ -72,6 +72,68 @@ function createRecoveryCurrentnessMessage(recovery) {
   return createCurrentnessMessage();
 }
 
+function normalizeSentence(text) {
+  if (typeof text !== "string") {
+    return null;
+  }
+
+  const trimmed = text.trim();
+
+  if (!trimmed) {
+    return null;
+  }
+
+  const [firstSentence] = trimmed.split(/(?<=[.!?])\s+/);
+
+  if (!firstSentence) {
+    return null;
+  }
+
+  return firstSentence.replace(/[.!?]+$/, "").trim();
+}
+
+function toSentence(text) {
+  const normalized = normalizeSentence(text);
+  return normalized ? `${normalized}.` : null;
+}
+
+function createCompactModeSummary(mode) {
+  const sentence = normalizeSentence(mode.summary);
+
+  if (!sentence) {
+    return mode.summary;
+  }
+
+  return `${sentence
+    .replace(/\bwithin the short walk from here\b/gi, "nearby")
+    .replace(/\bfrom here, now\b/gi, "nearby")
+    .replace(/\bstill\b/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim()}.`;
+}
+
+function createModeSupportLine(mode) {
+  const supportFragments = [];
+
+  if (mode.sourceStatus.state !== "live") {
+    supportFragments.push(mode.sourceStatus.label);
+  }
+
+  if (mode.trust.confidence === "narrowed") {
+    supportFragments.push(mode.trust.state === "unavailable" ? "Unavailable" : "Read with care");
+  }
+
+  if (supportFragments.length > 0) {
+    return `${supportFragments.join(". ")}.`;
+  }
+
+  if (mode.disruptionScope !== "unaffected-readable") {
+    return toSentence(mode.nuance);
+  }
+
+  return null;
+}
+
 function orderNearbyModesForReading(nearbyModes) {
   return [...nearbyModes].sort((left, right) => {
     const leftIndex = CANONICAL_MODE_ORDER.indexOf(left.key);
@@ -335,11 +397,13 @@ export function presentDashboardSnapshot(snapshotInput, options = {}) {
     mobilityStatus: presentSourceStatus(snapshot.headerStatus.mobility),
     supportLabel: snapshot.supportLabel,
     nearbyModeHeading: "Nearby modes",
-    nearbyModeIntro: "From here, now: the nearby departure modes are reading as follows.",
+    nearbyModeIntro: "Compact local transport rows with one calm local cue where confidence narrows.",
     nearbyModes: Object.freeze(
       orderedNearbyModes.map((mode) =>
         Object.freeze({
           ...mode,
+          summary: createCompactModeSummary(mode),
+          nuance: createModeSupportLine(mode),
           sourceStatus: presentSourceStatus(mode.sourceStatus),
           trust: presentTrust(mode.trust),
           stateLabel: MODE_STATE_LABELS[mode.state],

@@ -37,19 +37,30 @@ export function ModeSummaryGrid({
   viewModel: ModeSummaryGridViewModel;
 }) {
   return (
-    <section className="mode-summary-panel" aria-labelledby="nearby-mode-heading">
-      <p className="dashboard-reserved__label">{viewModel.nearbyModeHeading}</p>
-      <h2 className="mode-summary-panel__heading" id="nearby-mode-heading">
-        Shared nearby read
-      </h2>
-      <p className="mode-summary-panel__intro">{viewModel.nearbyModeIntro}</p>
-      <div className="mode-summary-grid" role="list" aria-label="Nearby departure mode summaries">
-        {viewModel.nearbyModes.map((mode) => (
-          <div key={mode.key} role="listitem">
-            <ModeSummaryCard mode={mode} />
-          </div>
-        ))}
+    <section
+      className="mode-summary-panel"
+      aria-labelledby="nearby-mode-heading"
+      aria-describedby="nearby-mode-intro"
+    >
+      <div className="mode-summary-panel__header">
+        <div>
+          <p className="dashboard-reserved__label">{viewModel.nearbyModeHeading}</p>
+          <h2 className="mode-summary-panel__heading" id="nearby-mode-heading">
+            Local mode field
+          </h2>
+        </div>
+        <p className="mode-summary-panel__summary">One-screen nearby read</p>
       </div>
+      <p className="sr-only" id="nearby-mode-intro">
+        {viewModel.nearbyModeIntro}
+      </p>
+      <ul className="mode-summary-panel__rows mode-summary-grid" aria-label="Nearby departure mode summaries">
+        {viewModel.nearbyModes.map((mode) => (
+          <li key={mode.key} className="mode-summary-grid__row">
+            <ModeSummaryCard mode={mode} />
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }

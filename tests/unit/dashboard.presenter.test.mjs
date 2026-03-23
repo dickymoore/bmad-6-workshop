@@ -253,14 +253,62 @@ describe("dashboard presenter", () => {
     expect(viewModel.nearbyModes[0].sourceStatus.state).toBe("live");
     expect(viewModel.nearbyModes[0].disruptionScope).toBe("unaffected-readable");
     expect(viewModel.nearbyModes[0].emphasisLabel).toBe("Readable nearby");
+    expect(viewModel.nearbyModes[0].summary.split(".").filter(Boolean).length).toBe(1);
+    expect(/still reading|from here, now|best option|recommended/i.test(viewModel.nearbyModes[0].summary)).toBe(false);
+    expect(viewModel.nearbyModes[0].nuance).toBe(null);
     expect(viewModel.nearbyModes[1].trust.isNarrowed).toBe(true);
     expect(viewModel.nearbyModes[1].sourceStatus.state).toBe("carried-forward");
     expect(viewModel.nearbyModes[1].disruptionScope).toBe("locally-disrupted");
     expect(viewModel.nearbyModes[1].emphasisLabel).toBe("Disrupted nearby");
+    expect(viewModel.nearbyModes[1].summary).toMatch(/spacing uneven|west end/i);
+    expect(/shelter|queues|recommended|take\b/i.test(viewModel.nearbyModes[1].summary)).toBe(false);
+    expect(viewModel.nearbyModes[1].nuance).toMatch(/carried forward|read with care/i);
+    expect(/west end stops are moving/i.test(viewModel.nearbyModes[1].nuance)).toBe(false);
     expect(viewModel.nearbyModes[1].trust.detail).toMatch(/should be read with care/i);
     expect(viewModel.localMap.sourceStatus.state).toBe("live");
     expect(viewModel.updateSummary).toBe(null);
     expect(viewModel.liveAnnouncement).toBe(null);
+  });
+
+  it("locks nearby rows to compact fact-only board copy and local narrowed-confidence cues", () => {
+    const viewModel = presentDashboardSnapshot(
+      buildSnapshot({
+        disruptionEmphasis: {
+          level: "none",
+          headline: null,
+          detail: null,
+          affectedModeKeys: [],
+        },
+        nearbyModes: [
+          {
+            key: "roads",
+            label: "Roads",
+            state: "caution",
+            disruptionScope: "unaffected-readable",
+            summary: "Mayfair traffic is still flowing, with slower turns around the wetter junctions.",
+            nuance: "Street crossings remain readable, but the pace is not especially brisk.",
+            sourceStatus: {
+              state: "carried-forward",
+              label: "Carried forward",
+              detail: "Roads are carried forward while live nearby detail narrows.",
+            },
+            trust: createTrustSignal({
+              state: "stale",
+              subject: "Roads",
+            }),
+          },
+        ],
+      }),
+    );
+
+    expect(viewModel.nearbyModeHeading).toBe("Nearby modes");
+    expect(viewModel.nearbyModeIntro).toMatch(/compact local transport rows/i);
+    expect(viewModel.nearbyModes[0].summary.split(".").filter(Boolean).length).toBe(1);
+    expect(viewModel.nearbyModes[0].summary).toMatch(/mayfair traffic|wetter junctions/i);
+    expect(/still flowing|not especially brisk|recommended|switch to|take\b/i.test(viewModel.nearbyModes[0].summary)).toBe(false);
+    expect(viewModel.nearbyModes[0].nuance).toMatch(/carried forward|read with care/i);
+    expect(/mayfair traffic|street crossings remain readable/i.test(viewModel.nearbyModes[0].nuance)).toBe(false);
+    expect(viewModel.nearbyModes[0].changeSummary).toBe(null);
   });
 
   it("keeps restart messaging only while recovery is still active", () => {
@@ -662,12 +710,19 @@ describe("dashboard presenter", () => {
     expect(screenSource).toMatch(/<AtmosphericHeader viewModel=\{viewModel\} \/>/);
     expect(screenSource).toMatch(/<ModeSummaryGrid viewModel=\{viewModel\} \/>/);
     expect(screenSource).toMatch(/<LocalMapFrame viewModel=\{viewModel\.localMap\} \/>/);
+    expect(screenSource).toMatch(/dashboard-masthead/);
+    expect(screenSource).toMatch(/dashboard-lower-grid__modes/);
+    expect(screenSource).toMatch(/dashboard-lower-grid__map/);
     expect(headerSource).toMatch(/viewModel\.disruption\.hasSeriousDisruption/);
     expect(headerSource).toMatch(/viewModel\.disruption\.title/);
     expect(headerSource).toMatch(/viewModel\.disruption\.detail/);
+    expect(headerSource).toMatch(/getPublicStatus/);
+    expect(headerSource).toMatch(/signal-card/);
     expect(modeCardSource).toMatch(/mode\.isDisrupted/);
     expect(modeCardSource).toMatch(/mode\.emphasisLabel/);
-    expect(modeCardSource).toMatch(/mode\.trust\.detail/);
+    expect(modeCardSource).toMatch(/mode\.trust\.isNarrowed/);
+    expect(modeCardSource).toMatch(/mode-summary-card__status-rag/);
+    expect(modeCardSource).toMatch(/mode-summary-card__meta-chip/);
     expect(headerSource).toMatch(/viewModel\.weatherStatus/);
     expect(headerSource).toMatch(/viewModel\.mobilityStatus/);
     expect(modeCardSource).toMatch(/mode\.sourceStatus/);

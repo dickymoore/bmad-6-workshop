@@ -24,15 +24,19 @@ type NearbyModeViewModel = {
 };
 
 export function ModeSummaryCard({ mode }: { mode: NearbyModeViewModel }) {
-  const stateMark =
-    mode.sourceStatus.state === "live"
-      ? mode.state === "available"
-        ? "Open"
-        : mode.state === "caution"
-          ? "Watch"
-          : "Disrupted"
-      : mode.sourceStatus.label;
-  const stateLabel = mode.sourceStatus.state === "live" ? mode.stateLabel : mode.sourceStatus.label;
+  const boardStateLabel =
+    mode.state === "available" ? "Green" : mode.state === "caution" ? "Amber" : "Red";
+  const metaLabels = [mode.stateLabel, mode.sourceStatus.label];
+
+  if (mode.trust.isNarrowed) {
+    metaLabels.push("Read with care");
+  }
+
+  if (mode.isDisrupted) {
+    metaLabels.push(mode.emphasisLabel);
+  }
+
+  const uniqueMetaLabels = [...new Set(metaLabels)];
 
   return (
     <article
@@ -40,24 +44,25 @@ export function ModeSummaryCard({ mode }: { mode: NearbyModeViewModel }) {
       aria-label={mode.label}
       data-mode-key={mode.key}
     >
-      <div className="mode-summary-card__header">
-        <div>
+      <span className="mode-summary-card__rail" aria-hidden="true" />
+      <div className="mode-summary-grid__row">
+        <div className="mode-summary-card__header">
           <p className="mode-summary-card__label">{mode.label}</p>
-          <p className="mode-summary-card__state">
-            <span className="mode-summary-card__state-mark" aria-hidden="true">
-              {stateMark}
-            </span>
-            <span>{stateLabel}</span>
-          </p>
+          <p className="mode-summary-card__summary">{mode.summary}</p>
         </div>
-        {mode.isDisrupted ? <p className="mode-summary-card__emphasis">{mode.emphasisLabel}</p> : null}
+        <p className={`mode-summary-card__status mode-summary-card__status--${mode.state}`}>
+          <span className="mode-summary-card__status-rag">{boardStateLabel}</span>
+          <span>{mode.stateLabel}</span>
+        </p>
       </div>
-      <p className="mode-summary-card__summary">{mode.summary}</p>
       {mode.nuance ? <p className="mode-summary-card__nuance">{mode.nuance}</p> : null}
-      <p className={`mode-summary-card__trust mode-summary-card__trust--source mode-summary-card__trust--source-${mode.sourceStatus.state}`}>
-        {mode.sourceStatus.detail}
-      </p>
-      <p className={`mode-summary-card__trust mode-summary-card__trust--${mode.trust.confidence}`}>{mode.trust.detail}</p>
+      <div className="mode-summary-card__meta" aria-label={`${mode.label} status cues`}>
+        {uniqueMetaLabels.map((label, index) => (
+          <span key={`${mode.key}-${index}-${label}`} className="mode-summary-card__meta-chip">
+            {label}
+          </span>
+        ))}
+      </div>
       {mode.changeSummary ? <p className="mode-summary-card__update">{mode.changeSummary}</p> : null}
     </article>
   );
