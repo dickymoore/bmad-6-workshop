@@ -115,6 +115,13 @@ write_start_here() {
   local prompt_rel="files/$(stage_folder_name 10-analysis)/DEMO-START-PROMPT.md"
   local preinstall_rel="files/00-pre-install/"
   local installation_rel="files/installation/"
+  local analysis_links_rel="files/$(stage_folder_name 10-analysis)/SPEAKER-GUIDE-LINKS.md"
+  local planning_links_rel="files/$(stage_folder_name 20-planning)/SPEAKER-GUIDE-LINKS.md"
+  local solutioning_links_rel="files/$(stage_folder_name 30-solutioning)/SPEAKER-GUIDE-LINKS.md"
+  local setup_links_rel="files/$(stage_folder_name 40-implementation-setup)/SPEAKER-GUIDE-LINKS.md"
+  local implementation_links_rel="files/$(stage_folder_name 60-implementation)/SPEAKER-GUIDE-LINKS.md"
+  local final_app_rel="files/$(stage_folder_name 80-mvp)/snapshot/"
+  local final_app_readme_rel="files/$(stage_folder_name 80-mvp)/snapshot/README.md"
 
   cat > "$path" <<EOF
 # Start Here: ${TRACK}
@@ -128,6 +135,55 @@ Use this file as the facilitator entry point for the workshop workspace.
 - [Installation view](${installation_rel})
 - [Files index](${files_root}/README.md)
 - [Agent Replay](agent-replay/)
+
+## Session flow
+
+### 1. Clean start before BMAD install
+
+- [Pre-install view](${preinstall_rel})
+- [Clean bootstrap README](files/00-pre-install/snapshot/README.md)
+
+### 2. Run BMAD install in this session folder
+
+From this workspace root, run:
+
+\`\`\`bash
+npx bmad-method install
+\`\`\`
+
+Then inspect:
+
+- [Live install location: .agents/skills](.agents/skills/)
+- [Fallback install snapshot](files/installation/snapshot/.agents/skills/)
+
+### 3. Run BMAD and show prepared artifacts
+
+- [Demo start prompt](${prompt_rel})
+- [Analysis artifact links](${analysis_links_rel})
+- [Planning artifact links](${planning_links_rel})
+- [Solutioning artifact links](${solutioning_links_rel})
+- [Implementation setup links](${setup_links_rel})
+- [Implementation artifact links](${implementation_links_rel})
+- [Agent Replay sidecar](agent-replay/)
+
+### 4. Show the finished app
+
+- [Runnable app cut](${final_app_rel})
+- [App run guide](${final_app_readme_rel})
+
+From the runnable app folder:
+
+\`\`\`bash
+cd ${final_app_rel}
+cp env.local.example .env.local
+npm install
+npm run dev
+\`\`\`
+
+Then open:
+
+- \`http://localhost:3000\`
+- \`http://localhost:3000/ops\`
 
 ## Phase folders
 

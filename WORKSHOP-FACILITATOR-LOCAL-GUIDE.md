@@ -98,27 +98,18 @@ Create a clean external facilitator workspace:
 Create a batch of facilitator workspaces for rehearsals and workshop runs:
 
 ```bash
-mkdir -p ../facilitator-workspaces
-
-for session in \
-  test-runthrough \
-  deep-dive \
-  test-2 \
-  Wed-1 Wed-2 Wed-3 Wed-4 \
-  Thu-1 Thu-2 Thu-3 Thu-4
-do
-  ./scripts/create-facilitator-workspace.sh \
-    --track albemarle-pulse \
-    --destination "../facilitator-workspaces/${session}" \
-    --reset
-done
+./scripts/create-facilitator-workspace-batch.sh \
+  --track albemarle-pulse \
+  --destination-root ../facilitator-workspaces \
+  --reset \
+  Wed-test Wed-1 Wed-2 Wed-3 Wed-4 Thu-test Thu-1 Thu-2 Thu-3 Thu-4
 ```
 
 Each generated phase folder includes `SPEAKER-GUIDE-LINKS.md` with relative links to the files called out in the speaker guide.
 The generated workspace also includes `files/00-pre-install/` so you can show the clean state before running BMAD install.
 The generated workspace also includes `files/installation/` so you can show the BMAD install payload itself.
 The generated `files/phase-1-analysis/DEMO-START-PROMPT.md` gives you the Albemarle Pulse opening prompt to paste into the demo.
-The generated `START-HERE.md` gives you a single entry page with links to the prompt, pre-install view, installation view, all phase folders, and `agent-replay/`.
+The generated `START-HERE.md` gives you a single entry page with the session flow, run commands, and relative links to the prompt, pre-install view, installation view, phase artifacts, final runnable app, and `agent-replay/`.
 `agent-replay/` is a separate sidecar checkout cloned into the facilitator workspace, not a folder tracked inside this repository.
 
 ## Operator Rules

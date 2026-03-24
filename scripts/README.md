@@ -151,20 +151,11 @@ Current default track: `desk-booking`
 - Batch example for multiple sessions:
 
 ```bash
-mkdir -p ../facilitator-workspaces
-
-for session in \
-  test-runthrough \
-  deep-dive \
-  test-2 \
-  Wed-1 Wed-2 Wed-3 Wed-4 \
-  Thu-1 Thu-2 Thu-3 Thu-4
-do
-  ./scripts/create-facilitator-workspace.sh \
-    --track albemarle-pulse \
-    --destination "../facilitator-workspaces/${session}" \
-    --reset
-done
+./scripts/create-facilitator-workspace-batch.sh \
+  --track albemarle-pulse \
+  --destination-root ../facilitator-workspaces \
+  --reset \
+  Wed-test Wed-1 Wed-2 Wed-3 Wed-4 Thu-test Thu-1 Thu-2 Thu-3 Thu-4
 ```
 
 - Notes:
@@ -173,7 +164,7 @@ done
   - `files/installation/` shows the BMAD install payload from `workshop/<track>/10-analysis`, including `.agents/skills` and selected `_bmad` config files
   - `files/` contains phase folders like `phase-1-analysis/` and `phase-6-implementation/`
   - `files/phase-1-analysis/DEMO-START-PROMPT.md` contains the track-specific opening prompt for the live demo
-  - `START-HERE.md` gives you one top-level page linking to the prompt, pre-install view, installation view, phase folders, and `agent-replay/`
+  - `START-HERE.md` gives you one top-level page with the session flow, run commands, and relative links to the prompt, pre-install view, installation view, phase artifacts, final runnable app, and `agent-replay/`
   - phases without a frozen branch yet still get placeholder folders
   - clones `https://github.com/dickymoore/agent-replay` into `agent-replay/`
   - `agent-replay/` is a sidecar checkout, not content that lives in this repo
@@ -188,3 +179,22 @@ done
   --bmb-module evidence-blueprint \
   --reset
 ```
+
+## `scripts/create-facilitator-workspace-batch.sh`
+
+- Purpose: create one facilitator workspace per session under a single parent folder.
+- When to run: when you want isolated run folders for repeated workshops on the same machine.
+- Example:
+
+```bash
+./scripts/create-facilitator-workspace-batch.sh \
+  --track albemarle-pulse \
+  --destination-root ../facilitator-workspaces \
+  --reset \
+  Wed-test Wed-1 Wed-2 Wed-3 Wed-4 Thu-test Thu-1 Thu-2 Thu-3 Thu-4
+```
+
+- Notes:
+  - creates a top-level `README.md` linking to each session's `START-HERE.md`
+  - each session stays isolated, so BMAD install state and local changes do not bleed into the next workshop
+  - each session contains the same relative-link `START-HERE.md`, `files/`, and `agent-replay/` layout as the single-workspace generator
