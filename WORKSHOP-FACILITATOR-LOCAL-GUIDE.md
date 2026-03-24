@@ -110,6 +110,9 @@ The generated workspace also includes `files/00-pre-install/` so you can show th
 The generated workspace also includes `files/installation/` so you can show the BMAD install payload itself.
 The generated `files/phase-1-analysis/DEMO-START-PROMPT.md` gives you the Albemarle Pulse opening prompt to paste into the demo.
 The generated `START-HERE.md` gives you a single entry page with the session flow, run commands, and relative links to the prompt, pre-install view, installation view, phase artifacts, final runnable app, and `agent-replay/`.
+Use the session root itself for `npx bmad-method install` and `CODEX_HOME=$(pwd)/.codex codex`.
+Use `agent-replay/` for the simulator tool.
+Use `files/phase-8-mvp/snapshot/` for `npm install` and `npm run dev`.
 `agent-replay/` is a separate sidecar checkout cloned into the facilitator workspace, not a folder tracked inside this repository.
 
 ## Operator Rules

@@ -136,6 +136,12 @@ Use this file as the facilitator entry point for the workshop workspace.
 - [Files index](${files_root}/README.md)
 - [Agent Replay](agent-replay/)
 
+## Working directories
+
+- Session root (\`.\`): run \`npx bmad-method install\`, run \`CODEX_HOME=\$(pwd)/.codex codex\`, inspect \`.agents/skills\`, and do the live BMAD work for this workshop.
+- Simulator sidecar (\`agent-replay/\`): run the replay/simulator tool from here.
+- Final app cut (\`${final_app_rel}\`): run \`cp env.local.example .env.local\`, \`npm install\`, and \`npm run dev\` from here.
+
 ## Session flow
 
 ### 1. Clean start before BMAD install
@@ -143,18 +149,21 @@ Use this file as the facilitator entry point for the workshop workspace.
 - [Pre-install view](${preinstall_rel})
 - [Clean bootstrap README](files/00-pre-install/snapshot/README.md)
 
-### 2. Run BMAD install in this session folder
+### 2. Run BMAD install and Codex in the session root
 
 From this workspace root, run:
 
 \`\`\`bash
 npx bmad-method install
+CODEX_HOME=\$(pwd)/.codex codex
 \`\`\`
 
 Then inspect:
 
 - [Live install location: .agents/skills](.agents/skills/)
 - [Fallback install snapshot](files/installation/snapshot/.agents/skills/)
+
+Do not run BMAD install or Codex inside \`files/phase-*\`. Those folders are prepared snapshots for browsing.
 
 ### 3. Run BMAD and show prepared artifacts
 
@@ -165,6 +174,12 @@ Then inspect:
 - [Implementation setup links](${setup_links_rel})
 - [Implementation artifact links](${implementation_links_rel})
 - [Agent Replay sidecar](agent-replay/)
+
+Run the simulator tool from:
+
+\`\`\`bash
+cd agent-replay/
+\`\`\`
 
 ### 4. Show the finished app
 

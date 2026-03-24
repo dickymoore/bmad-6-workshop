@@ -165,6 +165,9 @@ Current default track: `desk-booking`
   - `files/` contains phase folders like `phase-1-analysis/` and `phase-6-implementation/`
   - `files/phase-1-analysis/DEMO-START-PROMPT.md` contains the track-specific opening prompt for the live demo
   - `START-HERE.md` gives you one top-level page with the session flow, run commands, and relative links to the prompt, pre-install view, installation view, phase artifacts, final runnable app, and `agent-replay/`
+  - run `npx bmad-method install` and `CODEX_HOME=$(pwd)/.codex codex` from the session root, not from `files/phase-*`
+  - run the simulator from `agent-replay/`
+  - run `npm install` and `npm run dev` from `files/phase-8-mvp/snapshot/`
   - phases without a frozen branch yet still get placeholder folders
   - clones `https://github.com/dickymoore/agent-replay` into `agent-replay/`
   - `agent-replay/` is a sidecar checkout, not content that lives in this repo
