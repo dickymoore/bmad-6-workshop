@@ -2,8 +2,8 @@
 
 - Branch: main
 - Source ref used for export: main
-- Commit: 66fe10e
-- Commit subject: feat(showcase): add pre-install snapshot support
+- Commit: bf19a99
+- Commit subject: chore(showcase): refresh albemarle-pulse export
 - Snapshot path: snapshot/
 
 ## Guidance

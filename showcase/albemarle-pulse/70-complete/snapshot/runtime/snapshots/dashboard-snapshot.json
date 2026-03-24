@@ -1,0 +1,179 @@
+{
+  "publishedAt": "2026-03-23T14:51:32.527Z",
+  "overallState": "watchful",
+  "overallTrend": "steady",
+  "weatherSummary": "Cold rain is moving across Mayfair and the street is reading a little slower.",
+  "mobilitySummary": "Nearby departures are holding a calm live rhythm.",
+  "placeLabel": "Royal Institution, Albemarle Street",
+  "supportLabel": "Movement remains live while weather detail narrows nearby.",
+  "disruptionEmphasis": {
+    "level": "none",
+    "headline": null,
+    "detail": null,
+    "affectedModeKeys": []
+  },
+  "headerTrust": {
+    "weather": {
+      "state": "reduced-confidence",
+      "label": "Reduced confidence",
+      "detail": "Weather is carried forward while live weather detail narrows.",
+      "confidence": "narrowed"
+    },
+    "mobility": {
+      "state": "current",
+      "label": "Current",
+      "detail": "Movement is current for the foyer.",
+      "confidence": "full"
+    }
+  },
+  "headerStatus": {
+    "weather": {
+      "state": "carried-forward",
+      "label": "Carried forward",
+      "detail": "Weather is carried forward while live weather detail narrows."
+    },
+    "mobility": {
+      "state": "live",
+      "label": "Live",
+      "detail": "Movement is reading live for the foyer."
+    }
+  },
+  "localMap": {
+    "title": "Local orientation",
+    "state": "default",
+    "sourceStatus": {
+      "state": "live",
+      "label": "Live",
+      "detail": "The local frame is reading live for this foyer."
+    },
+    "venueAnchor": {
+      "key": "royal-institution",
+      "label": "Royal Institution",
+      "x": 56,
+      "y": 60
+    },
+    "nearbyReferences": [
+      {
+        "key": "green-park-station",
+        "label": "Green Park",
+        "kind": "station",
+        "caption": "Jubilee, Piccadilly, Victoria"
+      },
+      {
+        "key": "piccadilly-stop-r",
+        "label": "Piccadilly / St James's Street",
+        "kind": "stop",
+        "caption": "Bus stop R"
+      },
+      {
+        "key": "albemarle-street",
+        "label": "Albemarle Street",
+        "kind": "corridor",
+        "caption": "Royal Institution frontage"
+      }
+    ],
+    "selectedNearbyNodes": [
+      {
+        "key": "green-park",
+        "label": "Green Park",
+        "x": 72,
+        "y": 36
+      },
+      {
+        "key": "piccadilly-stop-r",
+        "label": "Piccadilly / St James's Street",
+        "x": 46,
+        "y": 76
+      },
+      {
+        "key": "albemarle-street",
+        "label": "Albemarle Street",
+        "x": 56,
+        "y": 48
+      }
+    ],
+    "orientationSummary": "Royal Institution sits on Albemarle Street with Green Park and the Piccadilly / St James's Street stop in the immediate local read.",
+    "localityEmphasis": {
+      "label": "Royal Institution sits on Albemarle Street with Green Park and the Piccadilly / St James's Street stop in the immediate local read."
+    },
+    "fallbackCopy": null
+  },
+  "nearbyModes": [
+    {
+      "key": "tube-rail",
+      "label": "Tube and rail",
+      "state": "available",
+      "disruptionScope": "unaffected-readable",
+      "summary": "Tube and rail are reading open around Green Park and Piccadilly.",
+      "nuance": "TfL status is holding a calm nearby read.",
+      "sourceStatus": {
+        "state": "live",
+        "label": "Live",
+        "detail": "Tube and rail is reading live nearby."
+      },
+      "trust": {
+        "state": "current",
+        "label": "Current",
+        "detail": "Tube and rail is current for the foyer.",
+        "confidence": "full"
+      }
+    },
+    {
+      "key": "bus",
+      "label": "Bus",
+      "state": "available",
+      "disruptionScope": "unaffected-readable",
+      "summary": "Nearby bus movement is reading open through the West End streets.",
+      "nuance": "TfL status is holding a calm nearby read.",
+      "sourceStatus": {
+        "state": "live",
+        "label": "Live",
+        "detail": "Bus is reading live nearby."
+      },
+      "trust": {
+        "state": "current",
+        "label": "Current",
+        "detail": "Bus is current for the foyer.",
+        "confidence": "full"
+      }
+    },
+    {
+      "key": "roads",
+      "label": "Roads",
+      "state": "caution",
+      "disruptionScope": "unaffected-readable",
+      "summary": "Mayfair traffic is still flowing, with slower turns around the wetter junctions.",
+      "nuance": "Street crossings remain readable, but the pace is not especially brisk.",
+      "sourceStatus": {
+        "state": "carried-forward",
+        "label": "Carried forward",
+        "detail": "Roads is carried forward while live nearby detail narrows."
+      },
+      "trust": {
+        "state": "reduced-confidence",
+        "label": "Reduced confidence",
+        "detail": "Roads is carried forward while live nearby detail narrows.",
+        "confidence": "narrowed"
+      }
+    },
+    {
+      "key": "cycles-scooters",
+      "label": "Cycles and scooters",
+      "state": "caution",
+      "disruptionScope": "unaffected-readable",
+      "summary": "Open micromobility nearby is still moving, though vehicles are thinner under the rain.",
+      "nuance": "Availability remains patchier than the clearer corridors nearby.",
+      "sourceStatus": {
+        "state": "carried-forward",
+        "label": "Carried forward",
+        "detail": "Cycles and scooters is carried forward while live nearby detail narrows."
+      },
+      "trust": {
+        "state": "reduced-confidence",
+        "label": "Reduced confidence",
+        "detail": "Cycles and scooters is carried forward while live nearby detail narrows.",
+        "confidence": "narrowed"
+      }
+    }
+  ]
+}

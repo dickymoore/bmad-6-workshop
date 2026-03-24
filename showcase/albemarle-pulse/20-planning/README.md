@@ -12,6 +12,7 @@ Stage 2 (Planning): convert the analysis outputs into a PRD-ready planning basel
 
 ## Exported roots
 
+- .gitignore
 - README.md
 - _bmad-output
 - docs

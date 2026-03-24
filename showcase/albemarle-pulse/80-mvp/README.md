@@ -12,11 +12,15 @@ MVP stage: final demoable Albemarle Pulse dashboard.
 
 ## Exported roots
 
+- .gitignore
+- env.local.example
 - README.md
 - _bmad-output
 - docs
+- runtime
 - src
 - tests
+- tools
 - public
 - package.json
 - package-lock.json

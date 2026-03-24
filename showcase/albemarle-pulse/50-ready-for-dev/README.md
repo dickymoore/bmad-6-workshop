@@ -12,6 +12,7 @@ Ready-for-dev stage: complete sprint planning and handoff artifacts, then cut `w
 
 ## Exported roots
 
+- .gitignore
 - README.md
 - _bmad-output
 - docs

@@ -12,4 +12,5 @@ Stage 1 (Analysis): frame Albemarle Pulse, define user outcomes around the Royal
 
 ## Exported roots
 
+- .gitignore
 - README.md

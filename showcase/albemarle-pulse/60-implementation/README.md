@@ -12,11 +12,14 @@ Implementation stage: partial build state. When the MVP is not yet complete but 
 
 ## Exported roots
 
+- .gitignore
 - README.md
 - _bmad-output
 - docs
+- runtime
 - src
 - tests
+- tools
 - package.json
 - package-lock.json
 - tsconfig.json

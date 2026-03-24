@@ -1,0 +1,187 @@
+{
+  "publishedAt": "2026-03-24T08:52:22.159Z",
+  "overallState": "watchful",
+  "overallTrend": "steady",
+  "weatherSummary": "Dry nearby.",
+  "weatherTemperatureC": 11,
+  "mobilitySummary": "Nearby transport is running normally.",
+  "placeLabel": "Royal Institution, Albemarle Street",
+  "supportLabel": "Transport and weather are live.",
+  "disruptionEmphasis": {
+    "level": "none",
+    "headline": null,
+    "detail": null,
+    "affectedModeKeys": []
+  },
+  "headerTrust": {
+    "weather": {
+      "state": "delayed",
+      "label": "Delayed",
+      "detail": "Weather is delayed.",
+      "confidence": "narrowed"
+    },
+    "mobility": {
+      "state": "current",
+      "label": "Current",
+      "detail": "Movement is up to date.",
+      "confidence": "full"
+    }
+  },
+  "headerStatus": {
+    "weather": {
+      "state": "live",
+      "label": "Live",
+      "detail": "Weather is live.",
+      "confirmedAt": "2026-03-24T08:30:00.000Z"
+    },
+    "mobility": {
+      "state": "live",
+      "label": "Live",
+      "detail": "Movement is live.",
+      "confirmedAt": "2026-03-24T08:52:22.159Z"
+    }
+  },
+  "localMap": {
+    "title": "Local orientation",
+    "state": "default",
+    "sourceStatus": {
+      "state": "live",
+      "label": "Live",
+      "detail": "The local frame is reading live for this foyer.",
+      "confirmedAt": "2026-03-24T08:52:22.159Z"
+    },
+    "venueAnchor": {
+      "key": "royal-institution",
+      "label": "Royal Institution",
+      "x": 44,
+      "y": 47
+    },
+    "nearbyReferences": [
+      {
+        "key": "green-park-station",
+        "label": "Green Park",
+        "kind": "station",
+        "caption": "Jubilee, Piccadilly, Victoria"
+      },
+      {
+        "key": "piccadilly-stop-r",
+        "label": "Piccadilly / St James's Street",
+        "kind": "stop",
+        "caption": "Bus stop R"
+      },
+      {
+        "key": "albemarle-street",
+        "label": "Albemarle Street",
+        "kind": "corridor",
+        "caption": "Royal Institution frontage"
+      }
+    ],
+    "selectedNearbyNodes": [
+      {
+        "key": "green-park",
+        "label": "Green Park",
+        "x": 54,
+        "y": 30
+      },
+      {
+        "key": "piccadilly-stop-r",
+        "label": "Piccadilly / St James's Street",
+        "x": 37,
+        "y": 59
+      },
+      {
+        "key": "albemarle-street",
+        "label": "Albemarle Street",
+        "x": 44,
+        "y": 38
+      }
+    ],
+    "orientationSummary": "Royal Institution, Green Park, and the Piccadilly / St James's Street stop are shown on the local map.",
+    "localityEmphasis": {
+      "label": "Royal Institution, Green Park, and the Piccadilly / St James's Street stop are shown on the local map."
+    },
+    "fallbackCopy": null
+  },
+  "nearbyModes": [
+    {
+      "key": "tube-rail",
+      "label": "Tube and rail",
+      "state": "available",
+      "disruptionScope": "unaffected-readable",
+      "summary": "Green Park and Piccadilly services are running normally.",
+      "nuance": "No reported issue.",
+      "sourceStatus": {
+        "state": "live",
+        "label": "Live",
+        "detail": "Tube and rail is reading live nearby.",
+        "confirmedAt": "2026-03-24T08:52:22.159Z"
+      },
+      "trust": {
+        "state": "current",
+        "label": "Current",
+        "detail": "Tube and rail is up to date.",
+        "confidence": "full"
+      }
+    },
+    {
+      "key": "bus",
+      "label": "Bus",
+      "state": "available",
+      "disruptionScope": "unaffected-readable",
+      "summary": "Nearby buses are running normally.",
+      "nuance": "No reported issue.",
+      "sourceStatus": {
+        "state": "live",
+        "label": "Live",
+        "detail": "Bus is reading live nearby.",
+        "confirmedAt": "2026-03-24T08:52:22.159Z"
+      },
+      "trust": {
+        "state": "current",
+        "label": "Current",
+        "detail": "Bus is up to date.",
+        "confidence": "full"
+      }
+    },
+    {
+      "key": "roads",
+      "label": "Roads",
+      "state": "caution",
+      "disruptionScope": "unaffected-readable",
+      "summary": "Mayfair traffic is still flowing, with slower turns around the wetter junctions.",
+      "nuance": "Street crossings remain readable, but the pace is not especially brisk.",
+      "sourceStatus": {
+        "state": "carried-forward",
+        "label": "Carried forward",
+        "detail": "Roads is showing the last available update.",
+        "confirmedAt": "2026-03-24T08:51:44.845Z"
+      },
+      "trust": {
+        "state": "reduced-confidence",
+        "label": "Reduced confidence",
+        "detail": "Roads is showing the last available update.",
+        "confidence": "narrowed"
+      }
+    },
+    {
+      "key": "cycles-scooters",
+      "label": "Cycles and scooters",
+      "state": "caution",
+      "disruptionScope": "unaffected-readable",
+      "summary": "Open micromobility nearby is still moving, though vehicles are thinner under the rain.",
+      "nuance": "Availability remains patchier than the clearer corridors nearby.",
+      "sourceStatus": {
+        "state": "carried-forward",
+        "label": "Carried forward",
+        "detail": "Cycles and scooters is showing the last available update.",
+        "confirmedAt": "2026-03-24T08:51:44.845Z"
+      },
+      "trust": {
+        "state": "reduced-confidence",
+        "label": "Reduced confidence",
+        "detail": "Cycles and scooters is showing the last available update.",
+        "confidence": "narrowed"
+      }
+    }
+  ]
+}

@@ -12,11 +12,15 @@ Complete stage: stabilized full implementation before final MVP packaging. When 
 
 ## Exported roots
 
+- .gitignore
+- env.local.example
 - README.md
 - _bmad-output
 - docs
+- runtime
 - src
 - tests
+- tools
 - package.json
 - package-lock.json
 - tsconfig.json

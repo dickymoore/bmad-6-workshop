@@ -467,11 +467,15 @@ if installation_ref=$(resolve_ref "$installation_branch"); then
 fi
 
 candidate_paths=(
+  .gitignore
+  env.local.example
   README.md
   _bmad-output
   docs
+  runtime
   src
   tests
+  tools
   public
   data
   package.json
