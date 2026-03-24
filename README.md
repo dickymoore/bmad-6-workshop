@@ -88,6 +88,15 @@ Additional scaffolded track:
   - track definition: `workshops/albemarle-pulse/track.json`
   - facilitator showcase on `main`: `showcase/albemarle-pulse/`
 
+## Sidecar Repos
+
+- `agent-replay` is a separate sidecar repository, not a tracked file tree inside
+  `bmad-6-workshop`.
+- Facilitator workspaces clone it alongside the exported workshop files as
+  `agent-replay/`.
+- Do not expect `agent_replay.py` to exist anywhere under this repo unless you
+  have copied it in manually.
+
 ## Workshop Operations
 
 For facilitators and operators preparing or delivering the workshop:

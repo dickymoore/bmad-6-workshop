@@ -173,6 +173,7 @@ done
   - `START-HERE.md` gives you one top-level page linking to the prompt, installation view, phase folders, and `agent-replay/`
   - phases without a frozen branch yet still get placeholder folders
   - clones `https://github.com/dickymoore/agent-replay` into `agent-replay/`
+  - `agent-replay/` is a sidecar checkout, not content that lives in this repo
   - generates `SPEAKER-GUIDE-LINKS.md` inside each facilitator folder with relative links to the files referenced in the speaker guide
   - optional BMB export support:
 

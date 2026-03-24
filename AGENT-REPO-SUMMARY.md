@@ -98,6 +98,14 @@ Main session tools:
 These create one worktree per branch, bootstrap BMAD/Codex where needed, and
 open VS Code with `codex --yolo` auto-started per worktree.
 
+## Sidecar Tools
+
+- `agent-replay` is a sidecar repo, not part of this Git repository.
+- Facilitator workspace generation clones it separately into an `agent-replay/`
+  folder next to the exported workshop files.
+- If a doc mentions `agent_replay.py`, assume it lives in that sidecar checkout,
+  not under `bmad-6-workshop/`.
+
 ## Constraints Future Agents Must Respect
 
 - Do not treat this like a single-branch app repo.
