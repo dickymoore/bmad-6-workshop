@@ -1,12 +1,12 @@
 {
-  "publishedAt": "2026-03-23T19:43:43.180Z",
+  "publishedAt": "2026-03-24T08:51:50.972Z",
   "overallState": "watchful",
   "overallTrend": "steady",
-  "weatherSummary": "Cold rain is moving across Mayfair and the street is reading a little slower.",
-  "weatherTemperatureC": 12,
+  "weatherSummary": "Dry nearby.",
+  "weatherTemperatureC": 11,
   "mobilitySummary": "Nearby transport is running normally.",
   "placeLabel": "Royal Institution, Albemarle Street",
-  "supportLabel": "Transport is live. Weather is delayed.",
+  "supportLabel": "Transport and weather are live.",
   "disruptionEmphasis": {
     "level": "none",
     "headline": null,
@@ -15,9 +15,9 @@
   },
   "headerTrust": {
     "weather": {
-      "state": "reduced-confidence",
-      "label": "Reduced confidence",
-      "detail": "Weather is showing the last available update.",
+      "state": "delayed",
+      "label": "Delayed",
+      "detail": "Weather is delayed.",
       "confidence": "narrowed"
     },
     "mobility": {
@@ -29,14 +29,16 @@
   },
   "headerStatus": {
     "weather": {
-      "state": "carried-forward",
-      "label": "Carried forward",
-      "detail": "Weather is showing the last available update."
+      "state": "live",
+      "label": "Live",
+      "detail": "Weather is live.",
+      "confirmedAt": "2026-03-24T08:30:00.000Z"
     },
     "mobility": {
       "state": "live",
       "label": "Live",
-      "detail": "Movement is live."
+      "detail": "Movement is live.",
+      "confirmedAt": "2026-03-24T08:51:50.972Z"
     }
   },
   "localMap": {
@@ -45,7 +47,8 @@
     "sourceStatus": {
       "state": "live",
       "label": "Live",
-      "detail": "The local frame is reading live for this foyer."
+      "detail": "The local frame is reading live for this foyer.",
+      "confirmedAt": "2026-03-24T08:51:50.972Z"
     },
     "venueAnchor": {
       "key": "royal-institution",
@@ -110,7 +113,8 @@
       "sourceStatus": {
         "state": "live",
         "label": "Live",
-        "detail": "Tube and rail is reading live nearby."
+        "detail": "Tube and rail is reading live nearby.",
+        "confirmedAt": "2026-03-24T08:51:50.972Z"
       },
       "trust": {
         "state": "current",
@@ -129,7 +133,8 @@
       "sourceStatus": {
         "state": "live",
         "label": "Live",
-        "detail": "Bus is reading live nearby."
+        "detail": "Bus is reading live nearby.",
+        "confirmedAt": "2026-03-24T08:51:50.972Z"
       },
       "trust": {
         "state": "current",
@@ -148,7 +153,8 @@
       "sourceStatus": {
         "state": "carried-forward",
         "label": "Carried forward",
-        "detail": "Roads is showing the last available update."
+        "detail": "Roads is showing the last available update.",
+        "confirmedAt": "2026-03-24T08:51:10.826Z"
       },
       "trust": {
         "state": "reduced-confidence",
@@ -167,7 +173,8 @@
       "sourceStatus": {
         "state": "carried-forward",
         "label": "Carried forward",
-        "detail": "Cycles and scooters is showing the last available update."
+        "detail": "Cycles and scooters is showing the last available update.",
+        "confirmedAt": "2026-03-24T08:51:10.826Z"
       },
       "trust": {
         "state": "reduced-confidence",

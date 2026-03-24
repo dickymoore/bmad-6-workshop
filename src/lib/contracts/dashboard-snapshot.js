@@ -107,7 +107,7 @@ function normalizeSourceStatus(sourceStatus, fieldName, fallbackState = "live") 
     throw new Error(`Dashboard source status field "${fieldName}" must be an object`);
   }
 
-  const { state, label, detail } = sourceStatus;
+  const { state, label, detail, confirmedAt = null } = sourceStatus;
 
   if (!SOURCE_STATUS_STATES.includes(state)) {
     throw new Error(`Unsupported dashboard source status for "${fieldName}": ${state}`);
@@ -127,6 +127,7 @@ function normalizeSourceStatus(sourceStatus, fieldName, fallbackState = "live") 
     state,
     label: label.trim(),
     detail: detail.trim(),
+    confirmedAt,
   });
 }
 

@@ -98,9 +98,9 @@
       "source": "docs/design-inputs/screen.png",
       "sampleWidth": 180,
       "sampleHeight": 119,
-      "diffPixelRatio": 0.1127,
-      "meanChannelDelta": 15.49,
-      "meanLuminanceDelta": 19.8
+      "diffPixelRatio": 0.1088,
+      "meanChannelDelta": 15.44,
+      "meanLuminanceDelta": 19.74
     }
   }
 }

@@ -102,7 +102,7 @@ function createCarriedForwardTrust(subject, detail) {
   });
 }
 
-function createHeaderSegment({ segment, liveOverview, storedSummary, now, publishedAt }) {
+function createHeaderSegment({ segment, liveOverview, storedSummary, storedPublishedAt, now, publishedAt }) {
   if (liveOverview) {
     return {
       summary: liveOverview.summary,
@@ -116,6 +116,7 @@ function createHeaderSegment({ segment, liveOverview, storedSummary, now, publis
       sourceStatus: createSourceStatus({
         state: "live",
         subject: segment.subject,
+        confirmedAt: liveOverview.signalObservedAt ?? publishedAt,
       }),
     };
   }
@@ -130,6 +131,7 @@ function createHeaderSegment({ segment, liveOverview, storedSummary, now, publis
       sourceStatus: createSourceStatus({
         state: "carried-forward",
         detail: `${segment.subject} is showing the last available update.`,
+        confirmedAt: storedPublishedAt,
       }),
     };
   }
@@ -157,7 +159,7 @@ function deriveModeTrust({ now, publishedAt, baseMode, liveMode, tflOverview }) 
   });
 }
 
-function createCarriedForwardMode(mode, storedMode) {
+function createCarriedForwardMode(mode, storedMode, storedPublishedAt) {
   return {
     ...mode,
     state: storedMode?.state ?? (mode.state === "disrupted" ? "caution" : mode.state),
@@ -167,6 +169,7 @@ function createCarriedForwardMode(mode, storedMode) {
     sourceStatus: createSourceStatus({
       state: "carried-forward",
       detail: `${mode.label} is showing the last available update.`,
+      confirmedAt: storedPublishedAt,
     }),
     trust: createCarriedForwardTrust(mode.label, `${mode.label} is showing the last available update.`),
   };
@@ -267,6 +270,7 @@ function createLocalMap({ baseSnapshot, storedSnapshot, tflOverview }) {
       sourceStatus: createSourceStatus({
         state: "live",
         detail: "The local frame is reading live for this foyer.",
+        confirmedAt: tflOverview.signalObservedAt ?? baseSnapshot.publishedAt,
       }),
     };
   }
@@ -278,6 +282,7 @@ function createLocalMap({ baseSnapshot, storedSnapshot, tflOverview }) {
       sourceStatus: createSourceStatus({
         state: "carried-forward",
         detail: "The local frame stays simplified while richer locality detail narrows.",
+        confirmedAt: storedSnapshot.publishedAt,
       }),
       fallbackCopy: "The local frame stays simplified while richer locality detail narrows.",
     };
@@ -335,6 +340,7 @@ export async function buildDashboardSnapshot({
         sourceStatus: createSourceStatus({
           state: "live",
           detail: `${mode.label} is reading live nearby.`,
+          confirmedAt: liveMode.signalObservedAt ?? tflOverview?.signalObservedAt ?? publishedAt,
         }),
         trust: deriveModeTrust({
           now,
@@ -346,7 +352,7 @@ export async function buildDashboardSnapshot({
       };
     }
 
-    return storedMode ? createCarriedForwardMode(mode, storedMode) : createUnavailableMode(mode);
+    return storedMode ? createCarriedForwardMode(mode, storedMode, storedSnapshot?.publishedAt ?? null) : createUnavailableMode(mode);
   });
 
   const weatherHeader = createHeaderSegment({
@@ -364,6 +370,7 @@ export async function buildDashboardSnapshot({
             missedRefreshes: weatherOverview.missedRefreshes ?? 0,
           },
     storedSummary: storedSnapshot?.weatherSummary ?? null,
+    storedPublishedAt: storedSnapshot?.publishedAt ?? null,
     now,
     publishedAt,
   });
@@ -381,6 +388,7 @@ export async function buildDashboardSnapshot({
             missedRefreshes: tflOverview.missedRefreshes ?? 0,
           },
     storedSummary: storedSnapshot?.mobilitySummary ?? null,
+    storedPublishedAt: storedSnapshot?.publishedAt ?? null,
     now,
     publishedAt,
   });

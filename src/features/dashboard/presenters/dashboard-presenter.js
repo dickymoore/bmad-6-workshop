@@ -59,6 +59,14 @@ const CANONICAL_MODE_ORDER = Object.freeze([
   "roads",
   "cycles-scooters",
 ]);
+const LONDON_SOURCE_TIME_FORMATTER = new Intl.DateTimeFormat("en-GB", {
+  day: "2-digit",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+  timeZone: "Europe/London",
+});
 
 function createTrendMessage(overallTrend) {
   if (overallTrend === "improving") {
@@ -76,12 +84,56 @@ function createCurrentnessMessage() {
   return "Board refreshes in place.";
 }
 
+function formatConfirmedAt(confirmedAt) {
+  if (typeof confirmedAt !== "string" || confirmedAt.trim().length === 0) {
+    return null;
+  }
+
+  const parsedAt = new Date(confirmedAt);
+
+  if (Number.isNaN(parsedAt.getTime())) {
+    return null;
+  }
+
+  return LONDON_SOURCE_TIME_FORMATTER.format(parsedAt).replace(",", "");
+}
+
+function createDisplaySourceLabel(sourceStatus) {
+  if (sourceStatus.state !== "carried-forward") {
+    return sourceStatus.label;
+  }
+
+  const confirmedAtLabel = formatConfirmedAt(sourceStatus.confirmedAt);
+
+  return confirmedAtLabel ? `Last confirmed ${confirmedAtLabel}` : "Last confirmed";
+}
+
+function createDisplaySourceDetail(sourceStatus) {
+  if (sourceStatus.state !== "carried-forward") {
+    return sourceStatus.detail;
+  }
+
+  const confirmedAtLabel = formatConfirmedAt(sourceStatus.confirmedAt);
+
+  return confirmedAtLabel ? `Last confirmed ${confirmedAtLabel}.` : "Last confirmed update.";
+}
+
+function createLastConfirmedLine(subject, status) {
+  const confirmedAtLabel = formatConfirmedAt(status.confirmedAt);
+
+  return confirmedAtLabel ? `${subject} last confirmed ${confirmedAtLabel}.` : `${subject} last confirmed.`;
+}
+
 function createWeatherLead(weatherSummary, weatherStatus) {
   if (!weatherStatus.isLive) {
     return null;
   }
 
   const cue = createWeatherBoardCue(weatherSummary, weatherStatus);
+
+  if (cue === "Dry") {
+    return "Dry nearby.";
+  }
 
   if (cue === "Clear") {
     return "Clear nearby.";
@@ -99,37 +151,11 @@ function createWeatherLead(weatherSummary, weatherStatus) {
     return "Windy nearby.";
   }
 
+  if (cue === "Mist") {
+    return "Mist nearby.";
+  }
+
   return null;
-}
-
-function createWeatherBullet(weatherSummary) {
-  const summary = normalizeSentence(weatherSummary);
-
-  if (!summary) {
-    return null;
-  }
-
-  if (/rain/i.test(summary)) {
-    return "Rain nearby.";
-  }
-
-  if (/cloud/i.test(summary)) {
-    return "Cloudy nearby.";
-  }
-
-  if (/sun|clear|dry/i.test(summary)) {
-    return "Dry nearby.";
-  }
-
-  if (/wind/i.test(summary)) {
-    return "Windy nearby.";
-  }
-
-  if (/visibility|fog|mist/i.test(summary)) {
-    return "Reduced visibility nearby.";
-  }
-
-  return `${summary}.`;
 }
 
 function createRecoveryCurrentnessMessage(recovery) {
@@ -188,7 +214,7 @@ function createModeSupportLine(mode) {
   const supportFragments = [];
 
   if (mode.sourceStatus.state !== "live") {
-    supportFragments.push(mode.sourceStatus.label);
+    supportFragments.push(createDisplaySourceLabel(mode.sourceStatus));
   }
 
   if (mode.trust.confidence === "narrowed") {
@@ -232,22 +258,34 @@ function joinChangeFragments(fragments) {
 }
 
 function createWeatherBoardCue(weatherSummary, weatherStatus) {
+  if (!weatherStatus.isLive) {
+    return weatherStatus.label;
+  }
+
   const summary = weatherSummary.toLowerCase();
 
   if (summary.includes("rain")) {
     return "Rain";
   }
 
+  if (summary.includes("dry")) {
+    return "Dry";
+  }
+
   if (summary.includes("cloud")) {
     return "Cloudy";
   }
 
-  if (summary.includes("sun")) {
-    return "Clear";
+  if (summary.includes("sun") || summary.includes("clear")) {
+    return "Dry";
   }
 
   if (summary.includes("wind")) {
     return "Wind";
+  }
+
+  if (summary.includes("visibility") || summary.includes("fog") || summary.includes("mist")) {
+    return "Mist";
   }
 
   return weatherStatus.label;
@@ -263,6 +301,11 @@ function formatTemperatureC(temperatureC) {
 
 function createWeatherBoardValue(weatherSummary, weatherStatus, weatherTemperatureC) {
   const temperatureLabel = formatTemperatureC(weatherTemperatureC);
+
+  if (!weatherStatus.isLive) {
+    return temperatureLabel ?? weatherStatus.label;
+  }
+
   const cue = createWeatherBoardCue(weatherSummary, weatherStatus);
 
   if (temperatureLabel && cue && cue !== weatherStatus.label) {
@@ -305,7 +348,6 @@ function createContextTiles(nearbyModes, weatherSummary, weatherStatus, weatherT
 
 function createBoardSummary(snapshot, weatherStatus, mobilityStatus) {
   const weatherLead = createWeatherLead(snapshot.weatherSummary, weatherStatus);
-  const weatherBullet = createWeatherBullet(snapshot.weatherSummary);
   const hasDisruptedMode = snapshot.nearbyModes.some((mode) => mode.state === "disrupted");
   const hasCautionMode = snapshot.nearbyModes.some((mode) => mode.state === "caution");
   const transportBullet =
@@ -316,19 +358,17 @@ function createBoardSummary(snapshot, weatherStatus, mobilityStatus) {
         : "Services steady.";
 
   if (!weatherStatus.isLive && !mobilityStatus.isLive) {
-    if (weatherBullet) {
-      return `Last update held. ${normalizeSentence(weatherBullet)}, ${normalizeSentence(transportBullet)?.toLowerCase()}.`;
-    }
-
-    return `Last update held. ${transportBullet}`;
+    return `Last update held. ${createLastConfirmedLine("Weather", weatherStatus)}`;
   }
 
   if (!mobilityStatus.isLive) {
-    return weatherLead ? `${weatherLead} Service update pending.` : "Service update pending.";
+    return weatherLead
+      ? `${weatherLead} ${createLastConfirmedLine("Movement", mobilityStatus)}`
+      : createLastConfirmedLine("Movement", mobilityStatus);
   }
 
   if (!weatherStatus.isLive) {
-    return `${normalizeSentence(transportBullet)} Weather update pending.`;
+    return `${normalizeSentence(transportBullet)} ${createLastConfirmedLine("Weather", weatherStatus)}`;
   }
 
   if (hasDisruptedMode) {
@@ -534,8 +574,9 @@ function presentTrust(trust) {
 function presentSourceStatus(sourceStatus) {
   return Object.freeze({
     state: sourceStatus.state,
-    label: sourceStatus.label,
-    detail: sourceStatus.detail,
+    label: createDisplaySourceLabel(sourceStatus),
+    detail: createDisplaySourceDetail(sourceStatus),
+    confirmedAt: sourceStatus.confirmedAt ?? null,
     isLive: sourceStatus.state === "live",
   });
 }

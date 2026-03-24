@@ -104,6 +104,7 @@ export function createSourceStatus({
   label = SOURCE_STATUS_LABELS[state],
   detail,
   subject = "This source",
+  confirmedAt = null,
 } = {}) {
   if (!SOURCE_STATUS_STATES.includes(state)) {
     throw new Error(`Unsupported source status state: ${state}`);
@@ -123,10 +124,14 @@ export function createSourceStatus({
     throw new Error('Source status field "detail" must be a non-empty string');
   }
 
+  const normalizedConfirmedAt =
+    typeof confirmedAt === "string" && confirmedAt.trim().length > 0 ? confirmedAt.trim() : null;
+
   return Object.freeze({
     state,
     label: normalizedLabel,
     detail: normalizedDetail,
+    confirmedAt: normalizedConfirmedAt,
   });
 }
 

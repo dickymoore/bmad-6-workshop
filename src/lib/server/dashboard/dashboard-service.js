@@ -46,10 +46,12 @@ function createCarriedForwardSnapshot(snapshot) {
       weather: createSourceStatus({
         state: "carried-forward",
         detail: "Weather is showing the last available update.",
+        confirmedAt: snapshot.publishedAt,
       }),
       mobility: createSourceStatus({
         state: "carried-forward",
         detail: "Movement is showing the last available update.",
+        confirmedAt: snapshot.publishedAt,
       }),
     },
     localMap: {
@@ -58,6 +60,7 @@ function createCarriedForwardSnapshot(snapshot) {
       sourceStatus: createSourceStatus({
         state: "carried-forward",
         detail: "Showing the simpler local map.",
+        confirmedAt: snapshot.publishedAt,
       }),
       fallbackCopy: "Showing the simpler local map.",
     },
@@ -68,6 +71,7 @@ function createCarriedForwardSnapshot(snapshot) {
       sourceStatus: createSourceStatus({
         state: "carried-forward",
         detail: `${mode.label} is showing the last available update.`,
+        confirmedAt: snapshot.publishedAt,
       }),
       trust: createTrustSignal({
         state: "reduced-confidence",

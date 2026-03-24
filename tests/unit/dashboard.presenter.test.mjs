@@ -414,6 +414,34 @@ describe("dashboard presenter", () => {
     );
   });
 
+  it("keeps the live weather cue alongside temperature for dry conditions", () => {
+    const viewModel = presentDashboardSnapshot(
+      buildSnapshot({
+        weatherSummary: "Dry nearby.",
+        weatherTemperatureC: 11,
+        headerStatus: {
+          weather: {
+            state: "live",
+            label: "Live",
+            detail: "Weather is live.",
+          },
+          mobility: {
+            state: "live",
+            label: "Live",
+            detail: "Movement is live.",
+          },
+        },
+      }),
+    );
+
+    expect(viewModel.contextTiles.find((tile) => tile.key === "weather")).toEqual({
+      key: "weather",
+      label: "Weather",
+      value: "Dry 11°C",
+      tone: "available",
+    });
+  });
+
   it("keeps fallback locality narrower than the live map while preserving the same anchor seam", () => {
     const liveViewModel = presentDashboardSnapshot(createFixtureDashboardSnapshot());
     const fallbackViewModel = presentDashboardSnapshot(createFixtureDashboardFallbackSnapshot());
