@@ -97,6 +97,34 @@ but no frozen branch exists for this stage yet.
 EOF2
 }
 
+write_preinstall_readme() {
+  local path="$1"
+  local branch="$2"
+  local ref="$3"
+  local commit_sha="$4"
+  local subject="$5"
+  local guidance="$6"
+  local exported_csv="$7"
+
+  cat > "$path" <<EOF2
+# 00-pre-install - Clean bootstrap view
+
+- Branch: ${branch}
+- Source ref used for export: ${ref}
+- Commit: ${commit_sha}
+- Commit subject: ${subject}
+- Snapshot path: snapshot/
+
+## Guidance
+
+${guidance}
+
+## Exported roots
+
+${exported_csv}
+EOF2
+}
+
 write_installation_readme() {
   local path="$1"
   local branch="$2"
@@ -156,8 +184,10 @@ cat > "$root_readme" <<EOF2
 # Facilitator Showcase: ${TRACK}
 
 This folder is a generated facilitator view for workshop delivery without live
-branch switching. Each stage folder contains a generated summary and a
-snapshot/ directory exported from the corresponding frozen workshop branch.
+branch switching. The helper folders \`00-pre-install/\` and \`installation/\`
+show the clean bootstrap state and the BMAD install payload. Each stage folder
+contains a generated summary and a snapshot/ directory exported from the
+corresponding frozen workshop branch.
 
 The canonical source of truth remains the workshop branches plus the rolling
 authoring/${TRACK} branch. This showcase lives on main only.
@@ -165,6 +195,33 @@ authoring/${TRACK} branch. This showcase lives on main only.
 ## Stage snapshots
 
 EOF2
+
+bootstrap_branch=$(workshop_stage_branch "$TRACK" main)
+preinstall_guidance="Clean bootstrap snapshot taken from ${bootstrap_branch} before BMAD install. Use this view to show the starting repo state; the installed BMAD payload appears separately under installation/."
+preinstall_dir="$track_root/00-pre-install"
+mkdir -p "$preinstall_dir/snapshot"
+preinstall_paths=(
+  README.md
+)
+
+if preinstall_ref=$(resolve_ref "$bootstrap_branch"); then
+  preinstall_sha=$(git -C "$ROOT_DIR" rev-parse --short "$preinstall_ref")
+  preinstall_subject=$(git -C "$ROOT_DIR" log -1 --format=%s "$preinstall_ref")
+  exported_preinstall=()
+  for path in "${preinstall_paths[@]}"; do
+    if git -C "$ROOT_DIR" cat-file -e "$preinstall_ref:$path" 2>/dev/null; then
+      exported_preinstall+=("$path")
+    fi
+  done
+  if ((${#exported_preinstall[@]} > 0)); then
+    git -C "$ROOT_DIR" archive "$preinstall_ref" "${exported_preinstall[@]}" | tar -x -C "$preinstall_dir/snapshot"
+    preinstall_list=$(printf -- '- %s\n' "${exported_preinstall[@]}")
+  else
+    preinstall_list='- none'
+  fi
+  write_preinstall_readme "$preinstall_dir/README.md" "$bootstrap_branch" "$preinstall_ref" "$preinstall_sha" "$preinstall_subject" "$preinstall_guidance" "$preinstall_list"
+  printf -- '- 00-pre-install -> %s (%s)\n' "$bootstrap_branch" "$preinstall_sha" >> "$root_readme"
+fi
 
 installation_branch=$(workshop_stage_branch "$TRACK" 10-analysis)
 installation_guidance="BMAD install payload snapshot taken from ${installation_branch}, which is the first committed branch that contains the installed .agents and _bmad files."

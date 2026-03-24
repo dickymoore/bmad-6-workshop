@@ -87,6 +87,7 @@ Additional scaffolded track:
   - rolling authoring branch: `authoring/albemarle-pulse`
   - track definition: `workshops/albemarle-pulse/track.json`
   - facilitator showcase on `main`: `showcase/albemarle-pulse/`
+  - showcase flow includes `00-pre-install/`, `installation/`, and stage snapshots through `80-mvp/`
 
 ## Sidecar Repos
 

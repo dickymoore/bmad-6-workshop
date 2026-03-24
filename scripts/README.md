@@ -133,6 +133,8 @@ Current default track: `desk-booking`
 
 - Notes:
   - writes to `showcase/<track>/` on the current branch
+  - adds `showcase/<track>/00-pre-install/` from the bootstrap branch before BMAD is installed
+  - keeps `showcase/<track>/installation/` as the post-install BMAD payload view
   - exports each stage into `showcase/<track>/<stage>/snapshot/`
   - leaves a placeholder folder for stages that have not been cut yet
 
@@ -167,10 +169,11 @@ done
 
 - Notes:
   - destination must be outside the repo
-  - `files/installation/` shows the BMAD install payload from `main`, including `.agents/skills` and selected `_bmad` config files
+  - `files/00-pre-install/` shows the clean bootstrap state before BMAD install
+  - `files/installation/` shows the BMAD install payload from `workshop/<track>/10-analysis`, including `.agents/skills` and selected `_bmad` config files
   - `files/` contains phase folders like `phase-1-analysis/` and `phase-6-implementation/`
   - `files/phase-1-analysis/DEMO-START-PROMPT.md` contains the track-specific opening prompt for the live demo
-  - `START-HERE.md` gives you one top-level page linking to the prompt, installation view, phase folders, and `agent-replay/`
+  - `START-HERE.md` gives you one top-level page linking to the prompt, pre-install view, installation view, phase folders, and `agent-replay/`
   - phases without a frozen branch yet still get placeholder folders
   - clones `https://github.com/dickymoore/agent-replay` into `agent-replay/`
   - `agent-replay/` is a sidecar checkout, not content that lives in this repo
