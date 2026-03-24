@@ -16,9 +16,18 @@ This file records the frozen participant branch cuts that were reconstructed fro
 - `workshop/albemarle-pulse/40-implementation-setup` -> `cdb0b2b`
   - source commit: `Phase three complete`
   - branch meaning: architecture/epics/readiness complete, coding not yet shown
+- `workshop/albemarle-pulse/50-ready-for-dev` -> `4d9b3a1`
+  - source commit: reconstructed from `adb5d00` (`phase four development started`)
+  - branch meaning: sprint planning and first story handoff artifacts are present, but implementation code and runtime files have been stripped back out to preserve the pre-code participant boundary
 - `workshop/albemarle-pulse/60-implementation` -> `c8f7dfa`
   - source commit: `feat(epic-2): implement 2-1-keep-the-departure-picture-current-during-normal-operation`
   - branch meaning: frozen in-progress implementation snapshot from the latest pushed authoring state as of 2026-03-19
+- `workshop/albemarle-pulse/70-complete` -> `70ae7d5`
+  - source commit: `Good looking app`
+  - branch meaning: stabilized full implementation with completed design-parity work before final MVP polish
+- `workshop/albemarle-pulse/80-mvp` -> `f37a179`
+  - source commit: `working version`
+  - branch meaning: final demoable MVP snapshot from the finished authoring branch
 
 ## Tags created
 
@@ -26,14 +35,17 @@ This file records the frozen participant branch cuts that were reconstructed fro
 - `cut/albemarle-pulse/20-planning-complete` -> `40e3087`
 - `cut/albemarle-pulse/30-solutioning-complete` -> `cdb0b2b`
 
-## Current gap
+## Reconstruction note
 
-`workshop/albemarle-pulse/50-ready-for-dev` has not been cut yet.
+`workshop/albemarle-pulse/50-ready-for-dev` could not be cut by simply pointing
+at an authoring commit because `adb5d00` introduced both sprint artifacts and
+application code together.
 
-Reason:
-- the first implementation commit (`adb5d00`) introduces both sprint artifacts and application code in the same commit
-- that means there is no clean pre-code boundary in the current history for a true ready-for-dev checkpoint
+That stage was therefore reconstructed as a branch-local cleanup cut:
 
-If a clean ready-for-dev checkpoint is needed later, it should be created from a
-future authoring commit that contains sprint planning artifacts without app code,
-or reconstructed with an explicit history-editing pass.
+- base commit: `adb5d00`
+- cleanup commit: `4d9b3a1`
+- removed from the frozen participant branch: `package.json`, `package-lock.json`,
+  `src/`, `tests/`, TypeScript/Next.js config files, and `.nvmrc`
+
+The rolling `authoring/albemarle-pulse` branch remains intact and unchanged.

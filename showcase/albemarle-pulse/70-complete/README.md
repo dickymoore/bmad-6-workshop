@@ -1,13 +1,26 @@
 # 70-complete - Complete
 
 - Branch: workshop/albemarle-pulse/70-complete
-- Status: not yet cut from authoring history
+- Source ref used for export: workshop/albemarle-pulse/70-complete
+- Commit: 70ae7d5
+- Commit subject: Good looking app
+- Snapshot path: snapshot/
 
 ## Guidance
 
 Complete stage: stabilized full implementation before final MVP packaging. When ready, cut `workshop/albemarle-pulse/80-mvp`.
 
-## Notes
+## Exported roots
 
-This showcase folder exists so the facilitator view stays structurally stable,
-but no frozen branch exists for this stage yet.
+- README.md
+- _bmad-output
+- docs
+- src
+- tests
+- package.json
+- package-lock.json
+- tsconfig.json
+- next.config.ts
+- eslint.config.mjs
+- playwright.config.ts
+- .nvmrc

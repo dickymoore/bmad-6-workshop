@@ -1,0 +1,115 @@
+# generated: 2026-03-23
+# project: bmad-6-workshop-migration
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: /home/codexuser/bmad-6-workshop/docs/sprint-artifacts
+#
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog -> in-progress: Automatically when first story is created
+#   - in-progress -> done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - optional: Story intentionally not active in the current plan
+#   - ready-for-dev: Story file created in sprint artifacts
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' when active corrective stories are added or created
+# - Stories can be worked in parallel if team capacity allows
+# - Scrum Master typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code review in a fresh context
+
+generated: '2026-03-23'
+project: bmad-6-workshop-migration
+project_key: NOKEY
+tracking_system: file-system
+story_location: /home/codexuser/bmad-6-workshop/docs/sprint-artifacts
+
+review_debt_status:
+  external_adversarial_register: /home/codexuser/bmad-6-workshop/docs/sprint-artifacts/external-adversarial-remediation-register.md
+  review_debt_closure: done
+  release_readiness: evidence-backed
+  product_acceptance: accepted
+  no_action_context_only_story_ids:
+    epic-1:
+      - 1-3-render-the-overall-departure-picture
+      - 1-5-anchor-the-display-with-a-fixed-local-map
+  no_code_after_rerun_story_ids:
+    epic-2:
+      - 2-2-show-trend-and-freshness-where-confidence-matters
+      - 2-4-preserve-honest-usefulness-during-provider-failure
+      - 2-5-maintain-stable-live-reading-during-updates-and-motion-changes
+    epic-3:
+      - 3-3-diagnose-degraded-impact-by-signal-and-scope
+  reopened_story_ids:
+    epic-2: []
+    epic-3: []
+  candidate_story_ids:
+    epic-2: []
+    epic-3: []
+  pending_story_ids_for_4_5:
+    epic-2: []
+    epic-3: []
+  owner_path:
+    epic-2: 4-3-reopen-and-remediate-epic-2-review-debt
+    epic-3: 4-4-reopen-and-remediate-epic-3-review-debt
+    closure: 4-5-rerun-reviews-and-close-only-green-stories
+
+development_status:
+  epic-1: done
+  1-1-set-up-initial-project-from-approved-starter-template: done
+  1-2-establish-baseline-quality-gates-and-build-readiness: done
+  1-3-render-the-overall-departure-picture: done
+  1-4-show-nearby-mode-summaries-for-shared-reading: done
+  1-5-anchor-the-display-with-a-fixed-local-map: done
+  1-6-verify-the-primary-display-on-real-venue-sized-surfaces: done
+  epic-1-retrospective: optional
+
+  epic-2: done
+  2-1-keep-the-departure-picture-current-during-normal-operation: done
+  2-2-show-trend-and-freshness-where-confidence-matters: done
+  2-3-surface-serious-disruption-without-breaking-composure: done
+  2-4-preserve-honest-usefulness-during-provider-failure: done
+  2-5-maintain-stable-live-reading-during-updates-and-motion-changes: done
+  epic-2-retrospective: done
+
+  epic-3: done
+  3-1-provide-a-separate-local-only-ops-access-surface: done
+  3-2-show-public-readiness-and-current-ops-state: done
+  3-3-diagnose-degraded-impact-by-signal-and-scope: done
+  3-4-trigger-lightweight-refresh-and-trust-check-actions: done
+  3-5-recover-the-display-after-interruption-or-restart: done
+  epic-3-retrospective: done
+
+  epic-4: done
+  4-1-audit-external-adversarial-findings-and-map-them-to-story-ids: done
+  4-2-reopen-and-remediate-epic-1-review-debt: optional
+  4-3-reopen-and-remediate-epic-2-review-debt: done
+  4-4-reopen-and-remediate-epic-3-review-debt: done
+  4-5-re-review-and-re-close-only-green-stories: done
+  epic-4-retrospective: optional
+
+  epic-5: done
+  5-1-reframe-the-public-display-around-a-one-screen-status-first-board: done
+  5-2-replace-verbose-mode-cards-with-compact-rag-transport-rows: done
+  5-3-add-concrete-nearby-station-and-locality-references: done
+  5-4-redesign-the-local-map-for-practical-usefulness: done
+  5-5-revalidate-the-public-screen-against-board-readability-criteria: done
+  5-6-close-the-live-public-board-gap-to-the-approved-design-reference: done
+  5-7-validate-design-reference-parity-with-playwright-screenshots: done
+  epic-5-retrospective: optional
