@@ -1,27 +1,5 @@
 [
   {
-    "publishedAt": "2026-03-24T08:37:20.161Z",
-    "overallState": "watchful",
-    "nearbyModes": [
-      {
-        "key": "tube-rail",
-        "state": "available"
-      },
-      {
-        "key": "bus",
-        "state": "available"
-      },
-      {
-        "key": "roads",
-        "state": "caution"
-      },
-      {
-        "key": "cycles-scooters",
-        "state": "caution"
-      }
-    ]
-  },
-  {
     "publishedAt": "2026-03-24T08:40:59.159Z",
     "overallState": "watchful",
     "nearbyModes": [
@@ -419,6 +397,28 @@
   },
   {
     "publishedAt": "2026-03-24T08:51:50.972Z",
+    "overallState": "watchful",
+    "nearbyModes": [
+      {
+        "key": "tube-rail",
+        "state": "available"
+      },
+      {
+        "key": "bus",
+        "state": "available"
+      },
+      {
+        "key": "roads",
+        "state": "caution"
+      },
+      {
+        "key": "cycles-scooters",
+        "state": "caution"
+      }
+    ]
+  },
+  {
+    "publishedAt": "2026-03-24T08:52:22.159Z",
     "overallState": "watchful",
     "nearbyModes": [
       {

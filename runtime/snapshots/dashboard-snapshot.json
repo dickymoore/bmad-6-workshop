@@ -1,5 +1,5 @@
 {
-  "publishedAt": "2026-03-24T08:51:50.972Z",
+  "publishedAt": "2026-03-24T08:52:22.159Z",
   "overallState": "watchful",
   "overallTrend": "steady",
   "weatherSummary": "Dry nearby.",
@@ -38,7 +38,7 @@
       "state": "live",
       "label": "Live",
       "detail": "Movement is live.",
-      "confirmedAt": "2026-03-24T08:51:50.972Z"
+      "confirmedAt": "2026-03-24T08:52:22.159Z"
     }
   },
   "localMap": {
@@ -48,7 +48,7 @@
       "state": "live",
       "label": "Live",
       "detail": "The local frame is reading live for this foyer.",
-      "confirmedAt": "2026-03-24T08:51:50.972Z"
+      "confirmedAt": "2026-03-24T08:52:22.159Z"
     },
     "venueAnchor": {
       "key": "royal-institution",
@@ -114,7 +114,7 @@
         "state": "live",
         "label": "Live",
         "detail": "Tube and rail is reading live nearby.",
-        "confirmedAt": "2026-03-24T08:51:50.972Z"
+        "confirmedAt": "2026-03-24T08:52:22.159Z"
       },
       "trust": {
         "state": "current",
@@ -134,7 +134,7 @@
         "state": "live",
         "label": "Live",
         "detail": "Bus is reading live nearby.",
-        "confirmedAt": "2026-03-24T08:51:50.972Z"
+        "confirmedAt": "2026-03-24T08:52:22.159Z"
       },
       "trust": {
         "state": "current",
@@ -154,7 +154,7 @@
         "state": "carried-forward",
         "label": "Carried forward",
         "detail": "Roads is showing the last available update.",
-        "confirmedAt": "2026-03-24T08:51:10.826Z"
+        "confirmedAt": "2026-03-24T08:51:44.845Z"
       },
       "trust": {
         "state": "reduced-confidence",
@@ -174,7 +174,7 @@
         "state": "carried-forward",
         "label": "Carried forward",
         "detail": "Cycles and scooters is showing the last available update.",
-        "confirmedAt": "2026-03-24T08:51:10.826Z"
+        "confirmedAt": "2026-03-24T08:51:44.845Z"
       },
       "trust": {
         "state": "reduced-confidence",
