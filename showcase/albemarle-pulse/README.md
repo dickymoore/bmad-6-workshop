@@ -1,14 +1,17 @@
 # Facilitator Showcase: albemarle-pulse
 
 This folder is a generated facilitator view for workshop delivery without live
-branch switching. Each stage folder contains a generated summary and a
-snapshot/ directory exported from the corresponding frozen workshop branch.
+branch switching. The helper folders `00-pre-install/` and `installation/`
+show the clean bootstrap state and the BMAD install payload. Each stage folder
+contains a generated summary and a snapshot/ directory exported from the
+corresponding frozen workshop branch.
 
 The canonical source of truth remains the workshop branches plus the rolling
 authoring/albemarle-pulse branch. This showcase lives on main only.
 
 ## Stage snapshots
 
+- 00-pre-install -> main (66fe10e)
 - installation -> workshop/albemarle-pulse/10-analysis (6d7af6c)
 - 10-analysis -> workshop/albemarle-pulse/10-analysis (6d7af6c)
 - 20-planning -> workshop/albemarle-pulse/20-planning (7df8ee6)
