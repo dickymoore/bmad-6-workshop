@@ -1,0 +1,241 @@
+{
+  "id": "harbourwatch",
+  "display_name": "HarbourWatch",
+  "bootstrap": {
+    "branch": "main",
+    "folder": "00-main",
+    "guidance": "Main: shared bootstrap branch. For the HarbourWatch workshop, checkout `workshop/harbourwatch/10-analysis` to begin Stage 1 after the branch has been cut.",
+    "required_patterns": [
+      "^README\\.md$",
+      "^scripts/audit-bmad-v6\\.sh$",
+      "^scripts/migrate-bmad-v6\\.sh$",
+      "^scripts/verify-bmad-v6\\.sh$"
+    ],
+    "forbidden_patterns": [
+      "^\\.bmad/",
+      "^_bmad/",
+      "^\\.agents/",
+      "^docs/",
+      "^data/",
+      "^package\\.json$",
+      "^src/",
+      "^tests/"
+    ]
+  },
+  "stages": [
+    {
+      "id": "10-analysis",
+      "name": "Analysis",
+      "branch": "workshop/harbourwatch/10-analysis",
+      "old_canonical": null,
+      "legacy_aliases": [],
+      "source_branch": null,
+      "folder": "10-analysis",
+      "next_branch": "workshop/harbourwatch/20-planning",
+      "guidance": "Stage 1 (Analysis): frame HarbourWatch, define harbour-side user outcomes, and use BMAD to create brainstorming, domain research, technical research, and the product brief. When complete, cut `workshop/harbourwatch/20-planning` from `authoring/harbourwatch`.",
+      "required_patterns": [
+        "^README\\.md$",
+        "^_bmad/_config/manifest\\.yaml$",
+        "^_bmad/bmm/config\\.yaml$",
+        "^\\.agents/skills/",
+        "^scripts/audit-bmad-v6\\.sh$",
+        "^scripts/migrate-bmad-v6\\.sh$",
+        "^scripts/verify-bmad-v6\\.sh$"
+      ],
+      "forbidden_patterns": [
+        "^\\.bmad/",
+        "^docs/",
+        "^data/",
+        "^package\\.json$",
+        "^src/",
+        "^tests/"
+      ]
+    },
+    {
+      "id": "20-planning",
+      "name": "Planning",
+      "branch": "workshop/harbourwatch/20-planning",
+      "old_canonical": null,
+      "legacy_aliases": [],
+      "source_branch": null,
+      "folder": "20-planning",
+      "next_branch": "workshop/harbourwatch/30-solutioning",
+      "guidance": "Stage 2 (Planning): convert HarbourWatch analysis outputs into a PRD-ready planning baseline, then cut `workshop/harbourwatch/30-solutioning`.",
+      "required_patterns": [
+        "^README\\.md$",
+        "^_bmad/_config/manifest\\.yaml$",
+        "^_bmad/bmm/config\\.yaml$",
+        "^\\.agents/skills/",
+        "^docs/product-brief-.*\\.md$",
+        "^docs/research/domain-.*\\.md$",
+        "^docs/research/technical-.*\\.md$",
+        "^_bmad-output/brainstorming/brainstorming-session-.*\\.md$"
+      ],
+      "forbidden_patterns": [
+        "^\\.bmad/",
+        "^docs/prd\\.md$",
+        "^docs/ux-design-specification\\.md$",
+        "^data/",
+        "^package\\.json$",
+        "^src/",
+        "^tests/"
+      ]
+    },
+    {
+      "id": "30-solutioning",
+      "name": "Solutioning",
+      "branch": "workshop/harbourwatch/30-solutioning",
+      "old_canonical": null,
+      "legacy_aliases": [],
+      "source_branch": null,
+      "folder": "30-solutioning",
+      "next_branch": "workshop/harbourwatch/40-implementation-setup",
+      "guidance": "Stage 3 (Solutioning): produce the PRD, UX specification, and validation outputs for HarbourWatch, then cut `workshop/harbourwatch/40-implementation-setup`.",
+      "required_patterns": [
+        "^README\\.md$",
+        "^_bmad/_config/manifest\\.yaml$",
+        "^_bmad/bmm/config\\.yaml$",
+        "^\\.agents/skills/",
+        "^docs/prd\\.md$",
+        "^docs/ux-design-specification\\.md$"
+      ],
+      "forbidden_patterns": [
+        "^\\.bmad/",
+        "^docs/architecture\\.md$",
+        "^docs/epics\\.md$",
+        "^docs/implementation-readiness-report-.*\\.md$",
+        "^docs/sprint-artifacts/",
+        "^data/",
+        "^package\\.json$",
+        "^src/",
+        "^tests/"
+      ]
+    },
+    {
+      "id": "40-implementation-setup",
+      "name": "Implementation Setup",
+      "branch": "workshop/harbourwatch/40-implementation-setup",
+      "old_canonical": null,
+      "legacy_aliases": [],
+      "source_branch": null,
+      "folder": "40-implementation-setup",
+      "next_branch": "workshop/harbourwatch/50-ready-for-dev",
+      "guidance": "Stage 4 (Implementation setup): complete HarbourWatch architecture, epics, and readiness outputs, then cut `workshop/harbourwatch/50-ready-for-dev`.",
+      "required_patterns": [
+        "^README\\.md$",
+        "^_bmad/_config/manifest\\.yaml$",
+        "^_bmad/bmm/config\\.yaml$",
+        "^\\.agents/skills/",
+        "^docs/architecture\\.md$",
+        "^docs/epics\\.md$",
+        "^docs/implementation-readiness-report-.*\\.md$"
+      ],
+      "forbidden_patterns": [
+        "^\\.bmad/",
+        "^docs/sprint-artifacts/",
+        "^data/",
+        "^package\\.json$",
+        "^src/",
+        "^tests/"
+      ]
+    },
+    {
+      "id": "50-ready-for-dev",
+      "name": "Ready for Dev",
+      "branch": "workshop/harbourwatch/50-ready-for-dev",
+      "old_canonical": null,
+      "legacy_aliases": [],
+      "source_branch": null,
+      "folder": "50-ready-for-dev",
+      "next_branch": "workshop/harbourwatch/60-implementation",
+      "guidance": "Ready-for-dev stage: complete sprint planning and the first HarbourWatch implementation story, then cut `workshop/harbourwatch/60-implementation`.",
+      "required_patterns": [
+        "^README\\.md$",
+        "^_bmad/_config/manifest\\.yaml$",
+        "^_bmad/bmm/config\\.yaml$",
+        "^\\.agents/skills/",
+        "^docs/sprint-artifacts/sprint-status\\.yaml$",
+        "^docs/sprint-artifacts/1-1-.*\\.md$"
+      ],
+      "forbidden_patterns": [
+        "^\\.bmad/",
+        "^data/",
+        "^package\\.json$",
+        "^src/",
+        "^tests/"
+      ]
+    },
+    {
+      "id": "60-implementation",
+      "name": "Implementation",
+      "branch": "workshop/harbourwatch/60-implementation",
+      "old_canonical": null,
+      "legacy_aliases": [],
+      "source_branch": null,
+      "folder": "60-implementation",
+      "next_branch": "workshop/harbourwatch/70-complete",
+      "guidance": "Implementation stage: partial HarbourWatch build state. When the app exists but the MVP is not yet complete, cut `workshop/harbourwatch/70-complete`.",
+      "required_patterns": [
+        "^README\\.md$",
+        "^_bmad/_config/manifest\\.yaml$",
+        "^_bmad/bmm/config\\.yaml$",
+        "^\\.agents/skills/",
+        "^package\\.json$",
+        "^src/",
+        "^tests/",
+        "^docs/sprint-artifacts/sprint-status\\.yaml$"
+      ],
+      "forbidden_patterns": [
+        "^\\.bmad/"
+      ]
+    },
+    {
+      "id": "70-complete",
+      "name": "Complete",
+      "branch": "workshop/harbourwatch/70-complete",
+      "old_canonical": null,
+      "legacy_aliases": [],
+      "source_branch": null,
+      "folder": "70-complete",
+      "next_branch": "workshop/harbourwatch/80-mvp",
+      "guidance": "Complete stage: stabilized full HarbourWatch implementation before final MVP packaging. When ready, cut `workshop/harbourwatch/80-mvp`.",
+      "required_patterns": [
+        "^README\\.md$",
+        "^_bmad/_config/manifest\\.yaml$",
+        "^_bmad/bmm/config\\.yaml$",
+        "^\\.agents/skills/",
+        "^package\\.json$",
+        "^src/",
+        "^tests/",
+        "^docs/sprint-artifacts/sprint-status\\.yaml$"
+      ],
+      "forbidden_patterns": [
+        "^\\.bmad/"
+      ]
+    },
+    {
+      "id": "80-mvp",
+      "name": "MVP",
+      "branch": "workshop/harbourwatch/80-mvp",
+      "old_canonical": null,
+      "legacy_aliases": [],
+      "source_branch": null,
+      "folder": "80-mvp",
+      "next_branch": null,
+      "guidance": "MVP stage: final demoable HarbourWatch harbour operations display.",
+      "required_patterns": [
+        "^README\\.md$",
+        "^_bmad/_config/manifest\\.yaml$",
+        "^_bmad/bmm/config\\.yaml$",
+        "^\\.agents/skills/",
+        "^package\\.json$",
+        "^src/",
+        "^tests/",
+        "^docs/sprint-artifacts/sprint-status\\.yaml$"
+      ],
+      "forbidden_patterns": [
+        "^\\.bmad/"
+      ]
+    }
+  ]
+}

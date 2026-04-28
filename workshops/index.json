@@ -9,6 +9,10 @@
     "desk-booking": {
       "display_name": "Desk Booking",
       "path": "workshops/desk-booking/track.json"
+    },
+    "harbourwatch": {
+      "display_name": "HarbourWatch",
+      "path": "workshops/harbourwatch/track.json"
     }
   }
 }
