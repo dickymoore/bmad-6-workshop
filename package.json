@@ -1,0 +1,25 @@
+{
+  "name": "harbourwatch-authoring",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev -w @harbourwatch/web",
+    "dev:api": "npm run dev -w @harbourwatch/api",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test:boundary": "node scripts/verify-story-1-1.mjs",
+    "check": "npm run typecheck && npm run test:boundary"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "@types/ws": "latest",
+    "typescript": "5.9.3"
+  }
+}

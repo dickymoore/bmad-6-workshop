@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HarbourWatch Color Themes</title>
+<style>
+  :root{
+    --bg:#f7fafc;
+    --surface:#ffffff;
+    --surface2:#f1f4f6;
+    --surface3:#ebeef0;
+    --line:#c3c7ce;
+    --text:#181c1e;
+    --muted:#42474d;
+    --primary:#001629;
+    --primary2:#002b49;
+    --secondary:#aa3000;
+    --secondary2:#d43f00;
+    --error:#ba1a1a;
+    --radius:8px;
+    --font-head:"Epilogue", Arial, sans-serif;
+    --font-body:"Work Sans", Arial, sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-body)}
+  .wrap{max-width:1200px;margin:0 auto;padding:24px 20px 48px}
+  .hero{background:linear-gradient(135deg, rgba(0,22,41,.94), rgba(0,43,73,.96));color:#fff;border-radius:var(--radius);padding:22px 20px;margin-bottom:18px}
+  .hero h1{margin:0;font-family:var(--font-head);text-transform:uppercase;letter-spacing:.06em;font-size:28px}
+  .hero p{margin:10px 0 0;max-width:72ch;line-height:1.55;color:rgba(255,255,255,.85)}
+  .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px}
+  .section{grid-column:span 12;background:rgba(255,255,255,.78);border:1px solid rgba(0,22,41,.12);border-radius:var(--radius);overflow:hidden}
+  .section h2{margin:0;padding:14px 16px;border-bottom:1px solid rgba(0,22,41,.08);font-family:var(--font-head);text-transform:uppercase;letter-spacing:.05em;font-size:18px;color:var(--primary)}
+  .swatches{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:16px}
+  .swatch{border:1px solid rgba(0,22,41,.12);border-radius:8px;overflow:hidden;background:#fff}
+  .tile{height:78px}
+  .meta{padding:12px}
+  .name{font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:12px}
+  .hex{margin-top:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--muted)}
+  .desc{margin-top:6px;font-size:13px;line-height:1.45;color:var(--muted)}
+  .row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:16px}
+  .chip{padding:14px;border-radius:8px;border-left:4px solid var(--primary);background:#fff}
+  .chip.orange{border-left-color:var(--secondary)}
+  .chip.red{border-left-color:var(--error)}
+  .chip .label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  .chip .value{margin-top:6px;font-family:var(--font-head);font-size:20px;color:var(--primary);font-weight:700}
+  .chip .support{margin-top:4px;font-size:13px;line-height:1.5;color:var(--muted)}
+  .legend{padding:0 16px 16px;color:var(--muted);font-size:13px;line-height:1.55}
+  @media (max-width:900px){.swatches{grid-template-columns:repeat(2,minmax(0,1fr))}.row{grid-template-columns:1fr}}
+  @media (max-width:640px){.swatches{grid-template-columns:1fr}.wrap{padding:16px 12px 28px}}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>HarbourWatch Color Themes</h1>
+      <p>The Vibrant Maritime palette is the source of truth. These swatches map the tokens to semantic use so the board stays calm, readable, and clearly separated from control-room semantics.</p>
+    </section>
+
+    <div class="grid">
+      <section class="section">
+        <h2>Core Palette</h2>
+        <div class="swatches">
+          <div class="swatch"><div class="tile" style="background:#001629"></div><div class="meta"><div class="name">Deep Sea Blue</div><div class="hex">#001629</div><div class="desc">Primary structure, headings, borders, and shell anchors.</div></div></div>
+          <div class="swatch"><div class="tile" style="background:#002b49"></div><div class="meta"><div class="name">Primary Container</div><div class="hex">#002b49</div><div class="desc">Container depth and stable hierarchy surfaces.</div></div></div>
+          <div class="swatch"><div class="tile" style="background:#aa3000"></div><div class="meta"><div class="name">Safety Orange</div><div class="hex">#aa3000</div><div class="desc">Emphasis, selected role, refresh, and key status markers.</div></div></div>
+          <div class="swatch"><div class="tile" style="background:#d43f00"></div><div class="meta"><div class="name">Secondary Container</div><div class="hex">#d43f00</div><div class="desc">Supporting accent and active emphasis.</div></div></div>
+          <div class="swatch"><div class="tile" style="background:#ba1a1a"></div><div class="meta"><div class="name">Buoy Red</div><div class="hex">#ba1a1a</div><div class="desc">Unavailable, critical failure, or heightened notice state.</div></div></div>
+          <div class="swatch"><div class="tile" style="background:#f7fafc;border-bottom:1px solid #e0e3e5"></div><div class="meta"><div class="name">Fog White</div><div class="hex">#f7fafc</div><div class="desc">Background and calm surface layer.</div></div></div>
+          <div class="swatch"><div class="tile" style="background:#181c1e"></div><div class="meta"><div class="name">Primary Text</div><div class="hex">#181c1e</div><div class="desc">Main body text and strong content.</div></div></div>
+          <div class="swatch"><div class="tile" style="background:#42474d"></div><div class="meta"><div class="name">Muted Text</div><div class="hex">#42474d</div><div class="desc">Source lines, supporting text, and metadata.</div></div></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Semantic States</h2>
+        <div class="row">
+          <div class="chip"><div class="label">Fresh</div><div class="value">Normal reading</div><div class="support">Use neutral panel treatment with a quiet source line.</div></div>
+          <div class="chip orange"><div class="label">Stale</div><div class="value">Last known value</div><div class="support">Use muted treatment and explicit stale wording.</div></div>
+          <div class="chip red"><div class="label">Unavailable</div><div class="value">Source paused</div><div class="support">Use Buoy Red sparingly with calm wording.</div></div>
+          <div class="chip"><div class="label">Fixture-backed</div><div class="value">Local fixture</div><div class="support">Keep provenance explicit and visible.</div></div>
+        </div>
+        <div class="legend">The visual rule is simple: use strong color sparingly, keep the board readable, and never let calmness become low contrast or vague status language.</div>
+      </section>
+    </div>
+  </div>
+</body>
+</html>

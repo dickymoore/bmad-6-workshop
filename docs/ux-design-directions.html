@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HarbourWatch UX Design Directions</title>
+<style>
+  :root{
+    --bg:#f7fafc;
+    --surface:#ffffff;
+    --surface2:#f1f4f6;
+    --surface3:#ebeef0;
+    --line:#c3c7ce;
+    --outline:#73777e;
+    --text:#181c1e;
+    --muted:#42474d;
+    --primary:#001629;
+    --primary2:#002b49;
+    --secondary:#aa3000;
+    --secondary2:#d43f00;
+    --error:#ba1a1a;
+    --radius:6px;
+    --radius-sm:4px;
+    --shadow:0 1px 0 rgba(0,22,41,.08), 0 12px 24px rgba(0,22,41,.08);
+    --font-head:"Epilogue", Arial, sans-serif;
+    --font-body:"Work Sans", Arial, sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:
+      linear-gradient(180deg, rgba(0,22,41,.06), rgba(0,22,41,0) 18%),
+      linear-gradient(135deg, rgba(170,48,0,.04), rgba(170,48,0,0) 25%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+  }
+  .wrap{max-width:1440px;margin:0 auto;padding:24px 20px 48px}
+  .topbar{
+    display:flex;justify-content:space-between;align-items:center;gap:16px;
+    padding:18px 20px;border:1px solid rgba(0,22,41,.12);background:rgba(255,255,255,.8);
+    backdrop-filter:blur(10px);border-radius:var(--radius);box-shadow:var(--shadow);position:sticky;top:12px;z-index:5
+  }
+  .brand{font-family:var(--font-head);font-size:22px;letter-spacing:.08em;font-weight:800;color:var(--primary);text-transform:uppercase}
+  .sub{font-size:13px;color:var(--muted);max-width:68ch;line-height:1.5}
+  .pill{
+    display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
+    background:var(--primary);color:#fff;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(12,minmax(0,1fr));
+    gap:16px;
+    margin-top:20px;
+  }
+  .direction{
+    grid-column:span 12;
+    background:rgba(255,255,255,.7);
+    border:1px solid rgba(0,22,41,.12);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .direction-head{
+    display:flex;justify-content:space-between;gap:16px;align-items:flex-start;
+    padding:16px 18px;border-bottom:1px solid rgba(0,22,41,.08);background:linear-gradient(180deg, rgba(0,22,41,.04), rgba(0,22,41,0))
+  }
+  .direction h2{
+    margin:0;font-family:var(--font-head);font-size:20px;line-height:1.1;color:var(--primary);text-transform:uppercase;letter-spacing:.04em
+  }
+  .direction p{margin:6px 0 0;color:var(--muted);font-size:13px;line-height:1.5;max-width:82ch}
+  .tag{
+    display:inline-flex;align-items:center;padding:7px 10px;border-radius:999px;background:var(--secondary);color:#fff;
+    font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap
+  }
+  .screen{
+    display:grid;grid-template-columns:1.25fr .75fr;gap:16px;padding:16px;background:var(--surface2);
+  }
+  .panel{
+    background:var(--surface);border:1px solid rgba(0,22,41,.10);border-left:4px solid var(--primary);border-radius:var(--radius-sm);overflow:hidden
+  }
+  .panel.soft{border-left-color:var(--secondary)}
+  .panel .hd{
+    display:flex;justify-content:space-between;align-items:center;gap:12px;
+    padding:12px 14px;border-bottom:1px solid rgba(0,22,41,.08);font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)
+  }
+  .panel .body{padding:14px}
+  .shell{
+    display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px
+  }
+  .identity{
+    font-family:var(--font-head);font-size:17px;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--primary)
+  }
+  .roles{display:flex;gap:8px;flex-wrap:wrap}
+  .role{
+    padding:8px 10px;border:1px solid rgba(0,22,41,.14);border-radius:999px;background:#fff;
+    font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)
+  }
+  .role.active{background:var(--secondary);border-color:var(--secondary);color:#fff}
+  .refresh{
+    padding:8px 10px;border-radius:8px;background:var(--primary);color:#fff;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em
+  }
+  .strip{
+    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:14px;border:1px solid rgba(0,22,41,.10);border-radius:var(--radius-sm);background:#fff
+  }
+  .chip{
+    padding:10px 12px;border-left:4px solid var(--primary);background:var(--surface2);border-radius:4px;min-height:72px
+  }
+  .chip.orange{border-left-color:var(--secondary)}
+  .chip.red{border-left-color:var(--error)}
+  .label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  .value{font-family:var(--font-head);font-size:22px;line-height:1.05;color:var(--primary);font-weight:700}
+  .support{font-size:12px;line-height:1.4;color:var(--muted);margin-top:4px}
+  .summary{
+    margin-top:12px;padding:14px;border-left:4px solid var(--secondary);background:linear-gradient(180deg, rgba(170,48,0,.05), rgba(170,48,0,0));border-radius:var(--radius-sm)
+  }
+  .summary strong{
+    display:block;font-family:var(--font-head);font-size:18px;color:var(--primary);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px
+  }
+  .summary p{margin:0;color:var(--text);font-size:14px;line-height:1.6}
+  .stack{display:grid;gap:12px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .meter{
+    height:116px;background:linear-gradient(180deg, rgba(0,22,41,.04), rgba(0,22,41,0));border-radius:4px;border:1px solid rgba(0,22,41,.08);display:flex;align-items:flex-end;padding:12px;gap:10px
+  }
+  .bar{width:16%;border-radius:4px 4px 0 0;background:var(--primary);opacity:.22}
+  .bar.active{opacity:1;background:var(--secondary)}
+  .notice{padding:12px 14px;border:1px solid rgba(0,22,41,.08);border-radius:4px;background:#fff}
+  .notice.bad{border-left:4px solid var(--error)}
+  .notice.good{border-left:4px solid var(--secondary)}
+  .notice .title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  .notice .copy{margin-top:6px;font-size:14px;line-height:1.5;color:var(--text)}
+  .footer{
+    display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:12px;font-size:12px;color:var(--muted)
+  }
+  .token{
+    padding:8px 10px;background:var(--surface3);border:1px solid rgba(0,22,41,.10);border-radius:999px;font-weight:700
+  }
+  .hero{
+    grid-column:span 12;
+    border-radius:var(--radius);
+    border:1px solid rgba(0,22,41,.12);
+    background:linear-gradient(135deg, rgba(0,22,41,.93), rgba(0,43,73,.95));
+    color:#fff;
+    padding:24px 20px;
+    box-shadow:var(--shadow);
+  }
+  .hero-grid{
+    display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:start
+  }
+  .hero h1{
+    margin:0;font-family:var(--font-head);font-size:34px;line-height:1.05;text-transform:uppercase;letter-spacing:.05em
+  }
+  .hero p{margin:10px 0 0;font-size:14px;line-height:1.6;color:rgba(255,255,255,.84);max-width:60ch}
+  .hero .callouts{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+  .hero .callouts .pill{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2)}
+  .hero .right{
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:var(--radius);padding:14px
+  }
+  .hero .right .value{color:#fff}
+  .hero .right .support{color:rgba(255,255,255,.76)}
+  .hero .right .chip{background:rgba(255,255,255,.07);border-left-color:rgba(255,255,255,.7);color:#fff}
+  .mini-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+  .mini{padding:12px;border-radius:4px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16)}
+  .mini .value{font-size:20px}
+  .mini .support{color:rgba(255,255,255,.78)}
+  .span-8{grid-column:span 8}
+  .span-4{grid-column:span 4}
+  .span-6{grid-column:span 6}
+  .span-12{grid-column:span 12}
+  @media (max-width: 1080px){
+    .screen,.hero-grid,.row{grid-template-columns:1fr}
+    .strip,.mini-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .span-4,.span-6,.span-8{grid-column:span 12}
+  }
+  @media (max-width: 720px){
+    .wrap{padding:16px 12px 28px}
+    .topbar{position:static}
+    .strip,.mini-grid{grid-template-columns:1fr}
+    .hero h1{font-size:26px}
+    .identity{font-size:15px}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <div class="brand">HarbourWatch Design Directions</div>
+        <div class="sub">Six visual directions built from the Vibrant Maritime foundation. The differences are layout hierarchy, information density, and emphasis; the palette and semantic boundaries stay fixed.</div>
+      </div>
+      <div class="pill">Calm Confidence / Fast Read</div>
+    </div>
+
+    <div class="grid">
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <h1>Primary source of truth, multiple layout choices</h1>
+            <p>All directions preserve the same tokens, typography, and maritime-industrial mood. The question is which screen anatomy best supports the role-aware waterfront read without drifting into control-room or vessel-tracking semantics.</p>
+            <div class="callouts">
+              <div class="pill">Deep Sea Blue structure</div>
+              <div class="pill">Safety Orange emphasis</div>
+              <div class="pill">Fog White surfaces</div>
+              <div class="pill">8px working rhythm</div>
+            </div>
+          </div>
+          <div class="right">
+            <div class="chip">
+              <div class="label">Decision frame</div>
+              <div class="value">Preserve visual closeness, correct semantics</div>
+              <div class="support">Choose the layout that makes the ten-second read the clearest.</div>
+            </div>
+            <div class="mini-grid">
+              <div class="mini">
+                <div class="label">Best for</div>
+                <div class="value">Role switching</div>
+                <div class="support">Terminal / Harbour Office / Visitor</div>
+              </div>
+              <div class="mini">
+                <div class="label">Best for</div>
+                <div class="value">Stable states</div>
+                <div class="support">Fresh / stale / unavailable / fixture</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="direction span-12">
+        <div class="direction-head">
+          <div>
+            <h2>Direction 1. Board First</h2>
+            <p>Classic status-board layout. Strong shell, top condition strip, then prioritized modules. Best match for the shortest path to comprehension.</p>
+          </div>
+          <div class="tag">Most direct</div>
+        </div>
+        <div class="screen">
+          <div class="span-8">
+            <div class="panel">
+              <div class="body">
+                <div class="shell">
+                  <div class="identity">HarbourWatch</div>
+                  <div class="roles"><div class="role active">Visitor</div><div class="role">Terminal</div><div class="role">Harbour Office</div><div class="refresh">Refresh</div></div>
+                </div>
+                <div class="strip">
+                  <div class="chip"><div class="label">Ferry</div><div class="value">Service pattern typical</div><div class="support">1 route notice</div></div>
+                  <div class="chip orange"><div class="label">Tide</div><div class="value">Rising</div><div class="support">Next high 14:12</div></div>
+                  <div class="chip"><div class="label">Wind</div><div class="value">NW 12kt</div><div class="support">Breezy</div></div>
+                  <div class="chip red"><div class="label">Notice</div><div class="value">Access change</div><div class="support">Public advisory</div></div>
+                </div>
+                <div class="summary"><strong>Waterfront day</strong><p>Elliott Bay is breezy, tide is rising, and ferry service is broadly typical with one reported notice. The read is calm, specific, and public-safe.</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="span-4 stack">
+            <div class="panel soft">
+              <div class="hd"><span>Waterfront context</span><span>Seattle</span></div>
+              <div class="body">
+                <div class="meter">
+                  <div class="bar" style="height:55%"></div>
+                  <div class="bar" style="height:72%"></div>
+                  <div class="bar active" style="height:90%"></div>
+                  <div class="bar" style="height:68%"></div>
+                  <div class="bar" style="height:42%"></div>
+                </div>
+                <div class="footer"><span>Condition strip keeps the read stable</span><span class="token">Priority: summary</span></div>
+              </div>
+            </div>
+            <div class="notice good">
+              <div class="title">Source line</div>
+              <div class="copy">NOAA CO-OPS updated 08:12. Local fixture valid today. Ferry schedule source available.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="direction span-6">
+        <div class="direction-head">
+          <div>
+            <h2>Direction 2. Summary Dominant</h2>
+            <p>Pushes the harbor day summary above the panel grid and makes the screen feel quieter, with more emphasis on phrase-first reading.</p>
+          </div>
+          <div class="tag">Calmest</div>
+        </div>
+        <div class="screen" style="grid-template-columns:1fr;">
+          <div class="panel">
+            <div class="body">
+              <div class="shell">
+                <div class="identity">HarbourWatch</div>
+                <div class="roles"><div class="role">Terminal</div><div class="role active">Harbour Office</div><div class="role">Visitor</div><div class="refresh">Refresh</div></div>
+              </div>
+              <div class="summary" style="margin-top:0"><strong>Tide rising, wind notable</strong><p>Colman Dock and Elliott Bay are readable in one sentence. The board prioritizes the day shape, then supports it with compact panels.</p></div>
+              <div class="row" style="margin-top:12px">
+                <div class="notice"><div class="title">Tide</div><div class="copy">Rising through midday. Next high 14:12.</div></div>
+                <div class="notice"><div class="title">Wind</div><div class="copy">NW 12kt, gusts 18kt. Visibility clear.</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="notice good">
+            <div class="title">Why it works</div>
+            <div class="copy">Best if you want the screen to feel like a quiet maritime bulletin with the least visual noise.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="direction span-6">
+        <div class="direction-head">
+          <div>
+            <h2>Direction 3. Data Panel</h2>
+            <p>More explicit module framing. Panels are separated and readable, with a little more emphasis on source state and state transitions.</p>
+          </div>
+          <div class="tag">Most explicit</div>
+        </div>
+        <div class="screen" style="grid-template-columns:1fr;">
+          <div class="panel">
+            <div class="body">
+              <div class="shell">
+                <div class="identity">HarbourWatch</div>
+                <div class="roles"><div class="role active">Terminal</div><div class="role">Harbour Office</div><div class="role">Visitor</div><div class="refresh">Refresh</div></div>
+              </div>
+              <div class="row">
+                <div class="panel soft">
+                  <div class="hd"><span>Tide</span><span>Fresh</span></div>
+                  <div class="body">
+                    <div class="value">Rising</div>
+                    <div class="support">Observed at 08:12. Next high 14:12.</div>
+                  </div>
+                </div>
+                <div class="panel soft">
+                  <div class="hd"><span>Ferry</span><span>Fixture</span></div>
+                  <div class="body">
+                    <div class="value">Mostly typical</div>
+                    <div class="support">1 reported route notice, public-safe wording.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="notice bad">
+            <div class="title">Source honesty</div>
+            <div class="copy">Works well if the team wants a slightly more technical board without losing calmness.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="direction span-12">
+        <div class="direction-head">
+          <div>
+            <h2>Direction 4. Role Split</h2>
+            <p>Strong role segmentation. Best when the product needs immediate audience recognition and the team wants the hierarchy to change visibly per role.</p>
+          </div>
+          <div class="tag">Most role-forward</div>
+        </div>
+        <div class="screen">
+          <div class="span-4 stack">
+            <div class="panel">
+              <div class="hd"><span>Terminal</span><span>Selected</span></div>
+              <div class="body">
+                <div class="value">Ferry pattern first</div>
+                <div class="support">Passenger-facing notices and service summary dominate.</div>
+              </div>
+            </div>
+            <div class="panel soft">
+              <div class="hd"><span>Harbour Office</span><span>Secondary</span></div>
+              <div class="body">
+                <div class="value">Day shape first</div>
+                <div class="support">Tide, wind, visibility, and local notices move up.</div>
+              </div>
+            </div>
+            <div class="panel soft">
+              <div class="hd"><span>Visitor</span><span>Public</span></div>
+              <div class="body">
+                <div class="value">Safe summary</div>
+                <div class="support">Reduced disclosure, plain language, useful context.</div>
+              </div>
+            </div>
+          </div>
+          <div class="span-8">
+            <div class="panel">
+              <div class="body">
+                <div class="summary" style="margin-top:0"><strong>Role-aware ordering</strong><p>All three roles share the same modules. The difference is what rises to the top and what stays quiet.</p></div>
+                <div class="strip" style="margin-top:12px">
+                  <div class="chip"><div class="label">Panel order</div><div class="value">Role-driven</div></div>
+                  <div class="chip orange"><div class="label">Disclosure</div><div class="value">Audience-aware</div></div>
+                  <div class="chip"><div class="label">Tone</div><div class="value">Observational</div></div>
+                  <div class="chip red"><div class="label">State</div><div class="value">Visible</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="direction span-6">
+        <div class="direction-head">
+          <div>
+            <h2>Direction 5. Compact Control Strip</h2>
+            <p>Tighter shell, stronger status strip, more compact modules. Best if the interface needs to fit in smaller lobby hardware while keeping hierarchy intact.</p>
+          </div>
+          <div class="tag">Tightest</div>
+        </div>
+        <div class="screen" style="grid-template-columns:1fr;">
+          <div class="panel">
+            <div class="body">
+              <div class="shell">
+                <div class="identity">HarbourWatch</div>
+                <div class="roles"><div class="role active">Visitor</div><div class="refresh">Refresh</div></div>
+              </div>
+              <div class="strip" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+                <div class="chip orange"><div class="label">Tide</div><div class="value">Rising</div></div>
+                <div class="chip"><div class="label">Weather</div><div class="value">Breezy</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="notice"><div class="title">Panel style</div><div class="copy">Useful if screen real estate is limited and the board must read from a distance.</div></div>
+            <div class="notice good"><div class="title">Tradeoff</div><div class="copy">Less room for detail, but very strong at glanceability.</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="direction span-6">
+        <div class="direction-head">
+          <div>
+            <h2>Direction 6. Spacious Desk View</h2>
+            <p>More breathing room and a slightly more editorial board. Better for desktop use where the screen can feel less packed without losing structure.</p>
+          </div>
+          <div class="tag">Most spacious</div>
+        </div>
+        <div class="screen" style="grid-template-columns:1fr;">
+          <div class="panel">
+            <div class="body">
+              <div class="shell">
+                <div class="identity">HarbourWatch</div>
+                <div class="roles"><div class="role">Terminal</div><div class="role active">Harbour Office</div><div class="role">Visitor</div><div class="refresh">Refresh</div></div>
+              </div>
+              <div class="summary" style="padding:18px"><strong>Seattle waterfront day</strong><p>Quiet, structured layout with more whitespace between the summary and supporting modules. Best if the team wants a premium information-board feel rather than a compact terminal feel.</p></div>
+              <div class="mini-grid" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:12px">
+                <div class="mini" style="background:#fff;border-color:rgba(0,22,41,.08)"><div class="label">Tide</div><div class="value">Rising</div><div class="support">Next high 14:12</div></div>
+                <div class="mini" style="background:#fff;border-color:rgba(0,22,41,.08)"><div class="label">Wind</div><div class="value">NW 12kt</div><div class="support">Breezy</div></div>
+                <div class="mini" style="background:#fff;border-color:rgba(0,22,41,.08)"><div class="label">Notice</div><div class="value">One advisory</div><div class="support">Public-safe wording</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="footer"><span>More breathing room, less density</span><span class="token">Priority: clarity</span></div>
+        </div>
+      </section>
+
+      <section class="direction span-12">
+        <div class="direction-head">
+          <div>
+            <h2>Direction 7. Resilience Board</h2>
+            <p>Designs for degraded states as first-class content. This direction is useful if the team wants the error, stale, and fixture behaviors to be visually explicit.</p>
+          </div>
+          <div class="tag">Best for failure states</div>
+        </div>
+        <div class="screen">
+          <div class="span-8">
+            <div class="panel">
+              <div class="body">
+                <div class="shell">
+                  <div class="identity">HarbourWatch</div>
+                  <div class="roles"><div class="role active">Terminal</div><div class="role">Harbour Office</div><div class="role">Visitor</div><div class="refresh">Refresh</div></div>
+                </div>
+                <div class="strip">
+                  <div class="chip"><div class="label">Tide</div><div class="value">Fresh</div><div class="support">Observed 08:12</div></div>
+                  <div class="chip orange"><div class="label">Weather</div><div class="value">Stale</div><div class="support">Last update 42m ago</div></div>
+                  <div class="chip red"><div class="label">Ferry</div><div class="value">Unavailable</div><div class="support">Source paused</div></div>
+                  <div class="chip"><div class="label">Fixture</div><div class="value">Valid today</div><div class="support">Local notice</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="span-4 stack">
+            <div class="notice bad"><div class="title">Why this matters</div><div class="copy">Makes degraded states feel intentional, not broken, which matches the emotional goal.</div></div>
+            <div class="notice"><div class="title">Layout rule</div><div class="copy">Keep panel geometry stable even when source states shift.</div></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</body>
+</html>
